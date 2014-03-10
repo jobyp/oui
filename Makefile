@@ -8,9 +8,18 @@ else
 CCFLAGS:= -std=c++11
 endif
 
+
+
 hw: hw.cc
 	g++ $(CCFLAGS) -o $@ $<
 
 .PHONY: clean
 clean:
 	rm -f hw hw.o *~
+
+fix_source=$(shell sed -i -e '1 s/^[AB]*//' $(src_file))
+
+.PHONY: fix
+fix:
+	@echo -n $(foreach src_file,$(wildcard *.cc),$(fix_source))
+
