@@ -6,9 +6,9 @@ all: $(BINS)
 
 # On my Chromebook I have an older gcc
 ifeq ($(strip $(shell uname -m)),armv7l)
-CCFLAGS:= -std=c++0x
+CCFLAGS:= -std=c++0x -Wall
 else
-CCFLAGS:= -std=c++11
+CCFLAGS:= -std=c++11 -Wall
 endif
 
 %: %.cc
