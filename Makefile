@@ -8,10 +8,14 @@ else
 CCFLAGS:= -std=c++11
 endif
 
-
-
 hw: hw.cc
 	g++ $(CCFLAGS) -o $@ $<
+
+.PHONY: ev
+ev:
+	@echo '// Local Variables:'
+	@echo '// c-basic-offset: 8'
+	@echo '// End:'
 
 .PHONY: clean
 clean:
