@@ -1,5 +1,8 @@
+PROGS=$(wildcard *.cc)
+BINS=$(patsubst %.cc,%,$(PROGS))
+
 .PHONY: all
-all: hw
+all: $(BINS)
 
 # On my Chromebook I have an older gcc
 ifeq ($(strip $(shell uname -m)),armv7l)
@@ -8,7 +11,7 @@ else
 CCFLAGS:= -std=c++11
 endif
 
-hw: hw.cc
+%: %.cc
 	g++ $(CCFLAGS) -o $@ $<
 
 .PHONY: ev
@@ -19,7 +22,7 @@ ev:
 
 .PHONY: clean
 clean:
-	rm -f hw hw.o *~
+	@rm -f $(BINS) *.o *~
 
 fix_source=$(shell sed -i -e '1 s/^[AB]*//' $(src_file))
 
