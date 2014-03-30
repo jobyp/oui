@@ -62,4 +62,11 @@ int main()
   
   string s; string t; s + t; s.size(); string s(10, 'p');
 
+  Chapter 4. Classes
+
+  elem {new double[10]}
+  delete[] elem
+  
+  ~Vector() { delete[] elem; sz = 0;}
+
  */
