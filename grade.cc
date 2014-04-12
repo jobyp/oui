@@ -2,6 +2,7 @@
 
 #include "student_info.h"
 #include "median.h"
+#include "grade.h"
 
 using std::domain_error;
 

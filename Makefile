@@ -1,18 +1,26 @@
-PROGS?=$(wildcard *.cc)
-BINS=$(patsubst %.cc,%,$(PROGS))
+PROGS=students split
+
 EMACS_CC_MODE:='mode: c++'
 .PHONY: all
-all: $(BINS)
+all: $(PROGS)
 
 # On my Chromebook I have an older gcc
 ifeq ($(strip $(shell uname -m)),armv7l)
-CCFLAGS:= -g -O0 -std=c++0x -Wall
+CCFLAGS:= -g -O0 -std=c++0x -Wall -pedantic
 else
-CCFLAGS:= -g -O0 -std=c++11 -Wall
+CCFLAGS:= -g -O0 -std=c++11 -Wall -pedantic
 endif
 
-%: %.cc
-	g++ $(CCFLAGS) -o $@ $<
+%.o: %.cc
+	g++ -c $(CCFLAGS) -o $@ $<
+
+%: %.o
+	g++ $(CCFLAGS) -o $@ $^
+
+$(foreach src,$(wildcard *.cc),$(eval $(shell g++ -MM $(src))))
+
+students: students.o median.o student_info.o grade.o
+split: split.o
 
 .PHONY: ev
 ev:
@@ -23,7 +31,7 @@ ev:
 
 .PHONY: clean
 clean:
-	@rm -f $(BINS) *.o *~
+	@rm -f $(PROGS) *.o *~
 
 fix_source=$(shell sed -i -e '1 s/^[AB]*//' $(src_file))
 

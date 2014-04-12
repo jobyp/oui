@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <stdexcept>
+#include <list>
 
 #include "median.h"
 #include "student_info.h"
@@ -19,12 +20,13 @@ using std::vector;
 using std::sort;
 using std::string;
 using std::domain_error;
+using std::list;
 
-vector<Student_info> extract_fails(vector<Student_info>& students)
+list<Student_info> extract_fails(list<Student_info>& students)
 {
-	vector<Student_info> fails;
+	list<Student_info> fails;
 
-	vector<Student_info>::iterator iter = students.begin();
+	list<Student_info>::iterator iter = students.begin();
 
 	while(iter != students.end())
 		try {
@@ -46,27 +48,31 @@ int main()
 {
 	// read student records
 	Student_info s;
-	vector<Student_info> students;
-
-	while (read(cin, s))
-		students.push_back(s);
+	list<Student_info> students;
 	
-	sort(students.begin(), students.end(), compare_student_info);
+	while (read(cin, s)) 
+		students.push_back(s);
+
+	students.sort(compare_student_info);
 
 	string::size_type maxlen = 0;
 
-	for(auto& s: students)
-		maxlen = max(maxlen, s.name.size());
+	for(list<Student_info>::const_iterator iter = students.begin(); 
+	    iter != students.end(); 
+	    ++iter)
+		maxlen = max(maxlen, iter->name.size());
 	
-	vector<Student_info> failed = extract_fails(students);
+	list<Student_info> failed = extract_fails(students);
 
-	for(auto& s: students) 
+	for(list<Student_info>::const_iterator iter = students.begin(); 
+	    iter != students.end(); 
+	    ++iter)
 		try {
-			double final_grade = grade(s);
+			double final_grade = grade(*iter);
 			streamsize prec = cout.precision();
 			
-			cout << s.name 
-			     << string(maxlen + 1 - s.name.size(), ' ')
+			cout << iter->name 
+			     << string(maxlen + 1 - iter->name.size(), ' ')
 			     << ':' << setprecision(3) << final_grade
 			     << setprecision(prec) 
 			     << endl;
