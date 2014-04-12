@@ -26,7 +26,7 @@ private:
 	double* elem;
 	unsigned sz;
 public:
-	vector(unsigned s): elem{new double[sz]}, sz{s} {}
+	vector(unsigned s): elem{new double[s]}, sz{s} {}
 	~vector() { delete[] elem; sz = 0; }
 
 	unsigned size() const { return sz; }
