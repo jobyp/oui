@@ -4,6 +4,7 @@
 #include <vector>
 
 double median(std::vector<double> vec);
+double average(const std::vector<double>& v);
 
 #endif
 // Local Variables:

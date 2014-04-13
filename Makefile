@@ -1,4 +1,4 @@
-PROGS=students split
+PROGS=students split frame rev palin urls analyse
 
 EMACS_CC_MODE:='mode: c++'
 .PHONY: all
@@ -19,8 +19,8 @@ endif
 
 $(foreach src,$(wildcard *.cc),$(eval $(shell g++ -MM $(src))))
 
-students: students.o median.o student_info.o grade.o
-split: split.o
+students: median.o student_info.o grade.o
+analyse: median.o student_info.o grade.o report.o
 
 .PHONY: ev
 ev:

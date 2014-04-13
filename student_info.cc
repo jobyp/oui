@@ -1,10 +1,12 @@
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 #include "student_info.h"
 
 using std::istream;
 using std::vector;
+using std::find;
 
 istream& read_hw(istream& in, vector<double>& hw)
 {
@@ -32,6 +34,13 @@ bool compare_student_info(const Student_info& x, const Student_info& y)
 {
 	return x.name < y.name;
 }
+
+bool did_all_homework(const Student_info& s)
+{
+	return ( find( s.homework.begin(), s.homework.end(), 0) 
+		 == s.homework.end());
+}
+
 
 // Local Variables:
 // c-basic-offset: 8

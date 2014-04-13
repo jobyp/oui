@@ -2,38 +2,39 @@
 #include <string>
 #include <cctype>
 #include <vector>
+#include <algorithm>
+#include <iterator>
 
 using std::cout;
 using std::cin;
 using std::endl;
-using std::max;
 using std::vector;
 using std::string;
 using std::isspace;
+using std::find_if;
+
+bool is_space(char c) { return isspace( c); }
+
+bool not_space(char c) { return !isspace( c); }
 
 vector<string> split(const string& s)
 {
-	vector<string> result;
-	string::size_type i = 0;
+	vector<string> ret;
+	string::const_iterator i = s.begin();
 
-	while(i != s.size()) {
+	while( i != s.end()) {
 		
-		// skip leading whitespace chars
-		while(( i != s.size()) && isspace( s[i]))
-			i++;
+		i = find_if( i, s.end(), not_space);
+				
+		string::const_iterator j = find_if( i, s.end(), is_space);
 		
-		string::size_type j = i;
-		
-		while(( j != s.size()) && !isspace( s[j]))
-			j++;
-		      
-		if (i != j) {
-			result.push_back( s.substr( i, j - i));
+		if ( i != j) {
+			ret.push_back( string( i, j));
 			i = j;
 		}
 	}
 
-	return result;
+	return ret;
 }
 
 int main()
