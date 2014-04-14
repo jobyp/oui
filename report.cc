@@ -8,6 +8,7 @@
 #include "report.h"
 #include "median.h"
 #include "grade.h"
+#include "student_info.h"
 
 using std::vector;
 using std::transform;
@@ -37,14 +38,19 @@ double average_analysis(const vector<Student_info>& students)
 	return median( grades);
 }
 
-double optimistic_median(const vector<Student_info>& s)
+static double optimistic_median(const Student_info& s)
 {
 	vector<double> nonzeros;
 
-	remove_copy( v.begin(), v.end(), back_inserter( nonzeros), 0.0);
+	remove_copy( s.homework.begin(), 
+		     s.homework.end(), 
+		     back_inserter( nonzeros), 
+		     0.0);
 
 	if ( nonzeros.empty())
-		
+		return grade( s.midterm, s.final, 0.0);
+	else
+		return grade( s.midterm, s.final, median( nonzeros));
 }
 
 
