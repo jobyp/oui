@@ -4,6 +4,7 @@ EMACS_CC_MODE:='mode: c++'
 .PHONY: all
 all: $(PROGS)
 
+CXX?=g++
 # On my Chromebook I have an older gcc
 ifeq ($(strip $(shell uname -m)),armv7l)
 CCFLAGS:= -g -O0 -std=c++0x -Wall -pedantic
@@ -12,12 +13,12 @@ CCFLAGS:= -g -O0 -std=c++11 -Wall -pedantic
 endif
 
 %.o: %.cc
-	g++ -c $(CCFLAGS) -o $@ $<
+	$(CXX) -c $(CCFLAGS) -o $@ $<
 
 %: %.o
-	g++ $(CCFLAGS) -o $@ $^
+	$(CXX) $(CCFLAGS) -o $@ $^
 
-$(foreach src,$(wildcard *.cc),$(eval $(shell g++ -MM $(src))))
+$(foreach src,$(wildcard *.cc),$(eval $(shell $(CXX) -MM $(src))))
 
 students: median.o student_info.o grade.o
 analyse: median.o student_info.o grade.o report.o
