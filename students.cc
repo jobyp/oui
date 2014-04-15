@@ -23,17 +23,16 @@ using std::domain_error;
 using std::list;
 using std::remove_copy_if;
 using std::remove_if;
+using std::stable_partition;
 
-list<Student_info> extract_fails(list<Student_info>& students)
+vector<Student_info> extract_fails(vector<Student_info>& students)
 {
-	list<Student_info> fails;
+	vector<Student_info>::iterator iter = stable_partition( students.begin(), 
+								students.end(), 
+								pgrade);
+	vector<Student_info> fails( iter, students.end());
 
-	remove_copy_if( students.begin(), students.end(),
-			back_inserter( fails), pgrade);
-
-	students.erase( remove_if( students.begin(), students.end(),
-				   fgrade),
-			students.end());
+	students.erase( iter, students.end());
 	
 	return fails;
 }
@@ -48,26 +47,26 @@ int main()
 {
 	// read student records
 	Student_info s;
-	list<Student_info> students;
+	vector<Student_info> students;
 	
 	while( read( cin, s)) 
 		students.push_back( s);
 				
-	students.sort( compare_student_info);
+	sort( students.begin(), students.end(), compare_student_info);
 
 	string::size_type maxlen = 0;
 
-	for( list<Student_info>::const_iterator iter = students.begin(); 
+	for( vector<Student_info>::const_iterator iter = students.begin(); 
 	     iter != students.end(); 
 	     ++iter)
 		maxlen = max(maxlen, iter->name.size());
 	
-	list<Student_info> failed = extract_fails(students);
+        vector<Student_info> failed = extract_fails(students);
 	
 	for( const auto& s: failed)
 		print_student_info( s);
 
-	for( list<Student_info>::const_iterator iter = students.begin(); 
+	for( vector<Student_info>::const_iterator iter = students.begin(); 
 	     iter != students.end(); 
 	     ++iter)
 		try {
