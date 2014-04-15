@@ -21,30 +21,28 @@ using std::sort;
 using std::string;
 using std::domain_error;
 using std::list;
-
+using std::remove_copy_if;
+using std::remove_if;
 
 list<Student_info> extract_fails(list<Student_info>& students)
 {
 	list<Student_info> fails;
 
-	list<Student_info>::iterator iter = students.begin();
+	remove_copy_if( students.begin(), students.end(),
+			back_inserter( fails), pgrade);
 
-	while(iter != students.end())
-		try {
-			bool fail = fgrade(*iter);
-			if (fail) { 
-				fails.push_back(*iter);
-				iter = students.erase(iter);
-			} else
-				++iter;
-		} catch (domain_error e) {
-			cout << e.what() << endl;
-			++iter;
-		}
+	students.erase( remove_if( students.begin(), students.end(),
+				   fgrade),
+			students.end());
 	
 	return fails;
 }
 
+void print_student_info(const Student_info& s)
+{
+	cout << s.name << " failed" << endl;
+	return;
+}
 
 int main()
 {
@@ -65,6 +63,9 @@ int main()
 		maxlen = max(maxlen, iter->name.size());
 	
 	list<Student_info> failed = extract_fails(students);
+	
+	for( const auto& s: failed)
+		print_student_info( s);
 
 	for( list<Student_info>::const_iterator iter = students.begin(); 
 	     iter != students.end(); 
