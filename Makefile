@@ -1,4 +1,4 @@
-PROGS=students split frame rev palin urls analyse
+PROGS=students test_split frame rev palin test_urls analyse concat map
 
 EMACS_CC_MODE:='mode: c++'
 .PHONY: all
@@ -22,6 +22,8 @@ $(foreach src,$(wildcard *.cc),$(eval $(shell $(CXX) -MM $(src))))
 
 students: median.o student_info.o grade.o
 analyse: median.o student_info.o grade.o report.o
+test_split: split.o
+test_urls: urls.o
 
 .PHONY: ev
 ev:

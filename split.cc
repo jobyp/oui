@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include "split.h"
+
 using std::cout;
 using std::cin;
 using std::endl;
@@ -13,9 +15,9 @@ using std::string;
 using std::isspace;
 using std::find_if;
 
-bool is_space(char c) { return isspace( c); }
+static bool is_space(char c) { return isspace( c); }
 
-bool not_space(char c) { return !isspace( c); }
+static bool not_space(char c) { return !isspace( c); }
 
 vector<string> split(const string& s)
 {
@@ -35,21 +37,6 @@ vector<string> split(const string& s)
 	}
 
 	return ret;
-}
-
-int main()
-{
-	string line;
-	vector<string> ss;
-	
-	while(getline(cin, line)) {
-		ss = split(line);
-		
-		for(const auto& s : ss) 
-			cout << "|> " << s << endl;
-	}
-
-	return 0;
 }
 
 // Local Variables:
