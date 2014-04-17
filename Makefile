@@ -1,4 +1,4 @@
-PROGS=students test_split frame rev palin test_urls analyse concat map
+PROGS=students test_split frame rev palin test_urls analyse concat map xref
 
 EMACS_CC_MODE:='mode: c++'
 .PHONY: all
@@ -29,6 +29,7 @@ students: median.o student_info.o grade.o
 analyse: median.o student_info.o grade.o report.o
 test_split: split.o
 test_urls: urls.o
+xref: split.o
 
 .PHONY: ev
 ev:
