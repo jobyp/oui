@@ -4,6 +4,8 @@ EMACS_CC_MODE:='mode: c++'
 .PHONY: all
 all: $(PROGS)
 
+-include $(patsubst %.cc,%.d,$(wildcard *.cc))
+
 CXX?=g++
 # On my Chromebook I have an older gcc
 ifeq ($(strip $(shell uname -m)),armv7l)
@@ -12,13 +14,16 @@ else
 CCFLAGS:= -g -O0 -std=c++11 -Wall -pedantic
 endif
 
+%.d : %.cc
+	@set -e ; rm -f $@; $(CXX) -MM $< > $@.$$$$; \
+	sed -e 's,\($*\)\.o[ ]*:,\1.o $@ :,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
 %.o: %.cc
 	$(CXX) -c $(CCFLAGS) -o $@ $<
 
 %: %.o
 	$(CXX) $(CCFLAGS) -o $@ $^
-
-$(foreach src,$(wildcard *.cc),$(eval $(shell $(CXX) -MM $(src))))
 
 students: median.o student_info.o grade.o
 analyse: median.o student_info.o grade.o report.o
@@ -34,7 +39,7 @@ ev:
 
 .PHONY: clean
 clean:
-	@rm -f $(PROGS) *.o *~
+	@rm -f $(PROGS) *.o *.d *~
 
 fix_source=$(shell sed -i -e '1 s/^[AB]*//' $(src_file))
 
