@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "split.h"
+#include "xref.h"
 
 using std::map;
 using std::string;
@@ -11,10 +12,30 @@ using std::vector;
 using std::cin;
 using std::cout;
 using std::endl;
+using std::istream;
 
+map< string, vector< unsigned > > xref(istream& in, 
+				       vector< string > find_words(const string& l))
+{
+	map< string, vector< unsigned > > ret;
+	string l;
+	unsigned i = 0;
+	
+	while( getline( in, l)) {
+
+		vector< string > words = find_words( l);
+	
+		for(const auto& w : words) 
+			ret[w].push_back( i);
+		
+		i++;
+	}
+
+	return ret;
+}
 
 map< string, vector< unsigned > > xref(const vector< string >& lines, 
-				       vector< string > find_words( const string& l) = split)
+				       vector< string > find_words(const string& l))
 {
 	map< string, vector< unsigned > > ret;
 
@@ -28,32 +49,6 @@ map< string, vector< unsigned > > xref(const vector< string >& lines,
 	}
 
 	return ret;
-}
-
-int main()
-{
-	string l;
-	vector< string > lines;
-
-	while( getline( cin, l))
-		lines.push_back( l);
-
-	map< string, vector< unsigned > > refs = xref( lines);
-
-	for(map< string, vector< unsigned > >::const_iterator it = refs.begin();
-	    it != refs.end();
-	    ++it) {
-
-		cout << it->first << ": ";
-		cout << it->second[0];
-
-		for(vector< unsigned >::size_type i = 1; i != it->second.size(); i++)
-			cout << ", " << it->second[i];
-		
-		cout << endl;
-	}
-	
-	return 0;
 }
 
 // Local Variables:
