@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <set>
 
 #include "split.h"
 #include "xref.h"
@@ -13,6 +14,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 using std::istream;
+using std::set;
 
 map< string, vector< unsigned > > xref(istream& in, 
 				       vector< string > find_words(const string& l))
@@ -24,9 +26,10 @@ map< string, vector< unsigned > > xref(istream& in,
 	while( getline( in, l)) {
 
 		vector< string > words = find_words( l);
-	
-		for(const auto& w : words) 
-			ret[w].push_back( i);
+		set< string > unique_words( words.begin(), words.end());
+		
+		for(const auto& w : unique_words) 
+				ret[w].push_back( i);
 		
 		i++;
 	}

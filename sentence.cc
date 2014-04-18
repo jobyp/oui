@@ -68,9 +68,9 @@ void print_grammar(const Grammar& g)
 	return;
 }
 
-void print_sentence(const vector< string>& words)
+void print_sentence(const vector< string >& sentence)
 {
-	for(const auto& w: words)
+	for(const auto& w: sentence)
 		cout << w << " ";
 	cout << endl;
 	
@@ -93,36 +93,49 @@ Rule_collection::size_type random_index(const Rule_collection& v)
 	if ( v.empty())
 		throw domain_error("random_index of empty Rule_collection");
 	
-	cout << random() << ":" << v.size() << endl;
+	Rule_collection::size_type n = v.size();
+	
+        const unsigned long bucket_size = RAND_MAX / v.size();
+	
+	unsigned long r;
 
-	return (random() % v.size());
+	do 
+		r = random() / bucket_size;
+	while( r >= n);
+	
+	return r;
 }
 
-void gen_sentence_aux(const Grammar& g, const string& phrase, vector< string >& ret)
+void gen_sentence_aux(const Grammar& g, 
+		      const string& phrase,
+		      vector< string >& ret)
 {
+	
 	if ( !bracketed_word( phrase))  {
-
+		
 		ret.push_back( phrase);
 		return;
 	}
-
+	
 	Grammar::const_iterator it = g.find( phrase);
 	
 	if ( it ==  g.end())
-		throw logic_error("empty grammar rule");
-
+		throw logic_error("non-existant grammar rule");
+	
 	const Rule_collection& rc = it->second;
 	
-	// cout << rc.size() << "{" << random_index( rc) << "}" << endl;
-	const Rule& r = rc[ random_index( rc)];
+	if ( rc.size() == 0)
+		throw logic_error("empty grammar rule");
 	
+	Rule r = rc[ random_index( rc)];
+			
 	for(const auto& s: r)
 		gen_sentence_aux( g, s, ret);
 	
 	return;
 }
 
-vector< string> gen_sentence(const Grammar& g)
+vector< string > gen_sentence(const Grammar& g)
 {
 	vector< string> ret;
 
@@ -130,7 +143,6 @@ vector< string> gen_sentence(const Grammar& g)
 
 	return ret;
 }
-
 
 int main() 
 {
