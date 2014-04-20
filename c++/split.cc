@@ -15,9 +15,9 @@ using std::string;
 using std::isspace;
 using std::find_if;
 
-static bool is_space(char c) { return isspace( c); }
+bool is_space(char c) { return isspace( c); }
 
-static bool not_space(char c) { return !isspace( c); }
+bool not_space(char c) { return !isspace( c); }
 
 vector<string> split(const string& s)
 {

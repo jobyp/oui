@@ -1,5 +1,5 @@
 PROGS=students test_split frame rev palin test_urls analyse concat map \
-test_xref sentence
+test_xref sentence f f2
 
 OBJDIR=_build
 
@@ -9,7 +9,7 @@ all: $(PROGS)
 -include $(patsubst %.cc,$(OBJDIR)/%.d,$(wildcard *.cc))
 
 CXX?=g++
-CCFLAGS:= -g -std=c++11 -Wall -pedantic
+CCFLAGS:=-g -std=c++11 -Wall -pedantic
 
 $(OBJDIR)/%.d : %.cc | $(OBJDIR)
 	@set -e ; rm -f $@; $(CXX) -MM $< > $@.$$$$; \
@@ -23,7 +23,7 @@ $(OBJDIR)/%.o: %.cc | $(OBJDIR)
 	$(CXX) $(CCFLAGS) -o $@ $^
 
 $(OBJDIR):
-	mkdir -p $(OBJDIR)
+	@mkdir -p $(OBJDIR)
 
 students: $(addprefix $(OBJDIR)/,median.o student_info.o grade.o)
 analyse: $(addprefix $(OBJDIR)/,median.o student_info.o grade.o report.o)
@@ -31,10 +31,11 @@ test_split: $(addprefix $(OBJDIR)/,split.o)
 test_urls: $(addprefix $(OBJDIR)/,urls.o)
 test_xref: $(addprefix $(OBJDIR)/,xref.o split.o)
 sentence: $(addprefix $(OBJDIR)/,split.o)
+f: $(addprefix $(OBJDIR)/,split.o)
 
 emacs_cxx_offset:='// c-basic-offset: 8'
 emacs_cxx_end:='// End:'
-emacs_cxx_begin:='// Local Vairables:'
+emacs_cxx_begin:='// Local Variables:'
 emacs_cxx_mode:='// mode: c++'
 
 .PHONY: ev
