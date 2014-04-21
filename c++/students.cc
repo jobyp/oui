@@ -39,7 +39,7 @@ vector<Student_info> extract_fails(vector<Student_info>& students)
 
 void print_student_info(const Student_info& s)
 {
-	cout << s.name << " failed" << endl;
+	cout << s.name() << " failed" << endl;
 	return;
 }
 
@@ -49,7 +49,7 @@ int main()
 	Student_info s;
 	vector<Student_info> students;
 	
-	while( read( cin, s)) 
+	while( s.read( cin)) 
 		students.push_back( s);
 				
 	sort( students.begin(), students.end(), compare_student_info);
@@ -59,7 +59,7 @@ int main()
 	for( vector<Student_info>::const_iterator iter = students.begin(); 
 	     iter != students.end(); 
 	     ++iter)
-		maxlen = max(maxlen, iter->name.size());
+		maxlen = max(maxlen, iter->name().size());
 	
         vector<Student_info> failed = extract_fails(students);
 	
@@ -70,11 +70,11 @@ int main()
 	     iter != students.end(); 
 	     ++iter)
 		try {
-			double final_grade = grade(*iter);
+			double final_grade = iter->grade();
 			streamsize prec = cout.precision();
 			
-			cout << iter->name 
-			     << string(maxlen + 1 - iter->name.size(), ' ')
+			cout << iter->name()
+			     << string(maxlen + 1 - iter->name().size(), ' ')
 			     << ':' << setprecision(3) << final_grade
 			     << setprecision(prec) 
 			     << endl;

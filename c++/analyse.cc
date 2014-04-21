@@ -30,8 +30,8 @@ int main()
 	Student_info s;
 	vector<Student_info> did, didnt;
 	
-	while ( read( cin, s)) 
-		if ( did_all_homework( s))
+	while ( s.read( cin)) 
+		if ( s.did_all_homework()))
 			did.push_back( s);
 		else
 			didnt.push_back( s);

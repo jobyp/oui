@@ -5,17 +5,24 @@
 #include <string>
 #include <iostream>
 
-struct Student_info {
-	std::string name;
+class Student_info {
+private:
+	std::string _name;
 	double midterm;
 	double final;
 	std::vector<double> homework;
+
+public:
+	Student_info() : midterm( 0), final( 0) {};
+	Student_info(std::istream& in) { read( in); };
+	std::istream& read(std::istream&);
+	double grade() const;
+	std::string name() const { return _name; }
+	bool valid() const { return !homework.empty(); }
 };
 
 std::istream& read_hw(std::istream& in, std::vector<double>& hw);
-std::istream& read(std::istream& in, Student_info& s);
 bool compare_student_info(const Student_info& x, const Student_info& y);
-bool did_all_homework(const Student_info& s);
 #endif
 // Local Variables:
 // c-basic-offset: 8
