@@ -1,5 +1,5 @@
 PROGS=students test_split frame rev palin test_urls concat map \
-test_xref sentence f f2 f3 f4
+test_xref sentence f f2 f3 f4 vec
 
 OBJDIR=_build
 
@@ -9,7 +9,7 @@ all: $(PROGS)
 -include $(patsubst %.cc,$(OBJDIR)/%.d,$(wildcard *.cc))
 
 CXX?=g++
-CCFLAGS:=-g -std=c++11 -Wall -pedantic
+CCFLAGS:=-g -O0 -std=c++11 -Wall -pedantic
 
 $(OBJDIR)/%.d : %.cc | $(OBJDIR)
 	@set -e ; rm -f $@; $(CXX) -MM $< > $@.$$$$; \
