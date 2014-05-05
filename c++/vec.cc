@@ -7,7 +7,7 @@ Vec<T> ff(typename Vec<T>::size_type i)
 	
 	Vec<T> ret2(ret);
 	ret2.push_back( T());
-	
+
 	return ret2;
 }
 
@@ -17,8 +17,13 @@ int main()
 	for(int i = 0; i < 10; i++)
 		v_i.push_back( i);
 
-	cout << "Vec<int> v_i is created" << endl;
-	return v_i.size();
+	cout << v_i.size() << endl;
+	v_i.erase(v_i.begin() + 2, v_i.end());
+	cout << v_i.size() << endl;
+	v_i.clear();
+	cout << v_i.size() << endl;
+	
+	return 0;
 }
 
 // Local Variables:

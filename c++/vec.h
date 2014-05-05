@@ -5,6 +5,7 @@
 #include <memory>
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 
 using std::cout;
 using std::endl;
@@ -23,12 +24,12 @@ public:
 	typedef T* iterator;
 	typedef const T* const_iterator;
 
-	Vec() { f_name() ; create(); }
-	explicit Vec(size_type n, const T& val = T()) { f_name(); create( n, val); }
-	Vec(const_iterator b, const_iterator e) { f_name(); create( b, e); }
-	Vec(const Vec& v) { f_name(); create( v.begin(), v.end()); }
+	Vec() { create(); }
+	explicit Vec(size_type n, const T& val = T()) { create( n, val); }
+	Vec(const_iterator b, const_iterator e) { create( b, e); }
+	Vec(const Vec& v) { create( v.begin(), v.end()); }
 	
-	~Vec() { f_name(); uncreate(); }
+	~Vec() { uncreate(); }
 	
 	Vec& operator[](size_type i) { return data[i]; }
 	const Vec& operator[](size_type i) const { return data[i]; }
@@ -52,9 +53,7 @@ public:
 
 	iterator erase(iterator i)
 	{
-		// Case 1. i points to last element
-		
-		if ( i + 1 == avail) {
+		if ( i + 1 == avail) { // Case 1. i points to last element
 			
 			alloc.destroy( i);
 			avail--;
@@ -66,8 +65,13 @@ public:
 
 	iterator erase(iterator b, iterator e)
 	{
-		return shrink( b, e);
+		if (b != e)
+			return shrink( b, e);
+		else
+			return e;
 	}
+
+	void clear() { uncreate(); }
 	
 private:
 	iterator data;
@@ -85,16 +89,31 @@ private:
 	void grow();
 	void unchecked_append(const T& val);
 
-	void shrink( iterator b, iterator e);
+	iterator shrink( iterator b, iterator e);
 };
+
+template <typename T>
+typename Vec<T>::iterator Vec<T>::shrink(iterator b, iterator e)
+{
+	Vec<T> v1( data, b);
+	Vec<T> v2( e, avail);
+
+	uncreate();
+
+	create( v1.begin(), v1.end());
+	
+	typename Vec<T>::iterator i = v2.begin();
+	while( i != v2.end())
+		push_back( *i);
+
+	return avail;
+}
 
 template <typename T>
 void Vec<T>::grow()
 {
 	typename std::allocator<T>::size_type n = std::max( limit - data, std::ptrdiff_t( 1)) * 2;
 	
-	cout << __PRETTY_FUNCTION__  << endl;
-
 	iterator new_data = alloc.allocate( n);
 	iterator new_avail = std::uninitialized_copy( begin(), end(), new_data);
 	
