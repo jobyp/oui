@@ -19,7 +19,7 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef T value_type;
-	typedef T& reference_type;
+	typedef T& reference;
 	typedef const T& const_reference;
 	typedef T* iterator;
 	typedef const T* const_iterator;
