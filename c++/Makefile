@@ -1,5 +1,5 @@
 PROGS=students test_split frame rev palin test_urls concat map \
-test_xref sentence f f2 f3 f4 vec lst
+test_xref sentence f f2 f3 f4 vec
 
 OBJDIR=_build
 
