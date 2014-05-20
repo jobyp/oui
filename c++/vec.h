@@ -31,8 +31,8 @@ public:
 	
 	~Vec() { uncreate(); }
 	
-	Vec& operator[](size_type i) { return data[i]; }
-	const Vec& operator[](size_type i) const { return data[i]; }
+	T& operator[](size_type i) { return data[i]; }
+	const T& operator[](size_type i) const { return data[i]; }
 	Vec& operator=(const Vec& rhs);
 
 	iterator begin() { return data; }
@@ -82,6 +82,7 @@ private:
 
 	void create();
 	void create(size_type n, const T& val);
+
 	void create(const_iterator b, const_iterator e);
 
 	void uncreate();
