@@ -1,13 +1,27 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <cctype>
 
 #include "str.h"
 #include "vec.h"
 
 std::istream& operator>>(std::istream& in, Str& s)
 {
+	s.data.clear();
 	
+	char c;
+	while( in.get( c) && isspace( c))
+		;
+
+	do 
+		s.data.push_back( c);
+	while ( in.get( c) && !isspace( c));
+
+	if ( in)
+		in.unget();
+
+	return in;
 }
 
 std::ostream& operator<<(std::ostream& out, const Str& s)

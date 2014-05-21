@@ -23,14 +23,13 @@ public:
 	char& operator[](size_type i) { return data[i]; }
 	const char& operator[](size_type i) const { return data[i]; }
 
+	friend std::istream& operator>>(std::istream& in, Str& s);
+
 private:
 	Vec<char> data;
 };
 
-
-std::istream& operator>>(std::istream& in, Str& s);
 std::ostream& operator<<(std::ostream& out, const Str& s);
-
 
 #endif
 // Local Variables:
