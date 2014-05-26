@@ -47,6 +47,17 @@ bool compare_student_info(const Student_info& x, const Student_info& y)
 	return x.name() < y.name();
 }
 
+bool fgrade(const Student_info& s)
+{
+	return ( s.grade() < 60);
+}
+
+bool pgrade(const Student_info& s)
+{
+	return !fgrade( s);
+}
+
+
 // Local Variables:
 // c-basic-offset: 8
 // mode: c++

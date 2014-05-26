@@ -23,6 +23,10 @@ public:
 
 std::istream& read_hw(std::istream& in, std::vector<double>& hw);
 bool compare_student_info(const Student_info& x, const Student_info& y);
+bool fgrade(const Student_info& s);
+bool pgrade(const Student_info& s);
+
+
 #endif
 // Local Variables:
 // c-basic-offset: 8

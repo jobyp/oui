@@ -1,11 +1,10 @@
 #ifndef __HEADER_GRADE__H_
 #define __HEADER_GRADE__H_
 
-#include "student_info.h"
+#include <vector>
 
 double grade(double midterm, double final, double homework);
-bool fgrade(const Student_info& s);
-bool pgrade(const Student_info& s);
+double grade(double midterm, double final, const std::vector<double>& hw);
 
 #endif
 // Local Variables:

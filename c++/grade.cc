@@ -1,9 +1,11 @@
 #include <stdexcept>
+#include <vector>
 
-#include "student_info.h"
 #include "median.h"
 #include "grade.h"
 
+
+using std::vector;
 using std::domain_error;
 
 double grade(double midterm, double final, double homework)
@@ -13,16 +15,13 @@ double grade(double midterm, double final, double homework)
 		 0.4 * homework);
 }
 
-bool fgrade(const Student_info& s)
+double grade(double midterm, double final, const vector<double>& hw)
 {
-	return ( s.grade() < 60);
-}
+	if ( hw.size() == 0)
+		throw domain_error("student didn't submit any homework grades");
 
-bool pgrade(const Student_info& s)
-{
-	return !fgrade( s);
+	return grade( midterm, final, median( hw));
 }
-
 // Local Variables:
 // c-basic-offset: 8
 // mode: c++

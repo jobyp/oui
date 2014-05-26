@@ -1,5 +1,5 @@
 PROGS=students test_split frame rev palin test_urls concat map \
-test_xref sentence f f2 f3 f4 vec str
+test_xref sentence f f2 f3 f4 vec str grad
 
 OBJDIR=_build
 
@@ -32,6 +32,7 @@ test_urls: $(addprefix $(OBJDIR)/,urls.o)
 test_xref: $(addprefix $(OBJDIR)/,xref.o split.o)
 sentence: $(addprefix $(OBJDIR)/,split.o)
 f: $(addprefix $(OBJDIR)/,split.o)
+grad: $(addprefix $(OBJDIR)/,grade.o)
 
 emacs_cxx_offset:='// c-basic-offset: 8'
 emacs_cxx_end:='// End:'
