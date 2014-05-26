@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <list>
 #include <cctype>
 
@@ -39,15 +40,16 @@ using std::list;
 
 int main()
 {
-	Vec<char> vs( 10, 'X');
-	Str c( vs.begin(), vs.end());
+	Str s1("Joby");
+	Str s2(" Poriyath");
+
+	Str s3(s1 + s2);
+
+	Str s4(s3.begin(), s3.end());
 	
-	cout << c.size() << endl;
-	cout << c[0] << endl;
-	c[0] = 'Z';
-	cout << c[0] << endl;
-	c.clear();
-	cout << c.size() << endl;
+	cout << s4 + ": C++ is fun" << endl;
+
+	cout << std::strlen( s1.c_str()) << endl;
 	
 	return 0;
 }
