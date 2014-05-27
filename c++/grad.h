@@ -6,6 +6,8 @@
 #include <vector>
 #include <stdexcept>
 
+#include "handle.h"
+
 class Core {
 
 public:
@@ -17,11 +19,10 @@ public:
 	virtual double grade() const;
 	
 	virtual ~Core() {};
+
+	virtual Core* clone() const { return new Core( *this); } 
 	
 protected:
-	friend class Student_info;
-	
-	virtual Core* clone() const { return new Core( *this); } 
 	std::istream& read_common(std::istream&);
 	double midterm, final;
 	std::vector<double> homework;
@@ -40,7 +41,6 @@ public:
 	double grade() const;
 	std::istream& read(std::istream&);
 	
-protected:
 	Grad* clone() const { return new Grad( *this); } 
 
 private:
@@ -54,13 +54,10 @@ class Student_info {
 public:
 	Student_info() : cp(nullptr) {}
 	Student_info(std::istream& in) : cp(nullptr) { read( in); }
-	Student_info(const Student_info&);
-	Student_info& operator=(const Student_info&);
-	~Student_info() { delete cp; }
 	
 	std::string name() const
 	{
-		if ( cp == nullptr)
+		if ( !cp)
 			throw std::runtime_error("uninitialized student object");
 		return cp->name();
 
@@ -68,7 +65,7 @@ public:
 
 	double grade() const
 	{
-		if ( cp == nullptr)
+		if ( !cp)
 			throw std::runtime_error("uninitialized student object");
 		return cp->grade();
 	}
@@ -77,8 +74,6 @@ public:
 	{
 		if ( !in)
 			return in;
-
-		delete cp;
 
 		char s_type;
 
@@ -98,7 +93,7 @@ public:
 	}
 
 private:
-	Core* cp;
+	Handle<Core> cp;
 };
 
 #endif

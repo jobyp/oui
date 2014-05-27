@@ -35,16 +35,6 @@ istream& read_hw(istream& in, vector<double>& hw)
 	return in;
 }
 
-// bool compare(const Core& c1, const Core& c2)
-// {
-// 	return c1.name() < c2.name();
-// }
-
-// bool compare_grades(const Core& c1, const Core& c2)
-// {
-// 	return c1.grade() < c2.grade();
-// }
-
 double Core::grade() const 
 {
 	return ::grade( midterm, final, homework);
@@ -74,28 +64,6 @@ istream& Grad::read(istream& in)
 double Grad::grade() const 
 {
 	return min( Core::grade(), thesis);
-}
-
-Student_info::Student_info(const Student_info& s) 
-	: cp (nullptr)
-{
-	if ( s.cp)
-		cp = s.cp->clone();
-}
-
-Student_info& Student_info::operator=(const Student_info& s)
-{
-	if ( this == &s)
-		return *this;
-
-	delete cp;
-
-	if ( s.cp)
-		cp = s.cp->clone();
-	else
-		cp = nullptr;
-
-	return *this;
 }
 
 int main()
