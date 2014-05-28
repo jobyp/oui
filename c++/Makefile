@@ -1,5 +1,5 @@
 PROGS=students test_split frame rev palin test_urls concat map \
-test_xref sentence f f2 f3 f4 vec str grad f5 handle
+test_xref sentence f f2 f3 f4 vec str grad f5 handle str2 hw
 
 OBJDIR=_build
 
@@ -10,9 +10,10 @@ all: $(PROGS)
 
 CXX?=g++
 CCFLAGS:=-g -O2 -std=c++11 -Wall -pedantic
+LDFLAGS:= -pthread
 
 $(OBJDIR)/%.d : %.cc | $(OBJDIR)
-	@set -e ; rm -f $@; $(CXX) -MM $< > $@.$$$$; \
+	@set -e ; rm -f $@; $(CXX) $(CCFLAGS) -MM $< > $@.$$$$; \
 	sed -e 's,\($*\)\.o[ ]*:,$(OBJDIR)/\1.o $@ :,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
@@ -20,7 +21,7 @@ $(OBJDIR)/%.o: %.cc | $(OBJDIR)
 	$(CXX) -c $(CCFLAGS) -o $@ $<
 
 %: $(OBJDIR)/%.o
-	$(CXX) $(CCFLAGS) -o $@ $^
+	$(CXX) $(CCFLAGS) $(LDFLAGS) -o $@ $^
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)

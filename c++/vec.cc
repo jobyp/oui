@@ -1,4 +1,9 @@
+#include <iostream>
+
 #include "vec.h"
+
+using std::cout;
+using std::endl;
 
 template <typename T>
 Vec<T> ff(typename Vec<T>::size_type i)

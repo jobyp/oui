@@ -7,10 +7,7 @@
 #include <iostream>
 #include <iterator>
 
-using std::cout;
-using std::endl;
-
-#define f_name() { cout << __PRETTY_FUNCTION__  << endl; }
+#define f_name() { std::cout << __PRETTY_FUNCTION__  << std::endl; }
 
 
 template <typename T>
@@ -128,8 +125,6 @@ void Vec<T>::grow()
 template <typename T>
 void Vec<T>::unchecked_append(const T& val)
 {
-	// cout << __PRETTY_FUNCTION__  << endl;
-	
 	alloc.construct( avail++, val);
 }
 
