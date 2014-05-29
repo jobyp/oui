@@ -5,6 +5,12 @@
 #include <cstring>
 
 template <typename T>
+T* clone(const T* tp)
+{
+	return tp->clone();
+}
+
+template <typename T>
 class Handle {
 
 public:
@@ -121,6 +127,7 @@ private:
 	std::size_t* refptr;
 };
 
+
 template<typename T>
 class Ptr {
 
@@ -167,7 +174,7 @@ public:
 			unbind();
 			
 			refptr = new std::size_t( 1);
-			p = p ? p->clone() : nullptr;
+			p = p ? clone( p) : nullptr;
 		}
 	}
 
