@@ -19,11 +19,9 @@ public:
 	~thread_guard() 
 	{
 		cout << __PRETTY_FUNCTION__ << endl;
-		if ( t.joinable()) {
 
+		if ( t.joinable())
 			t.join();
-			cout << "you should never see this\n";
-		}
 	}
 
 	thread_guard(const thread_guard&) = delete;
@@ -33,16 +31,29 @@ private:
 	thread& t;
 };
 
-int main()
+int ff()
 {
 	thread x( hello);
 	thread_guard tx( x);
-	
+
+#if 1	
 	throw std::runtime_error("murpy's law!");
-	
+#endif	
 	
 	cout << ( x.joinable() ? "true" : "false") << "\n";
-	//x.join();
+	x.join();
+	
+	return 0;
+}
+
+int main()
+{
+	try {
+		ff();
+	} catch(...) {
+		cout << "oops!\n";
+		return 1;
+	}
 	
 	return 0;
 }
