@@ -1,60 +1,35 @@
-#include <iostream>
 #include <thread>
-#include <stdexcept>
+#include <iostream>
+#include <string>
+#include <functional>
+#include <memory>
+#include <algorithm>
+#include <vector>
+#include <utility>
 
 using std::cout;
+using std::string;
 using std::endl;
-using std::thread;
 
-void hello()
+void hello(unsigned i)
 {
-	cout << "Hello, world\n";
+	std::cout << "[" << i << "]" << " Hello, world!\n";
+	return;
 }
 
-class thread_guard {
-
-public:
-	explicit thread_guard(thread& _t) : t( _t) {}
-
-	~thread_guard() 
-	{
-		cout << __PRETTY_FUNCTION__ << endl;
-
-		if ( t.joinable())
-			t.join();
-	}
-
-	thread_guard(const thread_guard&) = delete;
-	thread_guard& operator=(const thread_guard&) = delete;
-	
-private:
-	thread& t;
-};
-
-int ff()
+void f()
 {
-	thread x( hello);
-	thread_guard tx( x);
+	std::vector< std::thread > threads;
+	
+	for( unsigned i = 0; i < 20; i++) 
+		threads.push_back( std::thread( hello, i));
 
-#if 1	
-	throw std::runtime_error("murpy's law!");
-#endif	
-	
-	cout << ( x.joinable() ? "true" : "false") << "\n";
-	x.join();
-	
-	return 0;
+	std::for_each( threads.begin(), threads.end(), std::mem_fn( &std::thread::join));
 }
 
 int main()
 {
-	try {
-		ff();
-	} catch(...) {
-		cout << "oops!\n";
-		return 1;
-	}
-	
+	cout << std::thread::hardware_concurrency() << endl;
 	return 0;
 }
 
