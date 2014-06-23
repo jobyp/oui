@@ -1,11 +1,17 @@
-PROGS := hwserver hwclient version
+PROGS_ZMQ := hwserver hwclient version
+PROGS := hw
 OBJDIR := _build
 
 CFLAGS := -g -std=c99
 LDFLAGS := -lzmq
 
 .PHONY: all
-all: $(PROGS)
+all: $(PROGS_ZMQ) sock_progs
+	@:
+
+.PHONY: sock_progs
+sock_progs : LDFLAGS:=
+sock_progs : $(PROGS)
 	@:
 
 hwserver : $(addprefix $(OBJDIR)/,util.o)
@@ -34,5 +40,5 @@ $(OBJDIR):
 
 .PHONY: clean
 clean:
-	rm -rf $(PROGS) $(OBJDIR) *~ 
+	rm -rf $(PROGS) $(PROGS_ZMQ) $(OBJDIR) *~ 
 
