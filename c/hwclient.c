@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
+
+#include "util.h"
 
 int main()
 {
@@ -14,18 +17,17 @@ int main()
 	
 	for(int i = 0; i < 10; i++) {
 		
-		zmq_msg_t request;
-		zmq_msg_init_size( &request, 5);
-		memcpy( zmq_msg_data( &request), "Hello", 5);
-		printf( "Sending Hello %d...", i);
-		zmq_msg_send( &request, requester, 0);
-		zmq_msg_close( &request);
+		s_send( requester, "Hello");
+		
+		sleep( 1);
+		
+		char *data = s_recv( requester);
+		if ( data) {
 
-		zmq_msg_t reply;
-		zmq_msg_init( &reply);
-		zmq_msg_recv( & reply, requester, 0);
-		printf("Recieving World %d\n", i);
-		zmq_msg_close( &reply);
+			printf( "C Received: %s\n", data);
+			free( data);
+			data = NULL;
+		}
 	}
 
 	sleep( 2);

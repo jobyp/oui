@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+
+#include "util.h"
 
 int main()
 {
@@ -12,19 +15,18 @@ int main()
 
 	while( 1) {
 		
-		zmq_msg_t request;
-		zmq_msg_init( &request);
-		zmq_msg_recv( &request, responder, 0);
-		printf("Received Hello\n");
-		zmq_msg_close( &request);
+		char *msg = s_recv( responder);
+		if ( msg != NULL) {
+			printf("S received: %s\n", msg);
+			free( msg);
+			msg = NULL;
+		} else 
+			printf("S recieved: NULL\n");
+		
 
 		sleep( 1);
 
-		zmq_msg_t reply;
-		zmq_msg_init_size( &reply, 5);
-		memcpy( zmq_msg_data( &reply), "World", 5);
-		zmq_msg_send( &reply, responder, 0);
-		zmq_msg_close( &reply);
+		s_send( responder, "PCJ");
 	}
 
 	zmq_close( responder);
