@@ -14,6 +14,7 @@ using std::endl;
 void hello(unsigned i)
 {
 	std::cout << "[" << i << "]" << " Hello, world!\n";
+
 	return;
 }
 
@@ -25,11 +26,13 @@ void f()
 		threads.push_back( std::thread( hello, i));
 
 	std::for_each( threads.begin(), threads.end(), std::mem_fn( &std::thread::join));
+
 }
 
 int main()
 {
-	cout << std::thread::hardware_concurrency() << endl;
+	std::cout << std::this_thread::get_id() << endl;
+
 	return 0;
 }
 
