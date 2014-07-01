@@ -1,5 +1,5 @@
 PROGS_ZMQ := hwserver hwclient version
-PROGS := hw hw2
+PROGS := hw hw2 bst
 OBJDIR := _build
 
 CFLAGS := -D_POSIX_SOURCE -g -std=c99
