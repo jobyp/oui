@@ -2,7 +2,7 @@ PROGS_ZMQ := hwserver hwclient version
 PROGS := hw hw2 bst
 OBJDIR := _build
 
-CFLAGS := -D_POSIX_SOURCE -g -std=c99
+CFLAGS := -D_GNU_SOURCE -g -std=c99
 LDFLAGS := -lzmq
 
 .PHONY: all
