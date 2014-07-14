@@ -4,6 +4,17 @@
 #include <stdint.h>
 #include <ctype.h>
 
+/*
+  1. Insert at root.
+  2. Right rotate
+  3. Left rotate
+  4. Delete node
+  5. Balance BST
+  6. Copy a BST (recursive & iterative)
+  7. Join BSTs
+ */
+
+
 typedef struct Bst {
 	unsigned key;
 	struct Bst *left;
@@ -13,7 +24,6 @@ typedef struct Bst {
 } bst_t;
 
 typedef void (*tree_walk_func_t)(bst_t *t);
-
 
 void inorder_walk(bst_t *t)
 {
