@@ -1,5 +1,5 @@
-PROGS_ZMQ := hwserver hwclient version
-PROGS := hw hw2 bst
+BPROGS_ZMQ := hwserver hwclient version
+PROGS := hw hw2 bits_count
 OBJDIR := _build
 
 CFLAGS := -D_GNU_SOURCE -g -std=c99
