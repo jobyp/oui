@@ -37,3 +37,31 @@ let render_table header rows =
 let () = 
   printf "%s\n" (render_table lang_info_header lang_info)
 
+(*
+ *  List.{map,map2_exn,fold,dedup,reduce,partition_tf,append
+ *
+ *  List.filter_map drops all the elements for which None is returned
+ *)
+
+
+let is_ocaml_source s = 
+  match String.rsplit2 s ~on:'.' with
+  | Some ("", _) -> false
+  | Some (_, ("ml"|"mli")) -> true
+  | _ -> false
+
+
+let rec ls_rec s = 
+  if Sys.is_file_exn ~follow_symlinks:true s
+  then [s]
+  else 
+    Sys.ls_dir s
+    |> List.map ~f:(fun sub -> ls_rec (s ^/ sub))
+    |> List.concat
+
+let rec destutter = function
+  | [] as l -> l
+  | [_] as l -> l
+  | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
+  | hd :: tl -> hd :: destutter tl
+
