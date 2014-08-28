@@ -64,16 +64,14 @@ Definition admit {T: Type} : T.  Admitted.
 (** The following declaration tells Coq that we are defining
     a new set of data values -- a _type_. *)
 
-(* PCJOBY *)
-
 Inductive day : Type :=
-  | monday : day
-  | tuesday : day
-  | wednesday : day
-  | thursday : day
-  | friday : day
-  | saturday : day
-  | sunday : day.
+| monday : day
+| tuesday : day
+| wednesday : day
+| thursday : day
+| friday : day
+| saturday : day
+| sunday : day.
 
 (** The type is called [day], and its members are [monday],
     [tuesday], etc.  The second through eighth lines of the definition
@@ -84,13 +82,13 @@ Inductive day : Type :=
 
 Definition next_weekday (d:day) : day :=
   match d with
-  | monday    => tuesday
-  | tuesday   => wednesday
-  | wednesday => thursday
-  | thursday  => friday
-  | friday    => monday
-  | saturday  => monday
-  | sunday    => monday
+    | monday => tuesday
+    | tuesday => wednesday
+    | wednesday => thursday
+    | thursday => friday
+    | friday => monday
+    | saturday => monday
+    | sunday => monday
   end.
 
 (** One thing to note is that the argument and return types of
@@ -137,7 +135,6 @@ Example test_next_weekday:
 
 Proof. simpl. reflexivity.  Qed.
 
-
 (** The details are not important for now (we'll come back to
     them in a bit), but essentially this can be read as "The assertion
     we've just made can be proved by observing that both sides of the
@@ -161,8 +158,8 @@ Proof. simpl. reflexivity.  Qed.
     with members [true] and [false]. *)
 
 Inductive bool : Type :=
-  | true : bool
-  | false : bool.
+| true : bool
+| false : bool.
 
 (** Although we are rolling our own booleans here for the sake
     of building up everything from scratch, Coq does, of course,
@@ -176,22 +173,22 @@ Inductive bool : Type :=
 (** Functions over booleans can be defined in the same way as
     above: *)
 
-Definition negb (b:bool) : bool := 
+Definition negb (b:bool) : bool :=
   match b with
-  | true => false
-  | false => true
+    | true => false
+    | false => true
   end.
 
-Definition andb (b1:bool) (b2:bool) : bool := 
-  match b1 with 
-  | true => b2 
-  | false => false
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+    | true => b2
+    | false => false
   end.
 
-Definition orb (b1:bool) (b2:bool) : bool := 
-  match b1 with 
-  | true => true
-  | false => b2
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+    | true => true
+    | false => b2
   end.
 
 (** The last two illustrate the syntax for multi-argument
@@ -201,11 +198,11 @@ Definition orb (b1:bool) (b2:bool) : bool :=
     specification -- a truth table -- for the [orb] function: *)
 
 Example test_orb1:  (orb true  false) = true. 
-Proof. reflexivity.  Qed.
+Proof. simpl. reflexivity.  Qed.
 Example test_orb2:  (orb false false) = false.
-Proof. reflexivity.  Qed.
+Proof. simpl. reflexivity.  Qed.
 Example test_orb3:  (orb false true)  = true.
-Proof. reflexivity.  Qed.
+Proof. simpl. reflexivity.  Qed.
 Example test_orb4:  (orb true  true)  = true.
 Proof. reflexivity.  Qed.
 
@@ -233,19 +230,19 @@ Proof. reflexivity.  Qed.
     its inputs are [false]. *)
 
 Definition nandb (b1:bool) (b2:bool) : bool :=
-  (* FILL IN HERE *) admit.
+  negb (andb b1 b2).
 
 (** Remove "[Admitted.]" and fill in each proof with 
     "[Proof. reflexivity. Qed.]" *)
 
 Example test_nandb1:               (nandb true false) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_nandb2:               (nandb false false) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_nandb3:               (nandb false true) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_nandb4:               (nandb true true) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 (** [] *)
 
 (** **** Exercise: 1 star (andb3) *)
@@ -254,18 +251,19 @@ Example test_nandb4:               (nandb true true) = false.
     otherwise. *)
 
 Definition andb3 (b1:bool) (b2:bool) (b3:bool) : bool :=
-  (* FILL IN HERE *) admit.
+  andb b1 (andb b2 b3).
 
 Example test_andb31:                 (andb3 true true true) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_andb32:                 (andb3 false true true) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_andb33:                 (andb3 true false true) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_andb34:                 (andb3 true true false) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 (** [] *)
 
+(* PCJOBY *)
 (* ###################################################################### *)
 (** ** Function Types *)
 
