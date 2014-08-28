@@ -263,7 +263,6 @@ Example test_andb34:                 (andb3 true true false) = false.
 Proof. reflexivity. Qed.
 (** [] *)
 
-(* PCJOBY *)
 (* ###################################################################### *)
 (** ** Function Types *)
 
@@ -311,8 +310,8 @@ Module Playground1.
     example, we can define the natural numbers as follows: *)
 
 Inductive nat : Type :=
-  | O : nat
-  | S : nat -> nat.
+| O : nat
+| S : nat -> nat.
 
 (** The clauses of this definition can be read: 
       - [O] is a natural number (note that this is the letter "[O]," not
@@ -327,7 +326,7 @@ Inductive nat : Type :=
     actually a set of _expressions_.  The definition of [nat] says how
     expressions in the set [nat] can be constructed:
 
-    - the expression [O] belongs to the set [nat]; 
+    - the expression [O] belongs to the set [nat];
     - if [n] is an expression belonging to the set [nat], then [S n]
       is also an expression belonging to the set [nat]; and
     - expressions formed in these two ways are the only ones belonging
@@ -363,8 +362,7 @@ End Playground1.
 Definition minustwo (n : nat) : nat :=
   match n with
     | O => O
-    | S O => O
-    | S (S n') => n'
+    | S n' => pred n'
   end.
 
 (** Because natural numbers are such a pervasive form of data,
@@ -397,17 +395,18 @@ Check minustwo.
     whether [n-2] is even.  To write such functions, we use the
     keyword [Fixpoint]. *)
 
-Fixpoint evenb (n:nat) : bool :=
+Fixpoint evenb (n : nat) : bool :=
   match n with
-  | O        => true
-  | S O      => false
-  | S (S n') => evenb n'
+    | O => true
+    | S O => false
+    | S (S n') => evenb n'
   end.
+
 
 (** We can define [oddb] by a similar [Fixpoint] declaration, but here
     is a simpler definition that will be a bit easier to work with: *)
 
-Definition oddb (n:nat) : bool   :=   negb (evenb n).
+Definition oddb (n:nat) : bool := negb (evenb n).
 
 Example test_oddb1:    (oddb (S O)) = true.
 Proof. reflexivity.  Qed.
@@ -457,11 +456,11 @@ Proof. reflexivity.  Qed.
 (** You can match two expressions at once by putting a comma
     between them: *)
 
-Fixpoint minus (n m:nat) : nat :=
+Fixpoint minus (n m : nat) : nat :=
   match n, m with
-  | O   , _    => O
-  | S _ , O    => n
-  | S n', S m' => minus n' m'
+    | O, _ => O
+    | S _, O => n
+    | S n', S m' => minus n' m'
   end.
 
 (** The _ in the first line is a _wildcard pattern_.  Writing _ in a
@@ -471,10 +470,10 @@ Fixpoint minus (n m:nat) : nat :=
 
 End Playground2.
 
-Fixpoint exp (base power : nat) : nat :=
-  match power with
+Fixpoint exp (b e : nat) : nat :=
+  match e with
     | O => S O
-    | S p => mult base (exp base p)
+    | S e' => mult b (exp b e')
   end.
 
 (** **** Exercise: 1 star (factorial) *)
@@ -486,27 +485,30 @@ Fixpoint exp (base power : nat) : nat :=
     Translate this into Coq. *)
 
 Fixpoint factorial (n:nat) : nat := 
-(* FILL IN HERE *) admit.
+  match n with
+    | O => S O
+    | S n' => mult n (factorial n')
+  end.
 
 Example test_factorial1:          (factorial 3) = 6.
-(* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 Example test_factorial2:          (factorial 5) = (mult 10 12).
-(* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 (** [] *)
 
 (** We can make numerical expressions a little easier to read and
     write by introducing "notations" for addition, multiplication, and
     subtraction. *)
 
-Notation "x + y" := (plus x y)  
-                       (at level 50, left associativity) 
-                       : nat_scope.
-Notation "x - y" := (minus x y)  
-                       (at level 50, left associativity) 
-                       : nat_scope.
-Notation "x * y" := (mult x y)  
-                       (at level 40, left associativity) 
-                       : nat_scope.
+(* Notation "x + y" := (plus x y) *)
+(*                        (at level 50, left associativity) *)
+(*                        : nat_scope. *)
+(* Notation "x - y" := (minus x y) *)
+(*                        (at level 50, left associativity) *)
+(*                        : nat_scope. *)
+(* Notation "x * y" := (mult x y) *)
+(*                        (at level 40, left associativity) *)
+(*                        : nat_scope. *)
 
 Check ((0 + 1) + 1).
 
@@ -530,14 +532,16 @@ Check ((0 + 1) + 1).
 
 Fixpoint beq_nat (n m : nat) : bool :=
   match n with
-  | O => match m with
-         | O => true
-         | S m' => false
-         end
-  | S n' => match m with
-            | O => false
-            | S m' => beq_nat n' m'
-            end
+    | O => 
+      match m with
+        | O => true
+        | S _ => false
+      end
+    | S n' => 
+      match m with
+        | O => false
+        | S m' => beq_nat n' m'
+      end
   end.
 
 (** Similarly, the [ble_nat] function tests [nat]ural numbers for
@@ -545,11 +549,11 @@ Fixpoint beq_nat (n m : nat) : bool :=
 
 Fixpoint ble_nat (n m : nat) : bool :=
   match n with
-  | O => true
-  | S n' =>
+    | O => true
+    | S n' => 
       match m with
-      | O => false
-      | S m' => ble_nat n' m'
+        | O => false
+        | S m' => ble_nat n' m'
       end
   end.
 
@@ -570,15 +574,17 @@ Proof. reflexivity.  Qed.
     simple, elegant solution for which [simpl] suffices. *)
 
 Definition blt_nat (n m : nat) : bool :=
-  (* FILL IN HERE *) admit.
+  andb (ble_nat n m) (negb (beq_nat n m)).
 
 Example test_blt_nat1:             (blt_nat 2 2) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_blt_nat2:             (blt_nat 2 4) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_blt_nat3:             (blt_nat 4 2) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 (** [] *)
+
+(* PCJOBY *)
 
 (* ###################################################################### *)
 (** * Proof by Simplification *)
@@ -609,8 +615,8 @@ Example test_blt_nat3:             (blt_nat 4 2) = false.
 
 Theorem plus_O_n : forall n : nat, 0 + n = n.
 Proof.
-  intros n. reflexivity.  Qed.
-
+  intros n. simpl. reflexivity.
+Qed.
 
 (** (_Note_: You may notice that the above statement looks
     different in the original source file and the final html output. In Coq
