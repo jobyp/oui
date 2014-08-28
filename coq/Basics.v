@@ -584,7 +584,6 @@ Example test_blt_nat3:             (blt_nat 4 2) = false.
 Proof. reflexivity. Qed.
 (** [] *)
 
-(* PCJOBY *)
 
 (* ###################################################################### *)
 (** * Proof by Simplification *)
@@ -651,13 +650,15 @@ Qed.
 (** Step through these proofs in Coq and notice how the goal and
     context change. *)
 
-Theorem plus_1_l : forall n:nat, 1 + n = S n. 
+Theorem plus_1_l : forall n : nat, 1 + n = S n.
 Proof.
-  intros n. reflexivity.  Qed.
+  intros n. simpl. reflexivity.
+Qed.
 
-Theorem mult_0_l : forall n:nat, 0 * n = 0.
+Theorem mult_0_l : forall n : nat, 0 * n = 0.
 Proof.
-  intros n. reflexivity.  Qed.
+  intros n. simpl. reflexivity.
+Qed.
 
 (** The [_l] suffix in the names of these theorems is
     pronounced "on the left." *)
@@ -668,8 +669,8 @@ Proof.
 
 (** Here is a slightly more interesting theorem: *)
 
-Theorem plus_id_example : forall n m:nat,
-  n = m -> 
+Theorem plus_id_example : forall n m : nat,
+  n = m ->
   n + n = m + m.
 
 (** Instead of making a completely universal claim about all numbers
@@ -714,7 +715,13 @@ Proof.
 Theorem plus_id_exercise : forall n m o : nat,
   n = m -> m = o -> n + m = m + o.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m o.
+  intros H1.
+  intros H2.
+  rewrite -> H1.
+  rewrite <- H2.
+  reflexivity.
+Qed.
 (** [] *)
 
 (** As we've seen in earlier examples, the [Admitted] command
@@ -733,21 +740,26 @@ Proof.
     theorem instead of a hypothesis from the context. *)
 
 Theorem mult_0_plus : forall n m : nat,
-  (0 + n) * m = n * m.
+  (0 + n) * m = n * m.                      
 Proof.
-  intros n m.
+  intros.
   rewrite -> plus_O_n.
-  reflexivity.  Qed.
+  reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars (mult_S_1) *)
 Theorem mult_S_1 : forall n m : nat,
   m = S n -> 
   m * (1 + n) = m * m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  rewrite -> plus_1_l.
+  rewrite <- H.
+  reflexivity.
+Qed.
 (** [] *)
 
-
+(* PCJOBY *)
 
 (* ###################################################################### *)
 (** * Proof by Case Analysis *) 
