@@ -759,8 +759,6 @@ Proof.
 Qed.
 (** [] *)
 
-(* PCJOBY *)
-
 (* ###################################################################### *)
 (** * Proof by Case Analysis *) 
 
@@ -797,9 +795,10 @@ Abort.
 Theorem plus_1_neq_0 : forall n : nat,
   beq_nat (n + 1) 0 = false.
 Proof.
-  intros n. destruct n as [| n'].
-    reflexivity.
-    reflexivity.  Qed.
+  intros n. destruct n as [ | n'].
+  simpl. reflexivity.
+  simpl. reflexivity.
+Qed.
 
 (** The [destruct] generates _two_ subgoals, which we must then
     prove, separately, in order to get Coq to accept the theorem as
@@ -826,8 +825,9 @@ Theorem negb_involutive : forall b : bool,
   negb (negb b) = b.
 Proof.
   intros b. destruct b.
-    reflexivity.
-    reflexivity.  Qed.
+  reflexivity. 
+  reflexivity.
+Qed.
 
 (** Note that the [destruct] here has no [as] clause because
     none of the subcases of the [destruct] need to bind any variables,
@@ -842,7 +842,11 @@ Proof.
 Theorem zero_nbeq_plus_1 : forall n : nat,
   beq_nat 0 (n + 1) = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  destruct n as [| n']. 
+  reflexivity. 
+  reflexivity.
+Qed.
 (** [] *)
 
 (* ###################################################################### *)
@@ -852,18 +856,30 @@ Proof.
 (** Use the tactics you have learned so far to prove the following 
     theorem about boolean functions. *)
 
-Theorem identity_fn_applied_twice : 
-  forall (f : bool -> bool), 
-  (forall (x : bool), f x = x) ->
-  forall (b : bool), f (f b) = b.
+Theorem identity_fn_applied_twice :
+  forall (f : bool -> bool),
+    (forall (x : bool), f x = x) -> forall (b : bool), f (f b) = b.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct b.
+  rewrite -> H. rewrite -> H. reflexivity.
+  rewrite -> H. rewrite -> H. reflexivity.
+Qed. 
 
 (** Now state and prove a theorem [negation_fn_applied_twice] similar
     to the previous one but where the second hypothesis says that the
     function [f] has the property that [f x = negb x].*)
 
-(* FILL IN HERE *)
+Theorem negation_fn_applied_twice :
+  forall (f : bool -> bool),
+    (forall (x : bool), f x = negb x) ->
+    forall b : bool, f (f b) = b.
+Proof.
+  intros.
+  destruct b.
+  rewrite -> H. rewrite -> H. rewrite -> negb_involutive. reflexivity.
+  rewrite -> H. rewrite -> H. rewrite -> negb_involutive. reflexivity.
+Qed.  
 
 (** **** Exercise: 2 stars (andb_eq_orb) *)
 (** Prove the following theorem.  (You may want to first prove a
@@ -875,7 +891,11 @@ Theorem andb_eq_orb :
   (andb b c = orb b c) ->
   b = c.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros b c.
+  destruct b.
+  simpl. intros. rewrite -> H. reflexivity.
+  simpl. intros. trivial.
+Qed.
 
 (** **** Exercise: 3 stars (binary) *)
 (** Consider a different, more efficient representation of natural
@@ -912,7 +932,25 @@ Proof.
         converting it to unary and then incrementing. 
 *)
 
-(* FILL IN HERE *)
+Inductive bin : Type :=
+| Z : bin
+| Twice : bin -> bin
+| Twice_1 : bin -> bin.
+
+Fixpoint bin_inc (n : bin) : bin :=
+  match n with
+    | Z          => Twice_1 Z
+    | Twice n'   => Twice_1 n'
+    | Twice_1 n' => Twice (bin_inc n')
+  end.
+
+Fixpoint bin_to_nat (n : bin) : nat :=
+  match n with
+    | Z          => O
+    | Twice n'   => mult 2 (bin_to_nat n')
+    | Twice_1 n' => S (mult 2 (bin_to_nat n'))
+  end.
+
 (** [] *)
 
 (* ###################################################################### *)
@@ -920,12 +958,12 @@ Proof.
 
 (** ** More on Notation *)
 
-Notation "x + y" := (plus x y)  
-                       (at level 50, left associativity) 
-                       : nat_scope.
-Notation "x * y" := (mult x y)  
-                       (at level 40, left associativity) 
-                       : nat_scope.
+(* Notation "x + y" := (plus x y)   *)
+(*                        (at level 50, left associativity)  *)
+(*                        : nat_scope. *)
+(* Notation "x * y" := (mult x y)   *)
+(*                        (at level 40, left associativity)  *)
+(*                        : nat_scope. *)
 
 (** For each notation-symbol in Coq we can specify its _precedence level_
     and its _associativity_. The precedence level n can be specified by the
@@ -978,7 +1016,8 @@ Fixpoint plus' (n : nat) (m : nat) : nat :=
     _does_ terminate on all inputs, but that Coq will _not_ accept
     because of this restriction. *)
 
-(* FILL IN HERE *)
+(* ANSWER: interchange n' and m in recursive call to plus' in the above
+ defintion of plus' *)
 (** [] *)
 
 (* $Date: 2013-12-03 07:45:41 -0500 (Tue, 03 Dec 2013) $ *)

@@ -5,10 +5,10 @@ all: $(PROGS)
 	@ :
 
 %.vo: %.v
-	coqc $^
+	coqc $<
 
 # Add dependencies here
-
+Induction.vo : Basics.vo
 
 .PHONY: clean
 clean:
