@@ -103,10 +103,10 @@ Definition next_weekday (d:day) : day :=
     in Coq.  First, we can use the command [Eval compute] to evaluate a
     compound expression involving [next_weekday].  *)
 
-Eval compute in (next_weekday friday).
-   (* ==> monday : day *)
-Eval compute in (next_weekday (next_weekday saturday)).
-   (* ==> tuesday : day *)
+(* Eval compute in (next_weekday friday). *)
+(*    (* ==> monday : day *) *)
+(* Eval compute in (next_weekday (next_weekday saturday)). *)
+(*    (* ==> tuesday : day *) *)
 
 (** If you have a computer handy, now would be an excellent
     moment to fire up the Coq interpreter under your favorite IDE --
@@ -269,16 +269,16 @@ Proof. reflexivity. Qed.
 (** The [Check] command causes Coq to print the type of an
     expression.  For example, the type of [negb true] is [bool]. *)
 
-Check true.
+(* Check true. *)
 (* ===> true : bool *)
-Check (negb true).
+(* Check (negb true). *)
 (* ===> negb true : bool *)
 
 (** Functions like [negb] itself are also data values, just like
     [true] and [false].  Their types are called _function types_, and
     they are written with arrows. *)
 
-Check negb.
+(* Check negb. *)
 (* ===> negb : bool -> bool *)
 
 (** The type of [negb], written [bool -> bool] and pronounced
@@ -371,15 +371,15 @@ Definition minustwo (n : nat) : nat :=
     the "unary" notation defined by the constructors [S] and [O].  Coq
     prints numbers in arabic form by default: *)
 
-Check (S (S (S (S O)))).
-Eval compute in (minustwo 4).
+(* Check (S (S (S (S O)))). *)
+(* Eval compute in (minustwo 4). *)
 
 (** The constructor [S] has the type [nat -> nat], just like the
     functions [minustwo] and [pred]: *)
 
-Check S.
-Check pred.
-Check minustwo.
+(* Check S. *)
+(* Check pred. *)
+(* Check minustwo. *)
 
 (** These are all things that can be applied to a number to yield a
     number.  However, there is a fundamental difference: functions
@@ -427,7 +427,7 @@ Fixpoint plus (n : nat) (m : nat) : nat :=
 
 (** Adding three to two now gives us five, as we'd expect. *)
 
-Eval compute in (plus (S (S (S O))) (S (S O))).
+(* Eval compute in (plus (S (S (S O))) (S (S O))). *)
 
 (** The simplification that Coq performs to reach this conclusion can
     be visualized as follows: *)
@@ -510,7 +510,7 @@ Proof. simpl. reflexivity. Qed.
 (*                        (at level 40, left associativity) *)
 (*                        : nat_scope. *)
 
-Check ((0 + 1) + 1).
+(* Check ((0 + 1) + 1). *)
 
 (** (The [level], [associativity], and [nat_scope] annotations
    control how these notations are treated by Coq's parser.  The
