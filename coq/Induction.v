@@ -4,7 +4,7 @@
 (** The next line imports all of our definitions from the
     previous chapter. *)
 
-Require Export Basics.
+(* Require Export Basics. *)
 
 (** For it to work, you need to use [coqc] to compile [Basics.v]
     into [Basics.vo].  (This is like making a .class file from a .java
@@ -72,6 +72,8 @@ Tactic Notation "SSSSSSCase" constr(name) := Case_aux SSSSSSCase name.
 Tactic Notation "SSSSSSSCase" constr(name) := Case_aux SSSSSSSCase name.
 (** Here's an example of how [Case] is used.  Step through the
    following proof and observe how the context changes. *)
+
+Require Export Basics.
 
 Theorem andb_true_elim1 : forall b c : bool,
   andb b c = true -> b = true.
@@ -498,21 +500,32 @@ Proof.
   destruct b.
   simpl. destruct c. reflexivity. reflexivity.
   destruct c. reflexivity. reflexivity.
-Qed.  
+Qed.
 
-(* PCJOBY *)
+
+Lemma plus_assoc_4_1 : forall a b c d : nat,
+  a + b + (c + d) = a + c + (b + d).                      
+Proof.
+  intros.
+  assert (H1 :a + b + (c + d) = a + (b + (c + d))).
+  remember (c + d) as e.
+  rewrite -> plus_assoc. reflexivity.
+  rewrite -> H1.
+  assert (H2 : b + (c + d) = c + (b + d)).
+  rewrite -> plus_swap. reflexivity.
+  rewrite -> H2.
+  rewrite -> plus_assoc. reflexivity.
+Qed.
 
 Theorem mult_plus_distr_l : forall n m p : nat,
   p * (n + m)  = (p * n) + (p * m).
 Proof.
-  intros.
-  induction p as [|p'].
+  intros. induction p as [|p'].
   simpl. reflexivity.
-  simpl. rewrite -> plus_assoc.
-
-
-
-  
+  simpl. symmetry.
+  rewrite -> plus_assoc_4_1.
+  rewrite -> IHp'. reflexivity.
+Qed.
 
 Theorem mult_plus_distr_r : forall n m p : nat,
   (n + m) * p = (n * p) + (m * p).
@@ -525,15 +538,17 @@ Proof.
   assert (H2 : m * p = p * m).
   rewrite -> mult_comm. reflexivity.
   rewrite -> H2.
-
-  induction p as [|p'].
-  simpl. reflexivity.
-  simpl.
+  rewrite -> mult_plus_distr_l. reflexivity.
+Qed.
 
 Theorem mult_assoc : forall n m p : nat,
   n * (m * p) = (n * m) * p.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. induction n as [|n'].
+  simpl. reflexivity.
+  simpl. rewrite -> mult_plus_distr_r.
+  rewrite -> IHn'. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (beq_nat_refl) *)
@@ -546,7 +561,10 @@ problem using the theorem no matter which way we state it. *)
 Theorem beq_nat_refl : forall n : nat, 
   true = beq_nat n n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction n as [|n'].
+  reflexivity. simpl. apply IHn'.
+Qed.  
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (plus_swap') *)
@@ -564,9 +582,13 @@ Proof.
 Theorem plus_swap' : forall n m p : nat, 
   n + (m + p) = m + (n + p).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  rewrite -> plus_assoc.
+  replace (n + m) with (m + n).
+  rewrite -> plus_assoc. reflexivity.
+  rewrite -> plus_comm. reflexivity.
+Qed.
 (** [] *)
-
 
 (** **** Exercise: 3 stars (binary_commute) *)
 (** Recall the [increment] and [binary-to-unary] functions that you
@@ -581,9 +603,18 @@ Proof.
     wanting to change your original definitions to make the property
     easier to prove, feel free to do so.) *)
 
-(* FILL IN HERE *)
-(** [] *)
+Theorem binary_commute : forall b : bin,
+  bin_to_nat (bin_inc b) = S (bin_to_nat b).
+Proof.
+  intros.
+  induction b as [ | b' | b' ].
+  reflexivity.
+  simpl. reflexivity.
+  simpl. rewrite -> IHb'. simpl. rewrite -> plus_comm.
+  rewrite -> plus_0_r. simpl. reflexivity.
+Qed.
 
+(** [] *)
 
 (** **** Exercise: 5 stars, advanced (binary_inverse) *)
 (** This exercise is a continuation of the previous exercise about
@@ -610,7 +641,48 @@ Proof.
     here. 
 *)
 
-(* FILL IN HERE *)
+Fixpoint nat_to_bin (n : nat) : bin :=
+  match n with
+    | O     => Z
+    | S n' => bin_inc (nat_to_bin n')
+  end.
+
+Theorem nat_to_bin_sanity : forall n : nat,
+  bin_to_nat (nat_to_bin n) = n.
+Proof.
+  intros. induction n as [|n'].
+  reflexivity.
+  simpl. rewrite -> binary_commute. rewrite -> IHn'.
+  reflexivity.
+Qed.
+
+(* Solution to (b) 
+   bin numbers don't have unique representation for 0
+   e.g,   Z = Twice Z.
+*)
+
+Fixpoint normalize (b : bin) : bin :=
+  match b with
+    | Z     => Z
+    | Twice b' =>
+      match (normalize b') with
+        | Z => Z
+        | x => Twice x
+      end
+    | Twice_1 b' => Twice_1 (normalize b')
+  end.
+
+Lemma f_x1_x2 : forall (X Y : Type) ( f : X -> Y) (x1 : X) (x2 : X),
+   x1 = x2 -> f x1 = f x2.              
+Proof.
+  intros.
+  rewrite -> H. reflexivity.
+Qed.
+
+(* Theorem bin_to_nat_sanity : forall b : bin, *)
+(*   nat_to_bin (bin_to_nat b) = normalize b.                             *)
+(* Proof. *)
+
 (** [] *)
 
 (* ###################################################################### *)
