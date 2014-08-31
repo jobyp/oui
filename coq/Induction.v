@@ -672,17 +672,6 @@ Fixpoint normalize (b : bin) : bin :=
     | Twice_1 b' => Twice_1 (normalize b')
   end.
 
-Lemma f_x1_x2 : forall (X Y : Type) ( f : X -> Y) (x1 : X) (x2 : X),
-   x1 = x2 -> f x1 = f x2.              
-Proof.
-  intros.
-  rewrite -> H. reflexivity.
-Qed.
-
-(* Theorem bin_to_nat_sanity : forall b : bin, *)
-(*   nat_to_bin (bin_to_nat b) = normalize b.                             *)
-(* Proof. *)
-
 (** [] *)
 
 (* ###################################################################### *)

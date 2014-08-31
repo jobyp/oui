@@ -9,6 +9,7 @@ all: $(PROGS)
 
 # Add dependencies here
 Induction.vo : Basics.vo
+List.vo : Induction.vo
 
 .PHONY: clean
 clean:
