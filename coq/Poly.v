@@ -37,8 +37,6 @@ Inductive boollist : Type :=
     inductive type definitions.  For example, here is a _polymorphic
     list_ datatype. *)
 
-(* PCJOBY *)
-
 Inductive list (X : Type) : Type :=
 | nil : list X
 | cons : X -> list X -> list X.
@@ -67,7 +65,7 @@ Inductive list (X : Type) : Type :=
 
 (* Check nil. *)
 (* ===> nil : forall X : Type, list X *)
-Check cons.
+(* Check cons. *)
 (* ===> cons : forall X : Type, X -> list X -> list X *)
 
 (** The "[forall X]" in these types can be read as an additional
@@ -76,7 +74,7 @@ Check cons.
     arguments are supplied in the same way as the others.  For
     example, the list containing [2] and [1] is written like this: *)
 
-Check (cons nat 2 (cons nat 1 (nil nat))).
+(* Check (cons nat 2 (cons nat 1 (nil nat))). *)
 
 (** (We've gone back to writing [nil] and [cons] explicitly here
     because we haven't yet defined the [ [] ] and [::] notations for
@@ -88,10 +86,10 @@ Check (cons nat 2 (cons nat 1 (nil nat))).
 
 (** *** *)
 
-Fixpoint length (X:Type) (l:list X) : nat :=
+Fixpoint length (X : Type) (l : list X) : nat :=
   match l with
-  | nil      => 0
-  | cons h t => S (length X t)
+    | nil      => O
+    | cons h t => S (length X t)
   end.
 
 (** Note that the uses of [nil] and [cons] in [match] patterns
@@ -115,31 +113,27 @@ Example test_length2 :
     length bool (cons bool true (nil bool)) = 1.
 Proof. reflexivity.  Qed.
 
-
 (** *** *)
 (** Let's close this subsection by re-implementing a few other
     standard list functions on our new polymorphic lists: *)
 
-Fixpoint app (X : Type) (l1 l2 : list X)
-                : (list X) :=
+Fixpoint app (X : Type) (l1 l2 : list X) : (list X) :=
   match l1 with
-  | nil      => l2
-  | cons h t => cons X h (app X t l2)
+    | nil      => l2
+    | cons h t => cons X h (app X t l2)
   end.
 
-Fixpoint snoc (X:Type) (l:list X) (v:X) : (list X) :=
+Fixpoint snoc (X : Type) (l : list X) (v : X) : (list X) :=
   match l with
-  | nil      => cons X v (nil X)
-  | cons h t => cons X h (snoc X t v)
+    | nil      => cons X v (nil X)
+    | cons h t => cons X h (snoc X t v)
   end.
 
-Fixpoint rev (X:Type) (l:list X) : list X :=
+Fixpoint rev (X : Type) (l : list X) : list X :=
   match l with
-  | nil      => nil X
-  | cons h t => snoc X (rev X t) h
+    | nil      => nil X
+    | cons h t => snoc X (rev X t) h
   end.
-
-
 
 Example test_rev1 :
     rev nat (cons nat 1 (cons nat 2 (nil nat)))
@@ -155,12 +149,14 @@ Module MumbleBaz.
 (** Consider the following two inductively defined types. *)
 
 Inductive mumble : Type :=
-  | a : mumble
-  | b : mumble -> nat -> mumble
-  | c : mumble.
-Inductive grumble (X:Type) : Type :=
-  | d : mumble -> grumble X
-  | e : X -> grumble X.
+| a : mumble 
+| b : mumble -> nat -> mumble
+| c : mumble.
+
+Inductive grumble (X : Type) : Type :=
+| d : mumble -> grumble X
+| e : X -> grumble X.
+
 
 (** Which of the following are well-typed elements of [grumble X] for
     some type [X]?
@@ -179,11 +175,11 @@ Inductive grumble (X:Type) : Type :=
 (** Consider the following inductive definition: *)
 
 Inductive baz : Type :=
-   | x : baz -> baz
-   | y : baz -> bool -> baz.
+| x : baz -> baz
+| y : baz -> bool -> baz.
 
 (** How _many_ elements does the type [baz] have? 
-(* FILL IN HERE *)
+(* baz cannot have any elements *)
 [] *)
 
 End MumbleBaz.
@@ -203,9 +199,9 @@ Fixpoint app' X l1 l2 : list X :=
 
 (** Indeed it will.  Let's see what type Coq has assigned to [app']: *)
 
-Check app'.
+(* Check app'. *)
 (* ===> forall X : Type, list X -> list X -> list X *)
-Check app.
+(* Check app. *)
 (* ===> forall X : Type, list X -> list X -> list X *)
 
 (** It has exactly the same type type as [app].  Coq was able to
@@ -226,7 +222,7 @@ Check app.
 
 (* ###################################################### *)
 (** *** Type Argument Synthesis *)
-
+(* PCJOBY *)
 (** Whenever we use a polymorphic function, we need to pass it
     one or more types in addition to its other arguments.  For
     example, the recursive call in the body of the [length] function
