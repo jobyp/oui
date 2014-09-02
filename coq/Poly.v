@@ -7,7 +7,7 @@
     as data).
 *)
 
-Require Export Lists.   
+Require Export Lists.
 
 (* ###################################################### *)
 (** * Polymorphism *)
@@ -37,10 +37,11 @@ Inductive boollist : Type :=
     inductive type definitions.  For example, here is a _polymorphic
     list_ datatype. *)
 
-Inductive list (X:Type) : Type :=
-  | nil : list X
-  | cons : X -> list X -> list X.
+(* PCJOBY *)
 
+Inductive list (X : Type) : Type :=
+| nil : list X
+| cons : X -> list X -> list X.
 
 (** This is exactly like the definition of [natlist] from the
     previous chapter, except that the [nat] argument to the [cons]
@@ -64,7 +65,7 @@ Inductive list (X:Type) : Type :=
     are now _polymorphic constructors_.  Observe the types of these
     constructors: *)
 
-Check nil.
+(* Check nil. *)
 (* ===> nil : forall X : Type, list X *)
 Check cons.
 (* ===> cons : forall X : Type, X -> list X -> list X *)
