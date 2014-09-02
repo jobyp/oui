@@ -960,13 +960,19 @@ Proof.
 Qed.
 (** [] *)
 
-(* PCJOBY *)
-
 (** **** Exercise: 3 stars, optional (bag_count_sum) *)  
 (** Write down an interesting theorem about bags involving the
     functions [count] and [sum], and prove it.*)
 
-(* FILL IN HERE *)
+Theorem bag_count_sum : forall (s1 s2 : bag) (n : nat),
+  (count n s1) + (count n s2) = count n (sum s1 s2).
+Proof.
+  intros. induction s1 as [|h t].
+  simpl. reflexivity.
+  simpl. destruct (beq_nat n h).
+  simpl. rewrite -> IHt. reflexivity.
+  trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 4 stars, advanced (rev_injective) *)
@@ -977,7 +983,15 @@ Qed.
 There is a hard way and an easy way to solve this exercise.
 *)
 
-(* FILL IN HERE *)
+Theorem rev_injective : forall (l1 l2 : natlist),
+  rev l1 = rev l2 -> l1 = l2.
+Proof.
+  intros.
+  rewrite <- rev_involutive.
+  rewrite <- H.
+  rewrite -> rev_involutive.
+  reflexivity.
+Qed.
 (** [] *)
 
 
@@ -1007,17 +1021,16 @@ Fixpoint index_bad (n:nat) (l:natlist) : nat :=
     position [n]. *)
 
 Inductive natoption : Type :=
-  | Some : nat -> natoption
-  | None : natoption.  
+| Some : nat -> natoption
+| None : natoption.
 
-
-Fixpoint index (n:nat) (l:natlist) : natoption :=
+Fixpoint index (n : nat) (l : natlist) : natoption :=
   match l with
-  | nil => None 
-  | a :: l' => match beq_nat n O with 
-               | true => Some a
-               | false => index (pred n) l' 
-               end
+    | nil => None
+    | h :: t => match beq_nat n 0 with
+                  | true => Some h
+                  | false => index (pred n) t
+                end
   end.
 
 Example test_index1 :    index 0 [4;5;6;7]  = Some 4.
@@ -1052,8 +1065,8 @@ Fixpoint index' (n:nat) (l:natlist) : natoption :=
 
 Definition option_elim (d : nat) (o : natoption) : nat :=
   match o with
-  | Some n' => n'
-  | None => d
+    | Some n => n
+    | None => d
   end.
 
 (** **** Exercise: 2 stars (hd_opt) *)
@@ -1061,16 +1074,19 @@ Definition option_elim (d : nat) (o : natoption) : nat :=
    have to pass a default element for the [nil] case.  *)
 
 Definition hd_opt (l : natlist) : natoption :=
-  (* FILL IN HERE *) admit.
+  match l with 
+    | nil => None
+    | h :: t => Some h
+  end.
 
 Example test_hd_opt1 : hd_opt [] = None.
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Example test_hd_opt2 : hd_opt [1] = Some 1.
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Example test_hd_opt3 : hd_opt [5;6] = Some 5.
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, optional (option_elim_hd) *)
@@ -1079,8 +1095,11 @@ Example test_hd_opt3 : hd_opt [5;6] = Some 5.
 Theorem option_elim_hd : forall (l:natlist) (default:nat),
   hd default l = option_elim default (hd_opt l).
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. induction l as [| h t].
+  simpl. reflexivity.
+  simpl. reflexivity.
+Qed.
+  (** [] *)
 
 (* ###################################################### *)
 (** * Dictionaries *)
@@ -1094,8 +1113,8 @@ Proof.
 Module Dictionary.
 
 Inductive dictionary : Type :=
-  | empty  : dictionary 
-  | record : nat -> nat -> dictionary -> dictionary. 
+| empty : dictionary
+| record : nat -> nat -> dictionary -> dictionary.
 
 (** This declaration can be read: "There are two ways to construct a
     [dictionary]: either using the constructor [empty] to represent an
@@ -1104,7 +1123,7 @@ Inductive dictionary : Type :=
     [dictionary] with an additional key to value mapping." *)
 
 Definition insert (key value : nat) (d : dictionary) : dictionary :=
-  (record key value d).
+  record key value d.
 
 (** Here is a function [find] that searches a [dictionary] for a
     given key.  It evaluates evaluates to [None] if the key was not
@@ -1112,15 +1131,14 @@ Definition insert (key value : nat) (d : dictionary) : dictionary :=
     dictionary. If the same key is mapped to multiple values, [find]
     will return the first one it finds. *)
 
-Fixpoint find (key : nat) (d : dictionary) : natoption := 
-  match d with 
-  | empty         => None
-  | record k v d' => if (beq_nat key k) 
-                       then (Some v) 
-                       else (find key d')
+Fixpoint find (key : nat) (d : dictionary) : natoption :=
+  match d with
+    | empty => None
+    | record k v d' => match beq_nat key k with
+                         | true => Some v
+                         | false => find key d'
+                       end
   end.
-
-
 
 (** **** Exercise: 1 star (dictionary_invariant1) *)
 (** Complete the following proof. *)
@@ -1128,7 +1146,8 @@ Fixpoint find (key : nat) (d : dictionary) : natoption :=
 Theorem dictionary_invariant1' : forall (d : dictionary) (k v: nat),
   (find k (insert k v d)) = Some v.
 Proof.
- (* FILL IN HERE *) Admitted.
+  intros. simpl. rewrite <- beq_nat_refl. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star (dictionary_invariant2) *)
@@ -1137,10 +1156,9 @@ Proof.
 Theorem dictionary_invariant2' : forall (d : dictionary) (m n o: nat),
   beq_nat m n = false -> find m d = find m (insert n o d).
 Proof.
- (* FILL IN HERE *) Admitted.
+  intros. simpl. rewrite -> H. reflexivity.
+Qed.
 (** [] *)
-
-
 
 End Dictionary.
 
