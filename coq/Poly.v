@@ -222,7 +222,7 @@ Fixpoint app' X l1 l2 : list X :=
 
 (* ###################################################### *)
 (** *** Type Argument Synthesis *)
-(* PCJOBY *)
+
 (** Whenever we use a polymorphic function, we need to pass it
     one or more types in addition to its other arguments.  For
     example, the recursive call in the body of the [length] function
@@ -255,10 +255,10 @@ Fixpoint app' X l1 l2 : list X :=
     Using implicit arguments, the [length] function can be written
     like this: *)
 
-Fixpoint length' (X:Type) (l:list X) : nat :=
+Fixpoint length' (X : Type) (l : list X) : nat :=
   match l with
-  | nil      => 0
-  | cons h t => S (length' _ t)
+    | nil      => O
+    | cons h t => S (length' _ t)
   end.
 
 (** In this instance, we don't save much by writing [_] instead of
@@ -276,7 +276,7 @@ Definition list123' := cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
 (* ###################################################### *)
 (** *** Implicit Arguments *)
 
-(** If fact, we can go further.  To avoid having to sprinkle [_]'s
+(** In fact, we can go further.  To avoid having to sprinkle [_]'s
     throughout our programs, we can tell Coq _always_ to infer the
     type argument(s) of a given function. The [Arguments] directive
     specifies the name of the function or constructor, and then lists
@@ -285,7 +285,9 @@ Definition list123' := cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
     *)
 
 Arguments nil {X}.
-Arguments cons {X} _ _.  (* use underscore for argument position that has no name *)
+Arguments cons {X} _ _.  
+(* use underscore for argument position that has no name *)
+
 Arguments length {X} l.
 Arguments app {X} l1 l2.
 Arguments rev {X} l. 
@@ -293,7 +295,6 @@ Arguments snoc {X} l v.
 
 (* note: no _ arguments required... *)
 Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
-Check (length list123'').
 
 (** *** *)
 
@@ -303,8 +304,8 @@ Check (length list123'').
 
 Fixpoint length'' {X:Type} (l:list X) : nat :=
   match l with
-  | nil      => 0
-  | cons h t => S (length'' t)
+    | nil      => O
+    | cons h t => S (length'' t)
   end.
 
 (** (Note that we didn't even have to provide a type argument to
@@ -335,8 +336,6 @@ Definition mynil : list nat := nil.
 (** Alternatively, we can force the implicit arguments to be explicit by
    prefixing the function name with [@]. *)
 
-Check @nil.
-
 Definition mynil' := @nil nat.
 
 (** *** *)
@@ -347,6 +346,7 @@ Definition mynil' := @nil nat.
 
 Notation "x :: y" := (cons x y)
                      (at level 60, right associativity).
+
 Notation "[ ]" := nil.
 Notation "[ x ; .. ; y ]" := (cons x .. (cons y []) ..).
 Notation "x ++ y" := (app x y)
@@ -356,11 +356,7 @@ Notation "x ++ y" := (app x y)
 
 Definition list123''' := [1; 2; 3].
 
-Check ([3 + 4] ++ nil).
-
-
-
-
+(* PCJOBY *)
 (* ###################################################### *)
 (** *** Exercises: Polymorphic Lists *)
 
@@ -370,11 +366,14 @@ Check ([3 + 4] ++ nil).
     and complete the proofs below. *)
 
 Fixpoint repeat {X : Type} (n : X) (count : nat) : list X :=
-  (* FILL IN HERE *) admit.
+  match count with
+    | O        => nil
+    | S count' => cons n (repeat n count')
+  end.
 
 Example test_repeat1:
   repeat true 2 = cons true (cons true nil).
- (* FILL IN HERE *) Admitted.
+Proof. 
 
 Theorem nil_app : forall X:Type, forall l:list X,
   app [] l = l.
