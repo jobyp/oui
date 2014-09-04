@@ -37,8 +37,10 @@ Theorem silly2 : forall (n m o p : nat),
      (forall (q r : nat), q = r -> [q;o] = [r;p]) ->
      [n;o] = [m;p].
 Proof.
-  intros n m o p eq1 eq2. 
-  apply eq2. apply eq1.  Qed.
+  intros n m o p eq1 eq2.
+  apply eq2.
+  apply eq1.
+Qed.
 
 (** You may find it instructive to experiment with this proof
     and see if there is a way to complete it using just [rewrite]
@@ -58,7 +60,8 @@ Theorem silly2a : forall (n m : nat),
      [n] = [m].
 Proof.
   intros n m eq1 eq2.
-  apply eq2. apply eq1.  Qed.
+  apply eq2. apply eq1.
+Qed.
 
 (** **** Exercise: 2 stars, optional (silly_ex) *)
 (** Complete the following proof without using [simpl]. *)
@@ -68,7 +71,8 @@ Theorem silly_ex :
      evenb 3 = true ->
      oddb 4 = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. apply H. apply H0.
+Qed.
 (** [] *)
 
 (** To use the [apply] tactic, the (conclusion of the) fact
@@ -107,14 +111,19 @@ Theorem rev_exercise1 : forall (l l' : list nat),
      l = rev l' ->
      l' = rev l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  assert (rev (rev l') = l') as H1.
+  apply rev_involutive.
+  rewrite -> H.
+  symmetry.
+  apply rev_involutive.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, optional (apply_rewrite) *)
 (** Briefly explain the difference between the tactics [apply] and
     [rewrite].  Are there situations where both can usefully be
     applied?
-  (* FILL IN HERE *)
 *)
 (** [] *)
 
@@ -140,8 +149,9 @@ Proof.
 Theorem trans_eq : forall (X:Type) (n m o : X),
   n = m -> m = o -> n = o.
 Proof.
-  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2. 
-  reflexivity.  Qed.
+  intros.
+  rewrite -> H. rewrite -> H0. reflexivity.
+Qed.
 
 (** Now, we should be able to use [trans_eq] to
     prove the above example.  However, to do this we need
@@ -152,7 +162,7 @@ Example trans_eq_example' : forall (a b c d e f : nat),
      [c;d] = [e;f] ->
      [a;b] = [e;f].
 Proof.
-  intros a b c d e f eq1 eq2. 
+  intros a b c d e f eq1 eq2.
   (* If we simply tell Coq [apply trans_eq] at this point,
      it can tell (by matching the goal against the
      conclusion of the lemma) that it should instantiate [X]
@@ -161,7 +171,9 @@ Proof.
      instantiation for [m]: we have to supply one explicitly
      by adding [with (m:=[c,d])] to the invocation of
      [apply]. *)
-  apply trans_eq with (m:=[c;d]). apply eq1. apply eq2.   Qed.
+  apply trans_eq with (m:=[c; d]).
+  apply eq1. apply eq2.
+Qed.
 
 (**  Actually, we usually don't have to include the name [m]
     in the [with] clause; Coq is often smart enough to
@@ -174,7 +186,10 @@ Example trans_eq_exercise : forall (n m o p : nat),
      (n + p) = m ->
      (n + p) = (minustwo o). 
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  apply trans_eq with (m := m).
+  apply H0. apply H.
+Qed.
 (** [] *)
 
 
@@ -232,17 +247,19 @@ Proof.
     Below you will find example theorems that demonstrate the use of
     [inversion] and exercises to test your understanding. *)
 
+
 Theorem eq_add_S : forall (n m : nat),
-     S n = S m ->
-     n = m.
+  S n = S m ->
+  n = m.
 Proof.
-  intros n m eq. inversion eq. reflexivity.  Qed.
+  intros. inversion H. reflexivity.
+Qed.
 
 Theorem silly4 : forall (n m : nat),
      [n] = [m] ->
      n = m.
 Proof.
-  intros n o eq. inversion eq. reflexivity.  Qed.
+  intros. inversion H. reflexivity. Qed.
 
 (** As a convenience, the [inversion] tactic can also
     destruct equalities between complex values, binding
@@ -252,7 +269,7 @@ Theorem silly5 : forall (n m o : nat),
      [n;m] = [o;o] ->
      [n] = [m].
 Proof.
-  intros n m o eq. inversion eq. reflexivity. Qed.
+  intros. inversion H. reflexivity. Qed.
 
 (** **** Exercise: 1 star (sillyex1) *) 
 Example sillyex1 : forall (X : Type) (x y z : X) (l j : list X),
@@ -260,20 +277,24 @@ Example sillyex1 : forall (X : Type) (x y z : X) (l j : list X),
      y :: l = x :: j ->
      x = y.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. inversion H. inversion H0. symmetry. apply H2.
+Qed.
+
 (** [] *)
 
 Theorem silly6 : forall (n : nat),
      S n = O ->
      2 + 2 = 5.
 Proof.
-  intros n contra. inversion contra. Qed.
+  intros.
+  inversion H.
+Qed.
 
 Theorem silly7 : forall (n m : nat),
      false = true ->
      [n] = [m].
 Proof.
-  intros n m contra. inversion contra.  Qed.
+  intros. inversion H. Qed.
 
 (** **** Exercise: 1 star (sillyex2) *)
 Example sillyex2 : forall (X : Type) (x y z : X) (l j : list X),
@@ -281,7 +302,7 @@ Example sillyex2 : forall (X : Type) (x y z : X) (l j : list X),
      y :: l = z :: j ->
      x = z.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. inversion H. Qed.
 (** [] *)
 
 (** While the injectivity of constructors allows us to reason
@@ -291,28 +312,28 @@ Proof.
 
 Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A), 
     x = y -> f x = f y. 
-Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed. 
-
-
-
+Proof. intros. rewrite -> H. reflexivity. Qed.
 
 (** **** Exercise: 2 stars, optional (practice) *)
 (** A couple more nontrivial but not-too-complicated proofs to work
     together in class, or for you to work as exercises. *)
  
-
 Theorem beq_nat_0_l : forall n,
    beq_nat 0 n = true -> n = 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
-
+  intros. destruct n as [|n']. 
+  reflexivity. simpl in H. inversion H.
+Qed.
+  
 Theorem beq_nat_0_r : forall n,
    beq_nat n 0 = true -> n = 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. destruct n as [|n'].
+  reflexivity. rewrite -> S_nbeq_0 in H. inversion H.
+Qed.  
 (** [] *)
 
-
+(* PCJOBY *)
 (* ###################################################### *)
 (** * Using Tactics on Hypotheses *)
 
