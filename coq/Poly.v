@@ -570,7 +570,6 @@ Example test_hd_opt2 :   hd_opt  [[1];[2]]  = Some [1].
 Proof. simpl. reflexivity. Qed.
 (** [] *)
 
-(* PCJOBY *)
 (* ###################################################### *)
 (** * Functions as Data *)
 (* ###################################################### *)
@@ -585,7 +584,7 @@ Proof. simpl. reflexivity. Qed.
     Functions that manipulate other functions are often called
     _higher-order_ functions.  Here's a simple one: *)
 
-Definition doit3times {X:Type} (f:X->X) (n:X) : X :=
+Definition doit3times {X : Type} (f : X -> X) (n : X) : X :=
   f (f (f n)).
 
 (** The argument [f] here is itself a function (from [X] to
@@ -608,7 +607,7 @@ Proof. reflexivity.  Qed.
     seen are also examples of passing functions as data.  To see why,
     recall the type of [plus]. *)
 
-Check plus.
+(* Check plus. *)
 (* ==> nat -> nat -> nat *)
 
 (** Each [->] in this expression is actually a _binary_ operator
@@ -623,7 +622,6 @@ Check plus.
     supply just the first.  This is called _partial application_. *)
 
 Definition plus3 := plus 3.
-Check plus3.
 
 Example test_plus3 :    plus3 4 = 7.
 Proof. reflexivity.  Qed.
@@ -659,24 +657,32 @@ Definition prod_curry {X Y Z : Type}
 
 Definition prod_uncurry {X Y Z : Type}
   (f : X -> Y -> Z) (p : X * Y) : Z :=
-  (* FILL IN HERE *) admit.
+  f (fst p) (snd p).
 
 (** (Thought exercise: before running these commands, can you
     calculate the types of [prod_curry] and [prod_uncurry]?) *)
 
-Check @prod_curry.
-Check @prod_uncurry.
+(* Check @prod_curry. *)
+(* Check @prod_uncurry. *)
 
 Theorem uncurry_curry : forall (X Y Z : Type) (f : X -> Y -> Z) x y,
   prod_curry (prod_uncurry f) x y = f x y.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. 
+  unfold prod_curry.
+  unfold prod_uncurry.
+  simpl. reflexivity.
+Qed.
 
 Theorem curry_uncurry : forall (X Y Z : Type)
                                (f : (X * Y) -> Z) (p : X * Y),
   prod_uncurry (prod_curry f) p = f p.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct p as [x y].
+  unfold prod_uncurry.
+  simpl. unfold prod_curry. reflexivity.
+Qed.
 (** [] *)
 
 (* ###################################################### *)
@@ -687,12 +693,14 @@ Proof.
     and "filters" the list, returning a new list containing just those
     elements for which the predicate returns [true]. *)
 
-Fixpoint filter {X:Type} (test: X->bool) (l:list X)
-                : (list X) :=
+Fixpoint filter {X : Type} (test : X -> bool) (l : list X) : (list X) :=
   match l with
-  | []     => []
-  | h :: t => if test h then h :: (filter test t)
-                        else       filter test t
+    | nil      => nil
+    | cons h t => 
+      match (test h) with
+        | true => cons h (filter test t)
+        | false => filter test t
+      end
   end.
 
 (** For example, if we apply [filter] to the predicate [evenb]
@@ -717,7 +725,7 @@ Proof. reflexivity.  Qed.
 (** We can use [filter] to give a concise version of the
     [countoddmembers] function from the [Lists] chapter. *)
 
-Definition countoddmembers' (l:list nat) : nat :=
+Definition countoddmembers' (l : list nat) : nat :=
   length (filter oddb l).
 
 Example test_countoddmembers'1:   countoddmembers' [1;0;3;1;4;5] = 4.
@@ -765,15 +773,15 @@ Proof. reflexivity.  Qed.
     7. *)
 
 Definition filter_even_gt7 (l : list nat) : list nat :=
-  (* FILL IN HERE *) admit.
+  filter (fun n => andb (evenb n) (blt_nat 7 n)) l.
 
 Example test_filter_even_gt7_1 :
   filter_even_gt7 [1;2;6;9;10;3;12;8] = [10;12;8].
- (* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 
 Example test_filter_even_gt7_2 :
   filter_even_gt7 [5;2;6;19;129] = [].
- (* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars (partition) *)
@@ -791,12 +799,12 @@ Example test_filter_even_gt7_2 :
 
 Definition partition {X : Type} (test : X -> bool) (l : list X)
                      : list X * list X :=
-(* FILL IN HERE *) admit.
+  (filter test l, filter (fun x => negb (test x)) l). 
 
 Example test_partition1: partition oddb [1;2;3;4;5] = ([1;3;5], [2;4]).
-(* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 Example test_partition2: partition (fun x => false) [5;9;0] = ([], [5;9;0]).
-(* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 (** [] *)
 
 (* ###################################################### *)
@@ -804,11 +812,10 @@ Example test_partition2: partition (fun x => false) [5;9;0] = ([], [5;9;0]).
 
 (** Another handy higher-order function is called [map]. *)
 
-Fixpoint map {X Y:Type} (f:X->Y) (l:list X)
-             : (list Y) :=
+Fixpoint map {X Y : Type} (f : X -> Y) (l : list X) : (list Y) :=
   match l with
-  | []     => []
-  | h :: t => (f h) :: (map f t)
+    | nil      => nil
+    | cons h t => cons (f h) (map f t)
   end.
 
 (** *** *)
@@ -836,18 +843,27 @@ Example test_map3:
   = [[true;false];[false;true];[true;false];[false;true]].
 Proof. reflexivity.  Qed.
 
-
-
 (** ** Map for options *)
 (** **** Exercise: 3 stars (map_rev) *)
 (** Show that [map] and [rev] commute.  You may need to define an
     auxiliary lemma. *)
 
+Theorem map_snoc : forall (X Y : Type) (f : X -> Y) (l : list X) (x : X),
+  map f (snoc l x) = snoc (map f l) (f x). 
+Proof.
+  intros. induction l as [| h t].
+  simpl. reflexivity.
+  simpl. rewrite -> IHt. reflexivity.
+Qed.
 
 Theorem map_rev : forall (X Y : Type) (f : X -> Y) (l : list X),
   map f (rev l) = rev (map f l).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction l as [| h t].
+  reflexivity.
+  simpl. rewrite -> map_snoc. rewrite -> IHt. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars (flat_map) *)
@@ -862,22 +878,24 @@ Proof.
 
 Fixpoint flat_map {X Y:Type} (f:X -> list Y) (l:list X)
                    : (list Y) :=
-  (* FILL IN HERE *) admit.
+  match l with
+    | nil      => nil
+    | cons h t => (f h) ++ (flat_map f t)
+  end.
 
 Example test_flat_map1:
   flat_map (fun n => [n;n;n]) [1;5;4]
   = [1; 1; 1; 5; 5; 5; 4; 4; 4].
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 (** [] *)
 
 (** Lists are not the only inductive type that we can write a
     [map] function for.  Here is the definition of [map] for the
     [option] type: *)
 
-Definition option_map {X Y : Type} (f : X -> Y) (xo : option X)
-                      : option Y :=
+Definition option_map {X Y : Type} (f : X -> Y) (xo : option X) : option Y :=
   match xo with
-    | None => None
+    | None   => None
     | Some x => Some (f x)
   end.
 
@@ -898,10 +916,10 @@ Definition option_map {X Y : Type} (f : X -> Y) (xo : option X)
     operation that lies at the heart of Google's map/reduce
     distributed programming framework. *)
 
-Fixpoint fold {X Y:Type} (f: X->Y->Y) (l:list X) (b:Y) : Y :=
+Fixpoint fold {X Y : Type} (f : X -> Y -> Y) (l : list X) (b : Y) : Y :=
   match l with
-  | nil => b
-  | h :: t => f h (fold f t b)
+    | nil     => b
+    | h :: t  => f h (fold f t b)
   end.
 
 (** *** *)
@@ -918,7 +936,7 @@ Fixpoint fold {X Y:Type} (f: X->Y->Y) (l:list X) (b:Y) : Y :=
     Here are some more examples:
 *)
 
-Check (fold andb).
+(* Check (fold andb). *)
 (* ===> fold andb : list bool -> bool -> bool *)
 
 Example fold_example1 : fold mult [1;2;3;4] 1 = 24.
@@ -930,13 +948,15 @@ Proof. reflexivity. Qed.
 Example fold_example3 : fold app  [[1];[];[2;3];[4]] [] = [1;2;3;4].
 Proof. reflexivity. Qed.
 
-
 (** **** Exercise: 1 star, advanced (fold_types_different) *)
 (** Observe that the type of [fold] is parameterized by _two_ type
     variables, [X] and [Y], and the parameter [f] is a binary operator
     that takes an [X] and a [Y] and returns a [Y].  Can you think of a
     situation where it would be useful for [X] and [Y] to be
     different? *)
+(* Eval simpl in (fold (fun l n => max (length l) n) [[1];[];[2;3];[4]] 0). *)
+
+(* PCJOBY *)
 
 (* ###################################################### *)
 (** ** Functions For Constructing Functions *)
