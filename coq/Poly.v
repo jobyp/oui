@@ -591,7 +591,7 @@ Definition doit3times {X : Type} (f : X -> X) (n : X) : X :=
     [X]); the body of [doit3times] applies [f] three times to some
     value [n]. *)
 
-Check @doit3times.
+(* Check @doit3times. *)
 (* ===> doit3times : forall X : Type, (X -> X) -> X -> X *)
 
 Example test_doit3times: doit3times minustwo 9 = 3.
@@ -956,8 +956,6 @@ Proof. reflexivity. Qed.
     different? *)
 (* Eval simpl in (fold (fun l n => max (length l) n) [[1];[];[2;3];[4]] 0). *)
 
-(* PCJOBY *)
-
 (* ###################################################### *)
 (** ** Functions For Constructing Functions *)
 
@@ -970,8 +968,8 @@ Proof. reflexivity. Qed.
     some type [X]) and returns a function from [nat] to [X] that
     yields [x] whenever it is called, ignoring its [nat] argument. *)
 
-Definition constfun {X: Type} (x: X) : nat->X :=
-  fun (k:nat) => x.
+Definition constfun {X : Type} (x : X) : nat -> X :=
+  fun (k : nat) => x.
 
 Definition ftrue := constfun true.
 
@@ -988,8 +986,8 @@ Proof. reflexivity. Qed.
     exactly like [f] except that, when called with the argument [k],
     it returns [x]. *)
 
-Definition override {X: Type} (f: nat->X) (k:nat) (x:X) : nat->X:=
-  fun (k':nat) => if beq_nat k k' then x else f k'.
+Definition override {X : Type} (f : nat -> X) (k : nat) (x : X) : nat -> X :=
+  fun (k' : nat) => if beq_nat k k' then x else f k'.
 
 (** For example, we can apply [override] twice to obtain a
     function from numbers to booleans that returns [false] on [1] and
@@ -1021,7 +1019,9 @@ Proof. reflexivity. Qed.
 Theorem override_example : forall (b:bool),
   (override (constfun b) 3 true) 2 = b.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold override. simpl. unfold constfun. reflexivity.
+Qed.
 (** [] *)
 
 (** We'll use function overriding heavily in parts of the rest of the
@@ -1071,24 +1071,29 @@ Proof.
     override a function at some argument [k] and then look up [k], we
     get back the overridden value. *)
 
-Theorem override_eq : forall {X:Type} x k (f:nat->X),
+Theorem override_eq : forall (X : Type) x k (f : nat -> X),
   (override f k x) k = x.
 Proof.
-  intros X x k f.
-  unfold override.
+  intros. unfold override.
   rewrite <- beq_nat_refl.
-  reflexivity.  Qed.
+  reflexivity.
+Qed.
 
 (** This proof was straightforward, but note that it requires
     [unfold] to expand the definition of [override]. *)
 
 (** **** Exercise: 2 stars (override_neq) *)
-Theorem override_neq : forall (X:Type) x1 x2 k1 k2 (f : nat->X),
+Theorem override_neq : forall (X:Type) x1 x2 k1 k2 (f : nat -> X),
   f k1 = x1 ->
   beq_nat k2 k1 = false ->
   (override f k2 x2) k1 = x1.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold override.
+  rewrite -> H0.
+  trivial.
+Qed.
+
 (** [] *)
 
 (** As the inverse of [unfold], Coq also provides a tactic
@@ -1112,7 +1117,15 @@ Proof. reflexivity. Qed.
 
 Theorem fold_length_correct : forall X (l : list X),
   fold_length l = length l.
-(* FILL IN HERE *) Admitted. 
+Proof.
+  intros.
+  induction l as [| h t].
+  reflexivity. 
+  simpl.
+  rewrite <- IHt.
+  unfold fold_length. simpl.
+  reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars (fold_map) *)
@@ -1120,12 +1133,21 @@ Theorem fold_length_correct : forall X (l : list X),
     below. *)
 
 Definition fold_map {X Y:Type} (f : X -> Y) (l : list X) : list Y :=
-(* FILL IN HERE *) admit.
+  fold (fun x ys => (f x) :: ys) l [].
 
 (** Write down a theorem in Coq stating that [fold_map] is correct,
     and prove it. *)
 
-(* FILL IN HERE *)
+Theorem fold_map_correct : forall (X Y : Type) (f : X -> Y) (l : list X),
+  fold_map f l = map f l.
+Proof.
+  intros.
+  induction l as [|h t].
+  compute. reflexivity.
+  simpl. rewrite <- IHt.
+  unfold fold_map. simpl.
+  reflexivity.
+Qed.
 (** [] *)
 
 (* $Date: 2013-09-26 14:40:26 -0400 (Thu, 26 Sep 2013) $ *)

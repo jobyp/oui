@@ -3,3 +3,5 @@
 */_bin
 */*~
 ocaml/*.native
+coq/*.vo
+coq/*.glob

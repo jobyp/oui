@@ -1,16 +1,17 @@
-PROGS=$(patsubst %.v,%.vo,$(wildcard *.v))
+PROGS:=$(patsubst %.v,%.vo,$(wildcard *.v))
 
 .PHONY: all
 all: $(PROGS)
 	@ :
 
-%.vo: %.v
+%.vo : %.v
 	coqc $<
 
 # Add dependencies here
 Induction.vo : Basics.vo
-List.vo : Induction.vo
-Poly.vo : List.vo
+Lists.vo : Induction.vo
+Poly.vo : Lists.vo
+MoreCoq.vo : Poly.vo
 
 .PHONY: clean
 clean:
