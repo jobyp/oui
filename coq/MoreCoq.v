@@ -333,7 +333,6 @@ Proof.
 Qed.  
 (** [] *)
 
-(* PCJOBY *)
 (* ###################################################### *)
 (** * Using Tactics on Hypotheses *)
 
@@ -345,10 +344,11 @@ Qed.
     the hypothesis named [H] in the context. *)
 
 Theorem S_inj : forall (n m : nat) (b : bool),
-     beq_nat (S n) (S m) = b  ->
-     beq_nat n m = b. 
+  beq_nat (S n) (S m) = b ->
+  beq_nat n m = b.
 Proof.
-  intros n m b H. simpl in H. apply H.  Qed.
+  intros. simpl in H. trivial.
+Qed.
 
 (** Similarly, the tactic [apply L in H] matches some
     conditional statement [L] (of the form [L1 -> L2], say) against a
@@ -371,9 +371,12 @@ Theorem silly3' : forall (n : nat),
      true = beq_nat n 5  ->
      true = beq_nat (S (S n)) 7.
 Proof.
-  intros n eq H.
-  symmetry in H. apply eq in H. symmetry in H. 
-  apply H.  Qed.
+  intros.
+  symmetry in H0.
+  apply H in H0.
+  symmetry in H0.
+  trivial.
+Qed.
 
 (** Forward reasoning starts from what is _given_ (premises,
     previously proven theorems) and iteratively draws conclusions from
@@ -394,9 +397,23 @@ Theorem plus_n_n_injective : forall n m,
      n = m.
 Proof.
   intros n. induction n as [| n'].
-    (* Hint: use the plus_n_Sm lemma *)
-    (* FILL IN HERE *) Admitted.
+  intros. destruct m as [|m'].
+  reflexivity. simpl in H. inversion H.
+  intros. destruct m as [|m'].
+  simpl in H. inversion H.
+  assert (n'  = m' -> S n' = S m') as H1.
+  intros. rewrite -> H0. reflexivity.
+  apply H1.
+  apply IHn'.
+  simpl in H.
+  inversion H.
+  rewrite -> plus_comm in H2. simpl in H2.
+  rewrite <- plus_n_Sm in H2.
+  inversion H2. trivial.
+Qed.
 (** [] *)
+
+(* PCJOBY *)
 
 (* ###################################################### *)
 (** * Varying the Induction Hypothesis *)
