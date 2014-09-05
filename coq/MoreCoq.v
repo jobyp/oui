@@ -1,3 +1,5 @@
+
+
 (** * MoreCoq: More About Coq *)
 
 Require Export Poly.
@@ -413,8 +415,6 @@ Proof.
 Qed.
 (** [] *)
 
-(* PCJOBY *)
-
 (* ###################################################### *)
 (** * Varying the Induction Hypothesis *)
 
@@ -558,7 +558,17 @@ Proof.
 Theorem beq_nat_true : forall n m,
     beq_nat n m = true -> n = m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  induction n as [|n'].
+  intros. destruct m as [|m'].
+  reflexivity. simpl in H. inversion H.
+  intros. destruct m as [|m'].
+  simpl in H. inversion H.
+  assert (n' = m' -> S n' = S m') as H1.
+  intros. rewrite -> H0. reflexivity.
+  apply H1. apply IHn'.
+  simpl in H. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, advanced (beq_nat_true_informal) *)
@@ -666,8 +676,6 @@ _Proof_: Let [m] be a [nat]. We prove by induction on [m] that, for
     m'].  Since [S n' = n] and [S m' = m], this is just what we wanted
     to show. [] *)
 
-
-
 (** Here's another illustration of [inversion] and using an
     appropriately general induction hypothesis.  This is a slightly
     roundabout way of stating a fact that we have already proved
@@ -732,7 +740,15 @@ Theorem index_after_last: forall (n : nat) (X : Type) (l : list X),
      length l = n ->
      index n l = None.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n X l.
+  generalize dependent n.
+  induction l as [|h t].
+  intros. destruct n as [|n']. simpl. reflexivity.
+  simpl. reflexivity.
+  intros. destruct n as [|n'].
+  simpl in H. inversion H.
+  simpl. apply IHt. simpl in H. inversion H. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, advanced, optional (index_after_last_informal) *)
@@ -755,7 +771,16 @@ Theorem length_snoc''' : forall (n : nat) (X : Type)
      length l = n ->
      length (snoc l v) = S n. 
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n X v l.
+  generalize dependent n.
+  induction l as [|h t].
+  intros. destruct n as [|n'].
+  reflexivity. inversion H.
+  intros. simpl. apply eq_S.
+  destruct n as [|n'].
+  inversion H.
+  apply IHt. simpl in H. inversion H. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, optional (app_length_cons) *)
@@ -766,9 +791,17 @@ Theorem app_length_cons : forall (X : Type) (l1 l2 : list X)
      length (l1 ++ (x :: l2)) = n ->
      S (length (l1 ++ l2)) = n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X l1 l2 x.
+  induction l1 as [|h t].
+  intros. simpl. simpl in H. trivial.
+  intros. simpl. destruct n as [|n'].
+  inversion H.
+  apply eq_S. apply IHt.
+  simpl in H. inversion H. reflexivity.
+Qed.
 (** [] *)
 
+(* PCJOBY *)
 (** **** Exercise: 4 stars, optional (app_length_twice) *)
 (** Prove this by induction on [l], without using app_length. *)
 
@@ -776,8 +809,8 @@ Theorem app_length_twice : forall (X:Type) (n:nat) (l:list X),
      length l = n ->
      length (l ++ l) = n + n.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+Admitted.  
+ (** [] *)
 
 
 (** **** Exercise: 3 stars, optional (double_induction) *)
