@@ -1,5 +1,3 @@
-
-
 (** * MoreCoq: More About Coq *)
 
 Require Export Poly.
@@ -801,15 +799,30 @@ Proof.
 Qed.
 (** [] *)
 
-(* PCJOBY *)
 (** **** Exercise: 4 stars, optional (app_length_twice) *)
 (** Prove this by induction on [l], without using app_length. *)
+
+Lemma app_length : forall (X : Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof.
+  intros.
+  induction l1 as [|h t].
+  simpl. reflexivity.
+  simpl. apply eq_S. trivial.
+Qed.
 
 Theorem app_length_twice : forall (X:Type) (n:nat) (l:list X),
      length l = n ->
      length (l ++ l) = n + n.
 Proof.
-Admitted.  
+  intros X n l.
+  generalize dependent n.
+  induction l as [|h t].
+  intros. destruct n as [|n'].
+  reflexivity. inversion H.
+  intros. rewrite -> app_length.
+  rewrite -> H. reflexivity.
+Qed.
  (** [] *)
 
 
@@ -823,9 +836,20 @@ Theorem double_induction: forall (P : nat -> nat -> Prop),
   (forall m n, P m n -> P (S m) (S n)) ->
   forall m n, P m n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  generalize dependent n.
+  induction m as [|m'].
+  intros.
+  induction n as [|n'].
+  apply H.
+  apply H1. trivial.
+  intros.
+  induction n as [|n'].
+  apply H0. apply IHm'.
+  apply H2.
+  apply IHm'.
+Qed.
 (** [] *)
-
 
 (* ###################################################### *)
 (** * Using [destruct] on Compound Expressions *)
@@ -845,12 +869,13 @@ Definition sillyfun (n : nat) : bool :=
 Theorem sillyfun_false : forall (n : nat),
   sillyfun n = false.
 Proof.
-  intros n. unfold sillyfun. 
+  intros.
+  unfold sillyfun.
   destruct (beq_nat n 3).
-    Case "beq_nat n 3 = true". reflexivity.
-    Case "beq_nat n 3 = false". destruct (beq_nat n 5).
-      SCase "beq_nat n 5 = true". reflexivity.
-      SCase "beq_nat n 5 = false". reflexivity.  Qed.
+  reflexivity.
+  destruct (beq_nat n 5).
+  reflexivity. reflexivity.
+Qed.
 
 (** After unfolding [sillyfun] in the above proof, we find that
     we are stuck on [if (beq_nat n 3) then ... else ...].  Well,
@@ -870,18 +895,57 @@ Proof.
 Theorem override_shadow : forall (X:Type) x1 x2 k1 k2 (f : nat->X),
   (override (override f k1 x2) k1 x1) k2 = (override f k1 x1) k2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold override.
+  destruct (beq_nat k1 k2).
+  reflexivity. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, optional (combine_split) *)
 (** Complete the proof below *)
+(* PCJOBY *)
+
+Lemma f1_s : forall (X : Type) (v : X) (l1 l2 : list X),
+  v :: l1 = v :: l2 -> l1 = l2.
+Proof.
+  intros.
+  generalize dependent l2.
+  induction l1 as [|h1 t1].
+  intros. inversion H. reflexivity.
+  intros. inversion H.
+  reflexivity.
+Qed.
+
+Lemma f2_s : forall (X : Type) (v : X) (l1 l2 : list X),
+  l1 = l2 -> v :: l1 = v :: l2.
+Proof.
+  intros.
+  rewrite -> H. reflexivity.
+Qed.
 
 Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
   split l = (l1, l2) ->
   combine l1 l2 = l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X Y l.
+  induction l as [| (x, y) txy].
+  intros. inversion H. reflexivity.
+  intros. destruct l1 as [|h1 t1].
+  simpl in H. inversion H.
+  destruct l2 as [|h2 t2].
+  inversion H.
+  simpl. inversion H.
+  apply f2_s.
+  apply IHtxy.
+  rewrite -> H2. rewrite -> H4.
+  simpl in H.
+  inversion H.
+  destruct (split txy). simpl. reflexivity. 
+Qed.
 (** [] *)
+
+(* PCJOBY *)
 
 (** Sometimes, doing a [destruct] on a compound expression (a
     non-variable) will erase information we need to complete a proof. *)
