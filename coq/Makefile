@@ -12,6 +12,7 @@ Induction.vo : Basics.vo
 Lists.vo : Induction.vo
 Poly.vo : Lists.vo
 MoreCoq.vo : Poly.vo
+Logic.vo : MoreCoq.vo
 
 .PHONY: clean
 clean:
