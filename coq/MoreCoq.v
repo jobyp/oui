@@ -1290,8 +1290,6 @@ Proof. compute. reflexivity. Qed.
 Example test_existsb_4 : existsb evenb [] = false.
 Proof. compute. reflexivity. Qed.
 
-Check (fun x => S x).
-
 Definition existsb' {X : Type} (test : X -> bool) (l : list X) : bool :=
   negb (forallb (fun x => negb (test x)) l).
 

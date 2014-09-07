@@ -2,8 +2,6 @@
 
 Require Export MoreCoq. 
 
-
-
 (** Coq's built-in logic is very small: the only primitives are
     [Inductive] definitions, universal quantification ([forall]), and
     implication ([->]), while all the other familiar logical
@@ -25,18 +23,17 @@ Require Export MoreCoq.
     ([forall x, P]).  
 *)
 
-
 (** In Coq, the type of things that can (potentially) 
     be proven is [Prop]. *)
 
 (** Here is an example of a provable proposition: *)
 
-Check (3 = 3).
+(* Check (3 = 3). *)
 (* ===> Prop *)
 
 (** Here is an example of an unprovable proposition: *)
 
-Check (forall (n:nat), n = 2).
+(* Check (forall (n:nat), n = 2). *)
 (* ===> Prop *)
 
 (** Recall that [Check] asks Coq to tell us the type of the indicated 
@@ -74,7 +71,7 @@ Proof. reflexivity. Qed.
 (** We can see which proof term Coq constructs for a given Lemma by
 using the [Print] directive: *)
 
-Print silly.
+(* Print silly. *)
 (* ===> silly = eq_refl : 0 * 3 = 0 *)
 
 (** Here, the [eq_refl] proof term witnesses the equality. (More on equality later!)*)
@@ -97,10 +94,11 @@ Proof. intros H. reflexivity. Qed.
 (** We can see that the proof term for the above lemma is indeed a
 function: *)
 
-Print silly_implication.
+(* Print silly_implication. *)
 (* ===> silly_implication = fun _ : 1 + 1 = 2 => eq_refl
      : 1 + 1 = 2 -> 0 * 3 = 0 *)
 
+(* PCJOBY *)
 (** ** Defining Propositions *)
 
 (** Just as we can create user-defined inductive types (like the
