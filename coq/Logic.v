@@ -98,7 +98,6 @@ function: *)
 (* ===> silly_implication = fun _ : 1 + 1 = 2 => eq_refl
      : 1 + 1 = 2 -> 0 * 3 = 0 *)
 
-(* PCJOBY *)
 (** ** Defining Propositions *)
 
 (** Just as we can create user-defined inductive types (like the
@@ -131,7 +130,7 @@ function: *)
     constructor. *)
 
 Inductive and (P Q : Prop) : Prop :=
-  conj : P -> Q -> (and P Q). 
+| conj : P -> Q -> (and P Q).
 
 (** The intuition behind this definition is simple: to
     construct evidence for [and P Q], we must provide evidence
@@ -155,7 +154,7 @@ Notation "P /\ Q" := (and P Q) : type_scope.
 
 (** Consider the "type" of the constructor [conj]: *)
 
-Check conj.
+(* Check conj. *)
 (* ===>  forall P Q : Prop, P -> Q -> P /\ Q *)
 
 (** Notice that it takes 4 inputs -- namely the propositions [P]
@@ -172,12 +171,9 @@ Check conj.
     solves the current goal and leaves the two parts of the
     conjunction as subgoals to be proved separately. *)
 
-Theorem and_example : 
-  (0 = 0) /\ (4 = mult 2 2).
+Theorem and_example : (0 = 0) /\ (4 = mult 2 2).
 Proof.
-  apply conj.
-  Case "left". reflexivity.
-  Case "right". reflexivity.  Qed.
+  apply conj. reflexivity. reflexivity. Qed.
 
 (** Just for convenience, we can use the tactic [split] as a shorthand for
     [apply conj]. *)
@@ -185,9 +181,7 @@ Proof.
 Theorem and_example' : 
   (0 = 0) /\ (4 = mult 2 2).
 Proof.
-  split.
-    Case "left". reflexivity.
-    Case "right". reflexivity.  Qed.
+  split. reflexivity. reflexivity. Qed.
 
 (** ** "Eliminating" conjunctions *)
 (** Conversely, the [inversion] tactic can be used to take a
@@ -195,30 +189,24 @@ Proof.
     must have been used to build it, and add variables representing
     this evidence to the proof context. *)
 
-Theorem proj1 : forall P Q : Prop, 
+Theorem proj1 : forall P Q : Prop,
   P /\ Q -> P.
-Proof.
-  intros P Q H.
-  inversion H as [HP HQ]. 
-  apply HP.  Qed.
-
+Proof. intros. inversion H as [Hp Hq]. apply Hp. Qed.
+ 
 (** **** Exercise: 1 star, optional (proj2) *)
 Theorem proj2 : forall P Q : Prop, 
   P /\ Q -> Q.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. inversion H as [Hp Hq]. apply Hq. Qed.
 (** [] *)
 
 Theorem and_commut : forall P Q : Prop, 
   P /\ Q -> Q /\ P.
 Proof.
-  (* WORKED IN CLASS *)
-  intros P Q H.
-  inversion H as [HP HQ]. 
-  split.  
-    Case "left". apply HQ. 
-    Case "right". apply HP.  Qed.
-  
+  intros.
+  inversion H as [Hp Hq].
+  split. trivial. trivial.
+Qed.
 
 (** **** Exercise: 2 stars (and_assoc) *)
 (** In the following proof, notice how the _nested pattern_ in the
@@ -228,12 +216,11 @@ Proof.
 Theorem and_assoc : forall P Q R : Prop, 
   P /\ (Q /\ R) -> (P /\ Q) /\ R.
 Proof.
-  intros P Q R H.
-  inversion H as [HP [HQ HR]].
-(* FILL IN HERE *) Admitted.
+  intros.
+  inversion H as [Hp [Hq Hr]].
+  split. split. trivial. trivial. trivial.
+Qed.
 (** [] *)
-
-
 
 (* ###################################################### *)
 (** * Iff *)
@@ -241,27 +228,25 @@ Proof.
 (** The handy "if and only if" connective is just the conjunction of
     two implications. *)
 
-Definition iff (P Q : Prop) := (P -> Q) /\ (Q -> P).
+Definition iff (P Q : Prop) : Prop := (P -> Q) /\ (Q -> P).
 
 Notation "P <-> Q" := (iff P Q) 
                       (at level 95, no associativity) 
                       : type_scope.
 
-Theorem iff_implies : forall P Q : Prop, 
-  (P <-> Q) -> P -> Q.
-Proof.  
-  intros P Q H. 
-  inversion H as [HAB HBA]. apply HAB.  Qed.
+Theorem iff_implies : forall P Q : Prop,
+  (P <-> Q) -> (P -> Q).
+Proof.
+  intros.
+  inversion H. apply H1. trivial. Qed.
 
-Theorem iff_sym : forall P Q : Prop, 
+Theorem iff_sym : forall P Q : Prop,
   (P <-> Q) -> (Q <-> P).
 Proof.
-  (* WORKED IN CLASS *)
-  intros P Q H. 
-  inversion H as [HAB HBA].
-  split.
-    Case "->". apply HBA.
-    Case "<-". apply HAB.  Qed.
+  intros.
+  inversion H.
+  split. trivial. trivial.
+Qed.
 
 (** **** Exercise: 1 star, optional (iff_properties) *)
 (** Using the above proof that [<->] is symmetric ([iff_sym]) as
@@ -270,19 +255,21 @@ Proof.
 Theorem iff_refl : forall P : Prop, 
   P <-> P.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros. split. intros. trivial. intros. trivial. 
+Qed.
 
 Theorem iff_trans : forall P Q R : Prop, 
   (P <-> Q) -> (Q <-> R) -> (P <-> R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. inversion H. inversion H0.
+  split. intros. apply H3. apply H1. trivial.
+  intros. apply H2. apply H4. trivial.
+Qed.
 
 (** Hint: If you have an iff hypothesis in the context, you can use
     [inversion] to break it into two separate implications.  (Think
     about why this works.) *)
 (** [] *)
-
-
 
 (** Some of Coq's tactics treat [iff] statements specially, thus
     avoiding the need for some low-level manipulation when reasoning
@@ -298,21 +285,21 @@ Proof.
     inductive proposition. *)
 
 Inductive or (P Q : Prop) : Prop :=
-  | or_introl : P -> or P Q
-  | or_intror : Q -> or P Q. 
+| or_introl : P -> or P Q
+| or_intror : Q -> or P Q.
 
 Notation "P \/ Q" := (or P Q) : type_scope.
 
 (** Consider the "type" of the constructor [or_introl]: *)
 
-Check or_introl.
+(* Check or_introl. *)
 (* ===>  forall P Q : Prop, P -> P \/ Q *)
 
 (** It takes 3 inputs, namely the propositions [P], [Q] and
     evidence of [P], and returns, as output, the evidence of [P \/ Q].
     Next, look at the type of [or_intror]: *)
 
-Check or_intror.
+(* Check or_intror. *)
 (* ===>  forall P Q : Prop, Q -> P \/ Q *)
 
 (** It is like [or_introl] but it requires evidence of [Q]
@@ -331,13 +318,11 @@ Check or_intror.
 (** Since [P \/ Q] has two constructors, doing [inversion] on a
     hypothesis of type [P \/ Q] yields two subgoals. *)
 
-Theorem or_commut : forall P Q : Prop,
-  P \/ Q  -> Q \/ P.
+Theorem or_commut : forall P Q : Prop, P \/ Q -> Q \/ P.
 Proof.
-  intros P Q H.
-  inversion H as [HP | HQ].
-    Case "left". apply or_intror. apply HP.
-    Case "right". apply or_introl. apply HQ.  Qed.
+  intros. inversion H. apply or_intror. trivial.
+  apply or_introl. trivial.
+Qed.
 
 (** From here on, we'll use the shorthand tactics [left] and [right]
     in place of [apply or_introl] and [apply or_intror]. *)
@@ -345,38 +330,40 @@ Proof.
 Theorem or_commut' : forall P Q : Prop,
   P \/ Q  -> Q \/ P.
 Proof.
-  intros P Q H.
-  inversion H as [HP | HQ].
-    Case "left". right. apply HP.
-    Case "right". left. apply HQ.  Qed.
-
-
-
-
+  intros. inversion H.
+  right. trivial.
+  left. trivial.
+Qed.
 
 Theorem or_distributes_over_and_1 : forall P Q R : Prop,
   P \/ (Q /\ R) -> (P \/ Q) /\ (P \/ R).
 Proof. 
-  intros P Q R. intros H. inversion H as [HP | [HQ HR]]. 
-    Case "left". split.
-      SCase "left". left. apply HP.
-      SCase "right". left. apply HP.
-    Case "right". split.
-      SCase "left". right. apply HQ.
-      SCase "right". right. apply HR.  Qed.
+  intros. inversion H.
+  split. left. trivial. left. trivial.
+  inversion H0. 
+  split. right. trivial. right. trivial.
+Qed.  
 
 (** **** Exercise: 2 stars (or_distributes_over_and_2) *)
 Theorem or_distributes_over_and_2 : forall P Q R : Prop,
   (P \/ Q) /\ (P \/ R) -> P \/ (Q /\ R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  inversion H.
+  inversion H0. left. trivial.
+  inversion H1. left. trivial.
+  right. split. trivial. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, optional (or_distributes_over_and) *)
 Theorem or_distributes_over_and : forall P Q R : Prop,
   P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. split.
+  intros. apply or_distributes_over_and_1. trivial.
+  intros. apply or_distributes_over_and_2. trivial.
+Qed.  
 (** [] *)
 
 (* ################################################### *)
@@ -394,40 +381,43 @@ Proof.
 Theorem andb_prop : forall b c,
   andb b c = true -> b = true /\ c = true.
 Proof.
-  (* WORKED IN CLASS *)
-  intros b c H.
-  destruct b.
-    Case "b = true". destruct c.
-      SCase "c = true". apply conj. reflexivity. reflexivity.
-      SCase "c = false". inversion H.
-    Case "b = false". inversion H.  Qed.
+  intros.
+  split.
+  apply andb_true_elim1 with (c:=c). trivial.
+  apply andb_true_elim2 with (b:=b). trivial.
+Qed.
 
 Theorem andb_true_intro : forall b c,
   b = true /\ c = true -> andb b c = true.
 Proof.
-  (* WORKED IN CLASS *)
-  intros b c H.
-  inversion H.
-  rewrite H0. rewrite H1. reflexivity. Qed.
+  intros. inversion H.
+  rewrite -> H0. rewrite -> H1.
+  reflexivity.
+Qed.  
 
 (** **** Exercise: 2 stars, optional (bool_prop) *)
 Theorem andb_false : forall b c,
   andb b c = false -> b = false \/ c = false.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros. destruct b.
+  simpl in H. right. trivial.
+  left. reflexivity.
+Qed.
 
 Theorem orb_prop : forall b c,
   orb b c = true -> b = true \/ c = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. destruct b. left. reflexivity.
+  simpl in H. right. trivial.
+Qed.  
 
 Theorem orb_false_elim : forall b c,
   orb b c = false -> b = false /\ c = false.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros. destruct b. simpl in H. inversion H.
+  simpl in H. split. reflexivity. trivial.
+Qed.
 (** [] *)
-
-
 
 (* ################################################### *)
 (** * Falsehood *)
@@ -435,11 +425,10 @@ Proof.
 (** Logical falsehood can be represented in Coq as an inductively
     defined proposition with no constructors. *)
 
-Inductive False : Prop := . 
+Inductive False : Prop :=.   
 
 (** Intuition: [False] is a proposition for which there is no way
     to give evidence. *)
-
 
 (** Since [False] has no constructors, inverting an assumption
     of type [False] always yields zero subgoals, allowing us to
@@ -447,9 +436,9 @@ Inductive False : Prop := .
 
 Theorem False_implies_nonsense :
   False -> 2 + 2 = 5.
-Proof. 
-  intros contra.
-  inversion contra.  Qed. 
+Proof.
+  intros. inversion H.
+Qed.
 
 (** How does this work? The [inversion] tactic breaks [contra] into
     each of its possible cases, and yields a subgoal for each case.
@@ -471,17 +460,13 @@ Proof.
     thing being proved; it can easily be generalized to work for an
     arbitrary [P]: *)
 
-Theorem ex_falso_quodlibet : forall (P:Prop),
+Theorem ex_falso_quodlibet : forall (P : Prop),
   False -> P.
-Proof.
-  (* WORKED IN CLASS *)
-  intros P contra.
-  inversion contra.  Qed.
+Proof. intros. inversion H. Qed.
 
 (** The Latin _ex falso quodlibet_ means, literally, "from
     falsehood follows whatever you please."  This theorem is also
     known as the _principle of explosion_. *)
-
 
 (* #################################################### *)
 (** ** Truth *)
@@ -494,7 +479,9 @@ Proof.
     intution is that [True] should be a proposition for which it is
     trivial to give evidence.) *)
 
-(* FILL IN HERE *)
+Inductive True : Prop := 
+| T : True.
+
 (** [] *)
 
 (** However, unlike [False], which we'll use extensively, [True] is
@@ -510,14 +497,14 @@ Proof.
 (** The logical complement of a proposition [P] is written [not
     P] or, for shorthand, [~P]: *)
 
-Definition not (P:Prop) := P -> False.
+Definition not (P : Prop) : Prop := P -> False.
 
 (** The intuition is that, if [P] is not true, then anything at
     all (even [False]) follows from assuming [P]. *)
 
 Notation "~ x" := (not x) : type_scope.
 
-Check not.
+(* Check not. *)
 (* ===> Prop -> Prop *)
 
 (** It takes a little practice to get used to working with
@@ -530,21 +517,21 @@ Check not.
 Theorem not_False : 
   ~ False.
 Proof.
-  unfold not. intros H. inversion H.  Qed.
+  unfold not. intros. trivial. Qed.
 
 (** *** *)
 Theorem contradiction_implies_anything : forall P Q : Prop,
   (P /\ ~P) -> Q.
 Proof. 
-  (* WORKED IN CLASS *)
-  intros P Q H. inversion H as [HP HNA]. unfold not in HNA. 
-  apply HNA in HP. inversion HP.  Qed.
+  intros.
+  inversion H. apply H1 in H0. inversion H0.
+Qed.
 
 Theorem double_neg : forall P : Prop,
   P -> ~~P.
 Proof.
-  (* WORKED IN CLASS *)
-  intros P H. unfold not. intros G. apply G. apply H.  Qed.
+  intros. unfold not. intros. apply H0 in H. inversion H.
+Qed.
 
 (** **** Exercise: 2 stars, advanced (double_neg_inf) *)
 (** Write an informal proof of [double_neg]:
@@ -555,6 +542,7 @@ Proof.
 (* FILL IN HERE *)
    []
 *)
+(* PCJOBY *)
 
 (** **** Exercise: 2 stars (contrapositive) *)
 Theorem contrapositive : forall P Q : Prop,
