@@ -542,20 +542,27 @@ Qed.
 (* FILL IN HERE *)
    []
 *)
-(* PCJOBY *)
 
 (** **** Exercise: 2 stars (contrapositive) *)
 Theorem contrapositive : forall P Q : Prop,
   (P -> Q) -> (~Q -> ~P).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold not.
+  unfold not in H0.
+  intros. apply H in H1. apply H0 in H1. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star (not_both_true_and_false) *)
 Theorem not_both_true_and_false : forall P : Prop,
   ~ (P /\ ~P).
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  unfold not.
+  intros.
+  inversion H.
+  apply H1 in H0. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, advanced (informal_not_PNP) *)
@@ -600,7 +607,42 @@ Definition de_morgan_not_and_not := forall P Q:Prop,
 Definition implies_to_or := forall P Q:Prop, 
   (P->Q) -> (~P\/Q). 
 
-(* FILL IN HERE *)
+Theorem excluded_middle_to_classic: excluded_middle -> classic.
+Proof.
+  unfold excluded_middle.
+  unfold classic.
+  unfold not.
+  intros.
+  assert (P \/ (P -> False)) as H1.
+  apply H.
+  inversion H1. trivial.
+  apply H0 in H2. 
+  apply ex_falso_quodlibet. trivial.
+Qed.
+
+Theorem excluded_middle__implies_to_or: excluded_middle -> implies_to_or.
+Proof.
+  unfold excluded_middle.
+  unfold implies_to_or.
+  unfold not.
+  intros.
+  assert (P \/ (P -> False)) as H1. apply H.
+  inversion H1.
+  apply H0 in H2. right. trivial.
+  left. trivial.
+Qed.
+
+Theorem excluded_middle__peirce : excluded_middle -> peirce.
+Proof.
+  unfold excluded_middle. unfold peirce.
+  unfold not. intros.
+  assert (P \/ (P -> False)) as H1.
+  apply H. inversion H1. trivial.
+  apply H0.
+  intros. apply H2 in H3. inversion H3.
+Qed.
+
+( (* FILL IN HERE *)
 (** [] *)
 
 (** **** Exercise: 3 stars (excluded_middle_irrefutable) *)
@@ -611,8 +653,15 @@ we would have both [~ (P \/ ~P)] and [~ ~ (P \/ ~P)], a contradiction. *)
 
 Theorem excluded_middle_irrefutable:  forall (P:Prop), ~ ~ (P \/ ~ P).  
 Proof.
-  (* FILL IN HERE *) Admitted.
-
+  intros.
+  unfold not.
+  intros.
+  apply H.
+  right.
+  intros.
+  apply H.
+  left. trivial.
+Qed.
 
 (* ########################################################## *)
 (** ** Inequality *)
@@ -633,42 +682,54 @@ Notation "x <> y" := (~ (x = y)) : type_scope.
 Theorem not_false_then_true : forall b : bool,
   b <> false -> b = true.
 Proof.
-  intros b H. destruct b.
-  Case "b = true". reflexivity.
-  Case "b = false".
-    unfold not in H.  
-    apply ex_falso_quodlibet.
-    apply H. reflexivity.   Qed.
-
-
-(** *** *)
-
-(** *** *)
-
-(** *** *)
-
-(** *** *)
-
-(** *** *)
+  unfold not.
+  intros.
+  destruct b. reflexivity.
+  apply ex_falso_quodlibet. apply H. trivial.
+Qed.
 
 (** **** Exercise: 2 stars (false_beq_nat) *)
 Theorem false_beq_nat : forall n m : nat,
      n <> m ->
      beq_nat n m = false.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  unfold not.
+  intros n.
+  induction n as [|n'].
+  intros. destruct m as [|m'].
+  simpl. apply ex_falso_quodlibet. apply H. trivial.
+  simpl. trivial.
+  intros. destruct m as [|m'].
+  simpl. trivial.
+  simpl. apply IHn'.
+  intros.
+  apply H. rewrite -> H0. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (beq_nat_false) *)
 Theorem beq_nat_false : forall n m,
   beq_nat n m = false -> n <> m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  induction n as [|n'].
+  intros.
+  unfold not.
+  destruct m as [|m'].
+  simpl in H. inversion H.
+  intros. inversion H0.
+  intros. destruct m as [|m'].
+  unfold not.
+  intros. inversion H0.
+  unfold not.
+  simpl in H.
+  apply IHn' in H.
+  unfold not in H.
+  intros.
+  inversion H0.
+  apply H. trivial.
+Qed.
 (** [] *)
-
-
-
-
 
 (* $Date: 2014-06-05 07:22:21 -0400 (Thu, 05 Jun 2014) $ *)
 

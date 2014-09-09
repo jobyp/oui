@@ -13,6 +13,7 @@ Lists.vo : Induction.vo
 Poly.vo : Lists.vo
 MoreCoq.vo : Poly.vo
 Logic.vo : MoreCoq.vo
+Prop.vo : Logic.vo
 
 .PHONY: clean
 clean:
