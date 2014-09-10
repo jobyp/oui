@@ -12,7 +12,7 @@ Require Export Logic.
     function to define the _proposition_ that some number [n] is
     even: *)
 
-Definition even (n:nat) : Prop := 
+Definition even (n : nat) : Prop :=
   evenb n = true.
 
 (** That is, we can define "[n] is even" to mean "the function [evenb]
@@ -32,8 +32,8 @@ Definition even (n:nat) : Prop :=
 (** * Inductively Defined Propositions *)
 
 Inductive ev : nat -> Prop :=
-  | ev_0 : ev O
-  | ev_SS : forall n:nat, ev n -> ev (S (S n)).
+| ev_0 : ev 0
+| ev_SS : forall n : nat, ev n -> ev (S (S n)).
 
 (** This definition says that there are two ways to give
     evidence that a number [m] is even.  First, [0] is even, and
@@ -47,7 +47,11 @@ Inductive ev : nat -> Prop :=
 Theorem double_even : forall n,
   ev (double n).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction n as [|n'].
+  simpl. apply ev_0.
+  simpl. apply ev_SS. apply IHn'.
+Qed.
 (** [] *)
 
 
@@ -89,11 +93,12 @@ Proof.
 Theorem ev__even : forall n,
   ev n -> even n.
 Proof.
-  intros n E. induction E as [| n' E'].
-  Case "E = ev_0". 
-    unfold even. reflexivity.
-  Case "E = ev_SS n' E'".  
-    unfold even. apply IHE'.  
+  intros n E.
+  induction E as [| n' E'].
+  reflexivity.
+  unfold even.
+  simpl. 
+  apply IHE'.
 Qed.
 
 (** Could this proof also be carried out by induction on [n] instead
@@ -132,7 +137,11 @@ Qed.
 Theorem ev_sum : forall n m,
    ev n -> ev m -> ev (n+m).
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros n m En Em.
+  induction En as [|n' En'].
+  simpl. apply Em.
+  simpl. apply ev_SS. apply IHEn'.
+Qed.
 (** [] *)
 
 
@@ -218,13 +227,13 @@ Proof.
 (** *** *)
 (** In Coq, we can express the definition of [beautiful] as
     follows: *)
+(* PCJOBY *)
 
 Inductive beautiful : nat -> Prop :=
-  b_0   : beautiful 0
-| b_3   : beautiful 3
-| b_5   : beautiful 5
-| b_sum : forall n m, beautiful n -> beautiful m -> beautiful (n+m).
-
+| b_0 : beautiful 0
+| b_3 : beautiful 3
+| b_5 : beautiful 5
+| b_sum : forall n m, beautiful n -> beautiful m -> beautiful (n + m).
 
 (** The first line declares that [beautiful] is a proposition -- or,
     more formally, a family of propositions "indexed by" natural
