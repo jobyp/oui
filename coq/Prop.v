@@ -573,7 +573,6 @@ Proof.
 Qed.
 (** [] *)
 
-(* PCJOBY *)
 (* ####################################################### *)
 (** * Additional Exercises *)
 
@@ -593,10 +592,76 @@ Qed.
     - Prove that 
        forall l, pal l -> l = rev l.
 *)
+ 
+Inductive pal (X : Type) : list X -> Prop :=
+| pal_nil : pal X []
+| pal_one : forall (x : X), pal X [x]
+| pal_xyx : forall (x : X) (l : list X), pal X l -> pal X (x :: l ++ [x]).
 
+Arguments pal {X} _.
 
-(* FILL IN HERE *)
+Lemma snoc_app : forall (X : Type) (x : X) (l : list X),
+  snoc l x = l ++ [x].
+Proof.
+  intros.
+  induction l as [|h t].
+  simpl. reflexivity.
+  simpl. rewrite <- IHt. reflexivity.
+Qed.
+
+Theorem pal_app : forall (X : Type) (l : list X), pal (l ++ rev l).
+Proof.                       
+  intros.
+  induction l as [|h t].
+  simpl. apply pal_nil.
+  simpl. rewrite <- snoc_with_append.
+  rewrite -> snoc_app.
+  apply pal_xyx. apply IHt.
+Qed.
+
+Lemma app_nil : forall (X : Type) (l : list X), l ++ [] = l.
+Proof.
+  intros.
+  induction l as [|h t].
+  reflexivity.
+  simpl. rewrite -> IHt. reflexivity.
+Qed.
+
+Lemma snoc_distr : forall (X : Type) (x : X) (l1 l2 : list X), snoc (l1 ++ l2) x = l1 ++ snoc l2 x.
+Proof.
+  intros.
+  induction l1 as [|h t].
+  reflexivity.
+  simpl. rewrite -> IHt. reflexivity.
+Qed.
+
+Lemma rev_distr : forall (X : Type) (l1 l2 : list X), rev (l1 ++ l2) = rev l2 ++ rev l1.
+Proof.
+  intros.
+  induction l1 as [|h t].
+  simpl. rewrite -> app_nil. reflexivity.
+  simpl. rewrite-> IHt.
+  rewrite -> snoc_distr. reflexivity.
+Qed.
+
+Theorem pal_rev : forall (X : Type) (l : list X), pal l -> l = rev l.
+Proof.
+  intros.
+  induction H as [ | x | x l].  
+  reflexivity. 
+  simpl. reflexivity.
+  simpl. 
+  assert (x :: l ++ [x] = x :: rev l ++ [x]) as H1.
+  rewrite <- IHpal. reflexivity.
+  rewrite -> H1.
+  rewrite -> snoc_app.
+  rewrite -> rev_distr. simpl.
+  reflexivity.
+Qed.
+
 (** [] *)
+
+(* PCJOBY *)
 
 (** **** Exercise: 5 stars, optional (palindrome_converse) *)
 (** Using your definition of [pal] from the previous exercise, prove
@@ -604,7 +669,8 @@ Qed.
      forall l, l = rev l -> pal l.
 *)
 
-(* FILL IN HERE *)
+(* Theorem rev_pal : forall (X : Type) (l : list X), l = rev l -> pal l. *)
+  
 (** [] *)
 
 (** **** Exercise: 4 stars, advanced (subsequence) *)
