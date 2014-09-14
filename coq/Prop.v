@@ -661,8 +661,6 @@ Qed.
 
 (** [] *)
 
-(* PCJOBY *)
-
 (** **** Exercise: 5 stars, optional (palindrome_converse) *)
 (** Using your definition of [pal] from the previous exercise, prove
     that
@@ -705,7 +703,53 @@ Qed.
       induction carefully!
 *)
 
-(* FILL IN HERE *)
+Inductive subseq : list nat -> list nat -> Prop :=
+| sub_nil : forall l, subseq [] l
+| sub_n_1: forall n l1 l2, subseq l1 l2 -> subseq l1 (n :: l2)
+| sub_n_2: forall n l1 l2, subseq l1 l2 -> subseq (n :: l1) (n :: l2).
+
+Theorem subseq_refl: forall l, subseq l l.
+Proof.
+  intros. induction l as [|h t].
+  apply sub_nil.
+  apply sub_n_2. apply IHt.
+Qed.
+
+Theorem subseq_app: forall l1 l2 l3, subseq l1 l2 -> subseq l1 (l2 ++ l3).
+Proof.
+  intros.
+  induction H as [l | n l1' l2' | n l1' l2'].
+  apply sub_nil.
+  simpl. apply sub_n_1. apply IHsubseq.
+  simpl. apply sub_n_2. apply IHsubseq.
+Qed.
+
+Fixpoint remove_one (v : nat) (s : list nat) : list nat :=
+  match s with
+    | nil => nil
+    | h :: t =>
+      match (beq_nat v h) with
+        | true => t
+        | false => h :: (remove_one v t)
+      end
+  end.
+
+Lemma subseq_n_remove_one : forall n l, subseq (remove_one n l) l.
+Proof.
+  intros.
+  induction l as [|h t].
+  simpl. apply sub_nil.
+  simpl. destruct (beq_nat n h).
+  apply sub_n_1 with (n:=h).
+  apply subseq_refl.
+  apply sub_n_2 with (n:=h). apply IHt.
+Qed.
+
+
+(* CHECKME: Do transitive proof later *)
+(* Theorem subseq_trans: forall l1 l2 l3,  *)
+(*   subseq l1 l2 -> subseq l2 l3 -> subseq l1 l3. *)
+
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (R_provability) *)
@@ -721,9 +765,8 @@ Qed.
     - [R 6 [3,2,1,0]]
 *)
 
+(*  Only [R 2 [1,0]] can be proved *)
 (** [] *)
-
-
 
 (* ####################################################### *)
 (** * Relations *)
@@ -737,7 +780,6 @@ Qed.
 
 Module LeModule.  
 
-
 (** One useful example is the "less than or equal to"
     relation on numbers. *)
 
@@ -748,11 +790,10 @@ Module LeModule.
     to the predecessor of the second. *)
 
 Inductive le : nat -> nat -> Prop :=
-  | le_n : forall n, le n n
-  | le_S : forall n m, (le n m) -> (le n (S m)).
+| le_n : forall n, le n n
+| le_S : forall n m, (le n m) -> (le n (S m)).
 
 Notation "m <= n" := (le m n).
-
 
 (** Proofs of facts about [<=] using the constructors [le_n] and
     [le_S] follow the same patterns as proofs about properties, like
@@ -772,20 +813,23 @@ Notation "m <= n" := (le m n).
 Theorem test_le1 :
   3 <= 3.
 Proof.
-  (* WORKED IN CLASS *)
-  apply le_n.  Qed.
+  apply le_n. Qed.
 
 Theorem test_le2 :
   3 <= 6.
 Proof.
-  (* WORKED IN CLASS *)
-  apply le_S. apply le_S. apply le_S. apply le_n.  Qed.
+  apply le_S.
+  apply le_S.
+  apply le_S.
+  apply le_n.
+Qed.
 
 Theorem test_le3 :
   (2 <= 1) -> 2 + 2 = 5.
 Proof. 
-  (* WORKED IN CLASS *)
-  intros H. inversion H. inversion H2.  Qed.
+  intros.
+  inversion H. inversion H2.
+Qed.
 
 (** *** *)
 (** The "strictly less than" relation [n < m] can now be defined
@@ -793,34 +837,37 @@ Proof.
 
 End LeModule.
 
-Definition lt (n m:nat) := le (S n) m.
+Definition lt (n m : nat) : le (S n) m.
 
 Notation "m < n" := (lt m n).
 
 (** Here are a few more simple relations on numbers: *)
 
 Inductive square_of : nat -> nat -> Prop :=
-  sq : forall n:nat, square_of n (n * n).
+| sq : forall n: nat, square_of n (n * n).
 
-Inductive next_nat (n:nat) : nat -> Prop :=
-  | nn : next_nat n (S n).
+Inductive next_nat (n : nat) : nat -> Prop :=
+| nn : next_nat n (S n).
 
 Inductive next_even (n:nat) : nat -> Prop :=
-  | ne_1 : ev (S n) -> next_even n (S n)
-  | ne_2 : ev (S (S n)) -> next_even n (S (S n)).
+| ne_1 : ev (S n) -> next_even n (S n)
+| ne_2 : ev (S (S n)) -> next_even n (S (S n)).
 
 (** **** Exercise: 2 stars (total_relation) *)
 (** Define an inductive binary relation [total_relation] that holds
     between every pair of natural numbers. *)
 
-(* FILL IN HERE *)
+Inductive sum_ge_0: nat -> nat -> Prop :=
+| ge_0: forall n m, sum_ge_0 n m.
+
 (** [] *)
 
 (** **** Exercise: 2 stars (empty_relation) *)
 (** Define an inductive binary relation [empty_relation] (on numbers)
     that never holds. *)
 
-(* FILL IN HERE *)
+Inductive empty_nat_relation : nat -> nat -> Prop :=. 
+
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (le_exercises) *)
@@ -828,37 +875,61 @@ Inductive next_even (n:nat) : nat -> Prop :=
     we are going to need later in the course.  The proofs make good
     practice exercises. *)
 
+Lemma le_Sn_m : forall n m, le (S n) m -> le n m.
+Proof.
+  intros.
+  induction H. apply le_S. apply le_n.
+  apply le_S. trivial.
+Qed.
+
 Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros m n o H1 H2.
+  induction H1.
+  trivial.
+  apply IHle. 
+  apply le_Sn_m. trivial.
+Qed.
 
 Theorem O_le_n : forall n,
   0 <= n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. induction n as [|n'].
+  apply le_n. apply le_S. apply IHn'.
+Qed.
 
 Theorem n_le_m__Sn_le_Sm : forall n m,
   n <= m -> S n <= S m.
 Proof. 
-  (* FILL IN HERE *) Admitted.
-
+  intros.
+  induction H.
+  apply le_n.
+  apply le_S. apply IHle.
+Qed.
 
 Theorem Sn_le_Sm__n_le_m : forall n m,
   S n <= S m -> n <= m.
 Proof. 
-  (* FILL IN HERE *) Admitted.
-
+  intros.
+  inversion H. apply le_n.
+  apply le_Sn_m. apply H1.
+Qed.
 
 Theorem le_plus_l : forall a b,
   a <= a + b.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros. induction a as [|a'].
+  simpl. apply O_le_n.
+  simpl. apply n_le_m__Sn_le_Sm. trivial.
+Qed.
 
 Theorem plus_lt : forall n1 n2 m,
   n1 + n2 < m ->
   n1 < m /\ n2 < m.
 Proof. 
- unfold lt. 
+ unfold lt.
+
+
  (* FILL IN HERE *) Admitted.
 
 Theorem lt_S : forall n m,
@@ -1061,9 +1132,6 @@ Definition natural_number_induction_valid : Prop :=
     true_for_zero P ->
     preserved_by_S P -> 
     true_for_all_numbers P. 
-
-
-
 
 
 (** **** Exercise: 3 stars (combine_odd_even) *)
