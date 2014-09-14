@@ -837,7 +837,7 @@ Qed.
 
 End LeModule.
 
-Definition lt (n m : nat) : le (S n) m.
+Definition lt (n m : nat) := le (S n) m.
 
 Notation "m < n" := (lt m n).
 
@@ -928,232 +928,400 @@ Theorem plus_lt : forall n1 n2 m,
   n1 < m /\ n2 < m.
 Proof. 
  unfold lt.
-
-
- (* FILL IN HERE *) Admitted.
+ intros n1.
+ induction n1 as [|n1'].
+ intros. simpl in H.
+ split.
+ inversion H.
+ apply n_le_m__Sn_le_Sm. apply O_le_n.
+ apply n_le_m__Sn_le_Sm. apply O_le_n.
+ trivial.
+ intros.
+ destruct m as [|m'].
+ inversion H.
+ apply Sn_le_Sm__n_le_m in H.
+ simpl in H.
+ apply IHn1' in H.
+ inversion H.
+ split.
+ apply n_le_m__Sn_le_Sm. trivial.
+ apply n_le_m__Sn_le_Sm. trivial.
+ apply le_S in H1.
+ apply Sn_le_Sm__n_le_m. trivial.
+Qed.
 
 Theorem lt_S : forall n m,
   n < m ->
   n < S m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold lt.
+  intros.
+  apply le_S. trivial.
+Qed.
+
 
 Theorem ble_nat_true : forall n m,
   ble_nat n m = true -> n <= m.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  induction n as [|n'].
+  intros. apply O_le_n.
+  intros.
+  destruct m as [|m'].
+  simpl in H. inversion H.
+  apply n_le_m__Sn_le_Sm.
+  apply IHn'. simpl in H. trivial.
+Qed.
 
 Theorem le_ble_nat : forall n m,
   n <= m ->
   ble_nat n m = true.
 Proof.
-  (* Hint: This may be easiest to prove by induction on [m]. *)
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  induction n as [|n'].
+  intros. destruct m as [|m'].
+  reflexivity.
+  reflexivity.
+  intros.
+  destruct m as [|m'].
+  inversion H.
+  simpl. apply IHn'.
+  apply Sn_le_Sm__n_le_m. trivial.
+Qed.
 
 Theorem ble_nat_true_trans : forall n m o,
-  ble_nat n m = true -> ble_nat m o = true -> ble_nat n o = true.                               
+  ble_nat n m = true -> ble_nat m o = true -> ble_nat n o = true.
 Proof.
-  (* Hint: This theorem can be easily proved without using [induction]. *)
-  (* FILL IN HERE *) Admitted.
+  intros.
+  apply le_ble_nat.
+  apply ble_nat_true in H.
+  apply ble_nat_true in H0.
+  apply le_trans with (n:=m).
+  trivial. trivial.
+Qed.
 
 (** **** Exercise: 2 stars, optional (ble_nat_false) *)
 Theorem ble_nat_false : forall n m,
   ble_nat n m = false -> ~(n <= m).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold not.
+  intros.
+  apply le_ble_nat in H0.
+  rewrite -> H in H0. inversion H0.
+Qed.
 (** [] *)
 
 
 (** **** Exercise: 3 stars (R_provability2) *)
 Module R.
-(** We can define three-place relations, four-place relations,
-    etc., in just the same way as binary relations.  For example,
-    consider the following three-place relation on numbers: *)
+(** We can define three-place relations, four-place relations, *)
+(*     etc., in just the same way as binary relations.  For example, *)
+(*     consider the following three-place relation on numbers: *)
 
 Inductive R : nat -> nat -> nat -> Prop :=
-   | c1 : R 0 0 0 
+   | c1 : R 0 0 0
    | c2 : forall m n o, R m n o -> R (S m) n (S o)
    | c3 : forall m n o, R m n o -> R m (S n) (S o)
    | c4 : forall m n o, R (S m) (S n) (S (S o)) -> R m n o
    | c5 : forall m n o, R m n o -> R n m o.
 
-(** - Which of the following propositions are provable?
-      - [R 1 1 2]
-      - [R 2 2 6]
+(** - Which of the following propositions are provable? *)
+(*       - [R 1 1 2] *)
+(*       - [R 2 2 6] *)
 
-    - If we dropped constructor [c5] from the definition of [R],
-      would the set of provable propositions change?  Briefly (1
-      sentence) explain your answer.
+(*     - If we dropped constructor [c5] from the definition of [R], *)
+(*       would the set of provable propositions change?  Briefly (1 *)
+(*       sentence) explain your answer. *)
   
-    - If we dropped constructor [c4] from the definition of [R],
-      would the set of provable propositions change?  Briefly (1
-      sentence) explain your answer.
+(*     - If we dropped constructor [c4] from the definition of [R], *)
+(*       would the set of provable propositions change?  Briefly (1 *)
+(*       sentence) explain your answer. *)
 
-(* FILL IN HERE *)
-[]
-*)
+(* (* FILL IN HERE *) *)
+(* [] *)
+(* *)
 
-(** **** Exercise: 3 stars, optional (R_fact) *)  
-(** Relation [R] actually encodes a familiar function.  State and prove two
-    theorems that formally connects the relation and the function. 
-    That is, if [R m n o] is true, what can we say about [m],
-    [n], and [o], and vice versa?
-*)
+(** **** Exercise: 3 stars, optional (R_fact) *)
+(** Relation [R] actually encodes a familiar function.  State and prove two *)
+(*     theorems that formally connects the relation and the function.  *)
+(*     That is, if [R m n o] is true, what can we say about [m], *)
+(*     [n], and [o], and vice versa? *)
 
-(* FILL IN HERE *)
-(** [] *)
+Lemma n_m__Sn_Sm: forall n m, n = m -> S n = S m. 
+Proof. intros. rewrite -> H. reflexivity. Qed.
+
+Theorem R__plus: forall n m o, R n m o -> n + m = o.
+Proof.
+  intros.
+  induction H.
+  reflexivity.
+  simpl. apply n_m__Sn_Sm. trivial.
+  rewrite <- plus_n_Sm.
+  apply n_m__Sn_Sm. trivial.
+  simpl in IHR.
+  inversion IHR.
+  rewrite <- plus_n_Sm in H1. inversion H1. trivial. rewrite -> plus_comm.
+  trivial.
+Qed.
+
+Lemma R__0_n_n: forall n, R 0 n n.
+Proof.
+  intros n.
+  induction n as [|n'].
+  apply c1.
+  apply c3. apply IHn'.
+Qed.
+
+Theorem plus__R: forall n m o, plus n m = o -> R n m o.
+Proof.
+  intros n.
+  induction n as [|n'].
+  intros. simpl in H.
+  rewrite <- H.
+  apply R__0_n_n.
+  intros.
+  destruct o as [|o'].
+  simpl in H. inversion H.
+  apply c2. apply IHn'.
+  simpl in H.
+  inversion H. trivial.
+Qed.
 
 End R.
-
 
 (* ##################################################### *)
 (** * Programming with Propositions Revisited *)
 
-(** As we have seen, a _proposition_ is a statement expressing a factual claim,
-    like "two plus two equals four."  In Coq, propositions are written
-    as expressions of type [Prop]. . *)
+(** As we have seen, a _proposition_ is a statement expressing a factual claim, *)
+(*     like "two plus two equals four."  In Coq, propositions are written *)
+(*     as expressions of type [Prop]. . *)
 
-Check (2 + 2 = 4).
+(* Check (2 + 2 = 4). *)
 (* ===> 2 + 2 = 4 : Prop *)
 
-Check (ble_nat 3 2 = false).
+(* Check (ble_nat 3 2 = false). *)
 (* ===> ble_nat 3 2 = false : Prop *)
 
-Check (beautiful 8).
+(* Check (beautiful 8). *)
 (* ===> beautiful 8 : Prop *)
 
 (** *** *)
-(** Both provable and unprovable claims are perfectly good
-    propositions.  Simply _being_ a proposition is one thing; being
-    _provable_ is something else! *)
+(** Both provable and unprovable claims are perfectly good *)
+(*     propositions.  Simply _being_ a proposition is one thing; being *)
+(*     _provable_ is something else! *)
 
-Check (2 + 2 = 5).
+(* Check (2 + 2 = 5). *)
 (* ===> 2 + 2 = 5 : Prop *)
 
-Check (beautiful 4).
+(* Check (beautiful 4). *)
 (* ===> beautiful 4 : Prop *)
 
-(** Both [2 + 2 = 4] and [2 + 2 = 5] are legal expressions
-    of type [Prop]. *)
+(** Both [2 + 2 = 4] and [2 + 2 = 5] are legal expressions *)
+(*     of type [Prop]. *)
 
 (** *** *)
-(** We've mainly seen one place that propositions can appear in Coq: in
-    [Theorem] (and [Lemma] and [Example]) declarations. *)
+(** We've mainly seen one place that propositions can appear in Coq: in *)
+(*     [Theorem] (and [Lemma] and [Example]) declarations. *)
 
-Theorem plus_2_2_is_4 : 
+Theorem plus_2_2_is_4 :
   2 + 2 = 4.
 Proof. reflexivity.  Qed.
 
-(** But they can be used in many other ways.  For example, we have also seen that
-    we can give a name to a proposition using a [Definition], just as we have
-    given names to expressions of other sorts. *)
+(** But they can be used in many other ways.  For example, we have also seen 
+that *)
+(*     we can give a name to a proposition using a [Definition], just as we have *)
+(*     given names to expressions of other sorts. *)
 
 Definition plus_fact : Prop  :=  2 + 2 = 4.
-Check plus_fact.
+(* Check plus_fact. *)
 (* ===> plus_fact : Prop *)
 
-(** We can later use this name in any situation where a proposition is
-    expected -- for example, as the claim in a [Theorem] declaration. *)
+(** We can later use this name in any situation where a proposition is *)
+(*     expected -- for example, as the claim in a [Theorem] declaration. *)
 
-Theorem plus_fact_is_true : 
+Theorem plus_fact_is_true :
   plus_fact.
 Proof. reflexivity.  Qed.
 
 (** *** *)
-(** We've seen several ways of constructing propositions.  
+(** We've seen several ways of constructing propositions.   *)
 
-       - We can define a new proposition primitively using [Inductive].
+(*        - We can define a new proposition primitively using [Inductive]. *)
 
-       - Given two expressions [e1] and [e2] of the same type, we can
-         form the proposition [e1 = e2], which states that their
-         values are equal.
+(*        - Given two expressions [e1] and [e2] of the same type, we can *)
+(*          form the proposition [e1 = e2], which states that their *)
+(*          values are equal. *)
 
-       - We can combine propositions using implication and
-         quantification. *)
+(*        - We can combine propositions using implication and *)
+(*          quantification. *)
 (** *** *)
-(** We have also seen _parameterized propositions_, such as [even] and
-    [beautiful]. *)
+(** We have also seen _parameterized propositions_, such as [even] and *)
+(*     [beautiful]. *)
 
-Check (even 4).
-(* ===> even 4 : Prop *)
-Check (even 3).
-(* ===> even 3 : Prop *)
-Check even. 
-(* ===> even : nat -> Prop *)
+(* Check (even 4). *)
+(* (* ===> even 4 : Prop *) *)
+(* Check (even 3). *)
+(* (* ===> even 3 : Prop *) *)
+(* Check even. *)
+(* (* ===> even : nat -> Prop *) *)
 
 (** *** *)
-(** The type of [even], i.e., [nat->Prop], can be pronounced in
-    three equivalent ways: (1) "[even] is a _function_ from numbers to
-    propositions," (2) "[even] is a _family_ of propositions, indexed
-    by a number [n]," or (3) "[even] is a _property_ of numbers."  *)
+(** The type of [even], i.e., [nat->Prop], can be pronounced in *)
+(*     three equivalent ways: (1) "[even] is a _function_ from numbers to *)
+(*     propositions," (2) "[even] is a _family_ of propositions, indexed *)
+(*     by a number [n]," or (3) "[even] is a _property_ of numbers."  *)
 
-(** Propositions -- including parameterized propositions -- are
-    first-class citizens in Coq.  For example, we can define functions
-    from numbers to propositions... *)
+(** Propositions -- including parameterized propositions -- are *)
+(*     first-class citizens in Coq.  For example, we can define functions *)
+(*     from numbers to propositions... *)
 
 Definition between (n m o: nat) : Prop :=
   andb (ble_nat n o) (ble_nat o m) = true.
 
 (** ... and then partially apply them: *)
 
-Definition teen : nat->Prop := between 13 19.
+Definition teen : nat -> Prop := between 13 19.
 
-(** We can even pass propositions -- including parameterized
-    propositions -- as arguments to functions: *)
+(** We can even pass propositions -- including parameterized *)
+(*     propositions -- as arguments to functions: *)
 
-Definition true_for_zero (P:nat->Prop) : Prop :=
+Definition true_for_zero (P : nat -> Prop) : Prop :=
   P 0.
 
 (** *** *)
-(** Here are two more examples of passing parameterized propositions
-    as arguments to a function.  
+(** Here are two more examples of passing parameterized propositions *)
+(*     as arguments to a function.   *)
 
-    The first function, [true_for_all_numbers], takes a proposition
-    [P] as argument and builds the proposition that [P] is true for
-    all natural numbers. *)
+(*     The first function, [true_for_all_numbers], takes a proposition *)
+(*     [P] as argument and builds the proposition that [P] is true for *)
+(*     all natural numbers. *)
 
 Definition true_for_all_numbers (P:nat->Prop) : Prop :=
   forall n, P n.
 
-(** The second, [preserved_by_S], takes [P] and builds the proposition
-    that, if [P] is true for some natural number [n'], then it is also
-    true by the successor of [n'] -- i.e. that [P] is _preserved by
-    successor_: *)
+(** The second, [preserved_by_S], takes [P] and builds the proposition *)
+(*     that, if [P] is true for some natural number [n'], then it is also *)
+(*     true by the successor of [n'] -- i.e. that [P] is _preserved by *)
+(*     successor_: *)
 
 Definition preserved_by_S (P:nat->Prop) : Prop :=
   forall n', P n' -> P (S n').
 
 (** *** *)
-(** Finally, we can put these ingredients together to define
-a proposition stating that induction is valid for natural numbers: *)
+(** Finally, we can put these ingredients together to define *)
+(* a proposition stating that induction is valid for natural numbers: *)
 
 Definition natural_number_induction_valid : Prop :=
   forall (P:nat->Prop),
     true_for_zero P ->
-    preserved_by_S P -> 
-    true_for_all_numbers P. 
+    preserved_by_S P ->
+    true_for_all_numbers P.
 
 
 (** **** Exercise: 3 stars (combine_odd_even) *)
-(** Complete the definition of the [combine_odd_even] function
-    below. It takes as arguments two properties of numbers [Podd] and
-    [Peven]. As its result, it should return a new property [P] such
-    that [P n] is equivalent to [Podd n] when [n] is odd, and
-    equivalent to [Peven n] otherwise. *)
+(** Complete the definition of the [combine_odd_even] function *)
+(*     below. It takes as arguments two properties of numbers [Podd] and *)
+(*     [Peven]. As its result, it should return a new property [P] such *)
+(*     that [P n] is equivalent to [Podd n] when [n] is odd, and *)
+(*     equivalent to [Peven n] otherwise. *)
 
 Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop :=
-  (* FILL IN HERE *) admit.
+  fun n =>
+    ev n  -> Peven n \/ ev (S n) -> Podd n.
 
-(** To test your definition, see whether you can prove the following
-    facts: *)
+(** To test your definition, see whether you can prove the following *)
+(*     facts: *)
 
-Theorem combine_odd_even_intro : 
+Theorem ev_oddb: forall n, ev n -> oddb n = false.
+Proof.
+  intros.
+  induction H.
+  reflexivity.
+  unfold oddb.
+  simpl. unfold oddb in IHev.
+  trivial.
+Qed.
+
+Lemma negb_b__b: forall b1 b2, negb b1 = negb b2 -> b1 = b2.
+Proof.
+  intros.
+  destruct b1.
+  destruct b2.
+  reflexivity.
+  simpl in H. inversion H.
+  destruct b2. simpl in H. inversion H.
+  reflexivity.
+Qed.
+
+(* evenb_n__oddb_Sn: forall n : nat, evenb n = negb (evenb (S n)) *)
+
+Theorem oddb_t_ev: forall n, oddb n = true -> evenb (S n) = true.
+Proof.
+  unfold oddb.
+  intros n. induction n as [|n'].
+  intros. inversion H.
+  intros. unfold negb in H.
+  destruct (evenb (S n')) eqn:H1.
+  inversion H.
+  assert (evenb (S n') = negb (evenb (S (S n')))) as H2.
+  apply evenb_n__oddb_Sn. rewrite -> H1 in H2.
+  symmetry.
+  apply negb_b__b.
+  simpl. simpl in H2. trivial.
+Qed.
+
+Theorem oddb_f_ev: forall n, oddb n = false -> evenb n = true.
+Proof.
+  unfold oddb.
+  intros n. induction n as [|n'].
+  intros. reflexivity.
+  intros. unfold negb in H. destruct (evenb (S n')) eqn:H1.
+  reflexivity.
+  inversion H.
+Qed.
+
+Theorem evenb_t_oddb: forall n, evenb n = true -> oddb (S n) = true.
+Proof.
+  unfold oddb.
+  intros.
+  induction n as [|n'].
+  reflexivity.
+  simpl. 
+  assert (evenb (S n') = negb (evenb (S (S n')))) as H1.
+  apply evenb_n__oddb_Sn.
+  rewrite -> H in H1. simpl in H1. symmetry. trivial.
+Qed.
+
+Theorem evenb_f_oddb: forall n, evenb n = false -> oddb n = true.
+Proof.
+  unfold oddb.
+  intros.
+  induction n as [|n'].
+  inversion H.
+  rewrite -> H. reflexivity.
+Qed.
+
+Lemma evenb_ev: forall n, evenb n = true -> ev n.
+Proof.
+  intros.
+  apply evenb_t_oddb in H. 
+  apply oddb_t_ev in H.
+
+  simpl in H.
+
+
+
+Theorem combine_odd_even_intro :
   forall (Podd Peven : nat -> Prop) (n : nat),
     (oddb n = true -> Podd n) ->
     (oddb n = false -> Peven n) ->
     combine_odd_even Podd Peven n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold combine_odd_even.
+  
+
 
 Theorem combine_odd_even_elim_odd :
   forall (Podd Peven : nat -> Prop) (n : nat),
@@ -1174,27 +1342,27 @@ Proof.
 (** [] *)
 
 (* ##################################################### *)
-(** One more quick digression, for adventurous souls: if we can define
-    parameterized propositions using [Definition], then can we also
-    define them using [Fixpoint]?  Of course we can!  However, this
-    kind of "recursive parameterization" doesn't correspond to
-    anything very familiar from everyday mathematics.  The following
-    exercise gives a slightly contrived example. *)
+(** One more quick digression, for adventurous souls: if we can define *)
+(*     parameterized propositions using [Definition], then can we also *)
+(*     define them using [Fixpoint]?  Of course we can!  However, this *)
+(*     kind of "recursive parameterization" doesn't correspond to *)
+(*     anything very familiar from everyday mathematics.  The following *)
+(*     exercise gives a slightly contrived example. *)
 
 (** **** Exercise: 4 stars, optional (true_upto_n__true_everywhere) *)
-(** Define a recursive function
-    [true_upto_n__true_everywhere] that makes
-    [true_upto_n_example] work. *)
+(** Define a recursive function *)
+(*     [true_upto_n__true_everywhere] that makes *)
+(*     [true_upto_n_example] work. *)
 
-(* 
-Fixpoint true_upto_n__true_everywhere
-(* FILL IN HERE *)
+(*  *)
+(* Fixpoint true_upto_n__true_everywhere *)
+(* (* FILL IN HERE *) *)
 
-Example true_upto_n_example :
-    (true_upto_n__true_everywhere 3 (fun n => even n))
-  = (even 3 -> even 2 -> even 1 -> forall m : nat, even m).
-Proof. reflexivity.  Qed.
-*)
+(* Example true_upto_n_example : *)
+(*     (true_upto_n__true_everywhere 3 (fun n => even n)) *)
+(*   = (even 3 -> even 2 -> even 1 -> forall m : nat, even m). *)
+(* Proof. reflexivity.  Qed. *)
+(* *)
 (** [] *)
 
 
