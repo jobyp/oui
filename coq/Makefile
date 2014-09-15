@@ -14,6 +14,7 @@ Poly.vo : Lists.vo
 MoreCoq.vo : Poly.vo
 Logic.vo : MoreCoq.vo
 Prop.vo : Logic.vo
+MoreLogic.vo : Prop.vo
 
 .PHONY: clean
 clean:
