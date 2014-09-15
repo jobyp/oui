@@ -1228,7 +1228,10 @@ Definition natural_number_induction_valid : Prop :=
 
 Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop :=
   fun n =>
-    ev n  -> Peven n \/ ev (S n) -> Podd n.
+    match (evenb n) with
+      | true  => Peven n
+      | false => Podd n
+    end.
 
 (** To test your definition, see whether you can prove the following *)
 (*     facts: *)
@@ -1253,8 +1256,6 @@ Proof.
   destruct b2. simpl in H. inversion H.
   reflexivity.
 Qed.
-
-(* evenb_n__oddb_Sn: forall n : nat, evenb n = negb (evenb (S n)) *)
 
 Theorem oddb_t_ev: forall n, oddb n = true -> evenb (S n) = true.
 Proof.
@@ -1302,15 +1303,9 @@ Proof.
   rewrite -> H. reflexivity.
 Qed.
 
-Lemma evenb_ev: forall n, evenb n = true -> ev n.
-Proof.
-  intros.
-  apply evenb_t_oddb in H. 
-  apply oddb_t_ev in H.
+(* CHECKME: Do "evenb n = true -> ev n" later *)
 
-  simpl in H.
-
-
+(* Lemma evenb_ev: forall n, evenb n = true -> ev n. *)
 
 Theorem combine_odd_even_intro :
   forall (Podd Peven : nat -> Prop) (n : nat),
@@ -1318,9 +1313,15 @@ Theorem combine_odd_even_intro :
     (oddb n = false -> Peven n) ->
     combine_odd_even Podd Peven n.
 Proof.
+  unfold oddb.
   intros.
   unfold combine_odd_even.
-  
+  destruct (evenb n) eqn:H1.
+  apply H0.
+  reflexivity.
+  apply H.
+  reflexivity.
+Qed.
 
 
 Theorem combine_odd_even_elim_odd :
@@ -1329,7 +1330,13 @@ Theorem combine_odd_even_elim_odd :
     oddb n = true ->
     Podd n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold oddb.
+  unfold combine_odd_even.
+  intros.
+  destruct (evenb n) eqn:H1.
+  inversion H0.
+  trivial.
+Qed.
 
 Theorem combine_odd_even_elim_even :
   forall (Podd Peven : nat -> Prop) (n : nat),
@@ -1337,8 +1344,13 @@ Theorem combine_odd_even_elim_even :
     oddb n = false ->
     Peven n.
 Proof.
-  (* FILL IN HERE *) Admitted.
-
+  unfold combine_odd_even.
+  unfold oddb.
+  intros.
+  destruct (evenb n).
+  trivial.
+  inversion H0.
+Qed.
 (** [] *)
 
 (* ##################################################### *)
