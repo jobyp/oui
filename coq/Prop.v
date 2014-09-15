@@ -127,7 +127,7 @@ Qed.
    Intuitively, we expect the proof to fail because not every
    number is even. However, what exactly causes the proof to fail?
 
-(* FILL IN HERE *)
+
 *)
 (** [] *)
 
@@ -344,8 +344,6 @@ Inductive gorgeous : nat -> Prop :=
 (** **** Exercise: 1 star (gorgeous_tree) *)
 (** Write out the definition of [gorgeous] numbers using inference rule
     notation.
- 
-(* FILL IN HERE *)
 []
 *)
 
@@ -1038,7 +1036,7 @@ Inductive R : nat -> nat -> nat -> Prop :=
 (*       would the set of provable propositions change?  Briefly (1 *)
 (*       sentence) explain your answer. *)
 
-(* (* FILL IN HERE *) *)
+(* FILL IN HERE *)
 (* [] *)
 (* *)
 
@@ -1159,18 +1157,19 @@ Proof. reflexivity.  Qed.
 (** We have also seen _parameterized propositions_, such as [even] and *)
 (*     [beautiful]. *)
 
+
 (* Check (even 4). *)
-(* (* ===> even 4 : Prop *) *)
+(* ===> even 4 : Prop *)
 (* Check (even 3). *)
-(* (* ===> even 3 : Prop *) *)
+(* ===> even 3 : Prop *)
 (* Check even. *)
-(* (* ===> even : nat -> Prop *) *)
+(* ===> even : nat -> Prop *)
 
 (** *** *)
-(** The type of [even], i.e., [nat->Prop], can be pronounced in *)
-(*     three equivalent ways: (1) "[even] is a _function_ from numbers to *)
-(*     propositions," (2) "[even] is a _family_ of propositions, indexed *)
-(*     by a number [n]," or (3) "[even] is a _property_ of numbers."  *)
+(** The type of [even], i.e., [nat->Prop], can be pronounced in 
+    three equivalent ways: (1) "[even] is a _function_ from numbers to
+    propositions," (2) "[even] is a _family_ of propositions, indexed
+    by a number [n]," or (3) "[even] is a _property_ of numbers." *)
 
 (** Propositions -- including parameterized propositions -- are *)
 (*     first-class citizens in Coq.  For example, we can define functions *)
@@ -1235,6 +1234,7 @@ Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop :=
 
 (** To test your definition, see whether you can prove the following *)
 (*     facts: *)
+
 
 Theorem ev_oddb: forall n, ev n -> oddb n = false.
 Proof.
@@ -1368,7 +1368,7 @@ Qed.
 
 (*  *)
 (* Fixpoint true_upto_n__true_everywhere *)
-(* (* FILL IN HERE *) *)
+(* FILL IN HERE *) 
 
 (* Example true_upto_n_example : *)
 (*     (true_upto_n__true_everywhere 3 (fun n => even n)) *)
