@@ -9,8 +9,8 @@ Require Export "Prop".
     quantification_.  We can express it with the following
     definition: *)
 
-Inductive ex (X:Type) (P : X->Prop) : Prop :=
-  ex_intro : forall (witness:X), P witness -> ex X P.
+Inductive ex (X:Type) (P : X -> Prop) : Prop :=
+  ex_intro : forall (witness : X), P witness -> ex X P.
 
 (** That is, [ex] is a family of propositions indexed by a type [X]
     and a property [P] over [X].  In order to give evidence for the
@@ -20,7 +20,6 @@ Inductive ex (X:Type) (P : X->Prop) : Prop :=
     property [P]. 
 
 *)
-
 
 (** *** *)
 (** Coq's [Notation] facility can be used to introduce more
@@ -46,9 +45,9 @@ Notation "'exists' x : X , p" := (ex _ (fun x:X => p))
     when we use [apply]. *)
 
 Example exists_example_1 : exists n, n + (n * n) = 6.
-Proof.
-  apply ex_intro with (witness:=2). 
-  reflexivity.  Qed.
+Proof. apply ex_intro with (witness:=2).
+       reflexivity.
+Qed.
 
 (** Note that we have to explicitly give the witness. *)
 
@@ -59,7 +58,7 @@ Proof.
 
 Example exists_example_1' : exists n, n + (n * n) = 6.
 Proof.
-  exists 2. 
+  exists 2.
   reflexivity.  Qed.
 
 (** *** *)
@@ -75,20 +74,19 @@ Theorem exists_example_2 : forall n,
   (exists m, n = 4 + m) ->
   (exists o, n = 2 + o).
 Proof.
-  intros n H.
-  inversion H as [m Hm]. 
-  exists (2 + m).  
-  apply Hm.  Qed. 
-
+  intros.
+  inversion H as [m H1].
+  exists (2 + m).
+  simpl. simpl in H1. trivial.
+Qed.
 
 (** Here is another example of how to work with existentials. *)
 Lemma exists_example_3 : 
   exists (n:nat), even n /\ beautiful n.
 Proof.
-(* WORKED IN CLASS *)
   exists 8.
   split.
-  unfold even. simpl. reflexivity.
+  unfold even. reflexivity.
   apply b_sum with (n:=3) (m:=5).
   apply b_3. apply b_5.
 Qed.
@@ -99,10 +97,8 @@ Qed.
 ]] 
     mean? *)
 
-(* FILL IN HERE *)
+(* There exists a number n such that (n + 1) is beautiful *)
 
-(*
-*)
 (** **** Exercise: 1 star (dist_not_exists) *)
 (** Prove that "[P] holds for all [x]" implies "there is no [x] for
     which [P] does not hold." *)
@@ -110,7 +106,12 @@ Qed.
 Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
   (forall x, P x) -> ~ (exists x, ~ P x).
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold not.
+  intros.
+  inversion H0.
+  apply H1. apply H.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, optional (not_exists_dist) *)
@@ -122,7 +123,18 @@ Theorem not_exists_dist :
   forall (X:Type) (P : X -> Prop),
     ~ (exists x, ~ P x) -> (forall x, P x).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold excluded_middle.
+  unfold not.
+  intros.
+  assert ((P x) \/ ((P x) -> False)) as H1.
+  apply H.
+  inversion H1.
+  trivial.
+  assert (exists x : X, P x -> False) as H3.
+  exists x. trivial.
+  apply H0 in H3.
+  inversion H3.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars (dist_exists_or) *)
@@ -132,9 +144,24 @@ Proof.
 Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
   (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros.
+  unfold iff.
+  split.
+  intros.
+  inversion H as [x Hx].
+  inversion Hx.
+  left. exists x. trivial.
+  right. exists x. trivial.
+  intros.
+  inversion H.
+  inversion H0 as [x Hx].
+  exists x. left. trivial.
+  inversion H0 as [x Hx].
+  exists x. right. trivial.
+Qed.
 (** [] *)
 
+(* PCJOBY *)
 (* ###################################################### *)
 (** * Evidence-carrying booleans. *)
 
