@@ -161,7 +161,6 @@ Proof.
 Qed.
 (** [] *)
 
-(* PCJOBY *)
 (* ###################################################### *)
 (** * Evidence-carrying booleans. *)
 
@@ -176,13 +175,14 @@ using these lemmas quickly gets tedious.
 *)
 
 (** *** *)
+
 (** 
 It turns out that we can get the benefits of both forms at once 
 by using a construct called [sumbool]. *)
 
 Inductive sumbool (A B : Prop) : Set :=
- | left : A -> sumbool A B 
- | right : B -> sumbool A B.
+| left : A -> sumbool A B
+| right : B -> sumbool A B.
 
 Notation "{ A } + { B }" :=  (sumbool A B) : type_scope.
 
@@ -201,27 +201,21 @@ that allows us to compute with them.) *)
 
 Theorem eq_nat_dec : forall n m : nat, {n = m} + {n <> m}.
 Proof.
-  (* WORKED IN CLASS *)
   intros n.
   induction n as [|n'].
-  Case "n = 0".
-    intros m.
-    destruct m as [|m'].
-    SCase "m = 0".
-      left. reflexivity.
-    SCase "m = S m'".
-      right. intros contra. inversion contra.
-  Case "n = S n'".
-    intros m.
-    destruct m as [|m'].
-    SCase "m = 0".
-      right. intros contra. inversion contra.
-    SCase "m = S m'". 
-      destruct IHn' with (m := m') as [eq | neq].
-      left. apply f_equal.  apply eq.
-      right. intros Heq. inversion Heq as [Heq']. apply neq. apply Heq'.
-Defined. 
-  
+  intros. destruct m as [|m'].
+  left. reflexivity.
+  right. unfold not. intros. inversion H.
+  intros. destruct m as [|m'].
+  right. unfold not. intros. inversion H.
+  assert ({n' = m'} + {n' <> m'}) as H1.
+  apply IHn'.
+  inversion H1.
+  left. rewrite -> H. reflexivity.
+  right. unfold not in H. unfold not.
+  intros. apply H.  inversion H0. trivial.
+Defined.
+
 (** Read as a theorem, this says that equality on [nat]s is decidable:
 that is, given two [nat] values, we can always produce either 
 evidence that they are equal or evidence that they are not.
@@ -239,21 +233,17 @@ which is important for the computational interpretation.)
 (** 
 Here's a simple example illustrating the advantages of the [sumbool] form. *)
 
-Definition override' {X: Type} (f: nat->X) (k:nat) (x:X) : nat->X:=
-  fun (k':nat) => if eq_nat_dec k k' then x else f k'.
+Definition override' {X : Type} (f : nat -> X) (k : nat) (x : X) : nat -> X :=
+  fun (k' : nat) => if eq_nat_dec k k' then x else f k'.
 
-Theorem override_same' : forall (X:Type) x1 k1 k2 (f : nat->X),
-  f k1 = x1 -> 
-  (override' f k1 x1) k2 = f k2.
+Theorem override_same' : forall (X:Type) x1 k1 k2 (f : nat -> X),
+  f k1 = x1 -> (override' f k1 x1) k2 = f k2.
 Proof.
-  intros X x1 k1 k2 f. intros Hx1.
+  intros.
   unfold override'.
-  destruct (eq_nat_dec k1 k2).   (* observe what appears as a hypothesis *)
-  Case "k1 = k2".
-    rewrite <- e.
-    symmetry. apply Hx1.
-  Case "k1 <> k2". 
-    reflexivity.  Qed.
+  destruct (eq_nat_dec k1 k2) eqn:H1.
+  symmetry. rewrite <- e. trivial. trivial.
+Qed.
 
 (** Compare this to the more laborious proof (in MoreCoq.v) for the 
    version of [override] defined using [beq_nat], where we had to
@@ -265,12 +255,12 @@ Proof.
 Theorem override_shadow' : forall (X:Type) x1 x2 k1 k2 (f : nat->X),
   (override' (override' f k1 x2) k1 x1) k2 = (override' f k1 x1) k2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold override'.
+  destruct (eq_nat_dec k1 k2) eqn:H1.
+  reflexivity. reflexivity.
+Qed.
 (** [] *)
-
-
-
-
 
 
 (* ####################################################### *)
@@ -282,8 +272,12 @@ Proof.
     asserts that [P] is true for every element of the list [l]. *)
 
 Inductive all (X : Type) (P : X -> Prop) : list X -> Prop :=
-  (* FILL IN HERE *)
-.
+| empty : all X P []
+| non_empty : forall x l, P x -> all X P l -> all X P (x :: l).
+
+Arguments empty {X} _.
+Arguments non_empty {X} _ _ _ _ _.
+Arguments all {X} _ _.
 
 (** Recall the function [forallb], from the exercise
     [forall_exists_challenge] in chapter [Poly]: *)
@@ -301,7 +295,28 @@ Fixpoint forallb {X : Type} (test : X -> bool) (l : list X) : bool :=
     Are there any important properties of the function [forallb] which
     are not captured by your specification? *)
 
-(* FILL IN HERE *)
+
+Theorem forallb__all: forall (X : Type) (test : X -> bool) (l : list X),
+  forallb test l = true -> all (fun x => test x = true) l.
+Proof.
+  intros X test l.
+  induction l as [|h t].
+  intros. apply empty.
+  simpl.
+  destruct (test h) eqn:H1.
+  simpl.
+  intros. apply non_empty. trivial. apply IHt. trivial.
+  simpl. intros. inversion H.
+Qed.
+
+Theorem all__forallb: forall (X : Type) (test : X -> bool) (l : list X),
+  all (fun x => test x = true)  l -> forallb test l = true.
+Proof.
+  intros.
+  induction H.
+  simpl. reflexivity.
+  simpl. rewrite -> H. simpl. apply IHall.
+Qed.
 (** [] *)
 
 (** **** Exercise: 4 stars, advanced (filter_challenge) *)
@@ -329,7 +344,62 @@ Fixpoint forallb {X : Type} (test : X -> bool) (l : list X) : bool :=
     for one list to be a merge of two others.  Do this with an
     inductive relation, not a [Fixpoint].)  *)
 
-(* FILL IN HERE *)
+Inductive i_merge (X : Type) : list X -> list X -> list X -> Prop :=
+| l_nil : forall l, i_merge X [] l l
+| r_nil : forall l, i_merge X l [] l
+| l_lst : forall x l1 l2 l, i_merge X l1 l2 l -> i_merge X (x :: l1) l2 (x :: l)
+| r_lst : forall x l1 l2 l, i_merge X l1 l2 l -> i_merge X l1 (x :: l2) (x :: l).
+
+Arguments i_merge {X} _ _ _.
+Arguments l_nil {X} _.
+Arguments r_nil {X} _.
+Arguments l_lst {X} _ _ _ _ _.
+Arguments r_lst {X} _ _ _ _ _.
+
+Lemma filter_false: forall (X : Type) (test : X -> bool) (l : list X),
+  all (fun x => ~(test x = true)) l -> filter test l = [].
+Proof.
+  unfold not.
+  intros X test l.
+  induction l as [|h t].
+  intros. reflexivity.
+  intros.
+  simpl.
+  inversion H.
+  destruct (test h) eqn:H4.
+  apply ex_falso_quodlibet. apply H2. reflexivity.
+  apply IHt.
+  apply H3.
+Qed.
+
+Lemma f2_apply: forall (X Y Z : Type) (x1 x2 : X) (y1 y2 : Y) (f : X -> Y -> Z),
+  x1 = x2 -> y1 = y2 -> f x1 y1 = f x2 y2.
+Proof.
+  intros.
+  rewrite -> H. rewrite -> H0. reflexivity.
+Qed.
+
+Lemma filter_true: forall (X : Type) (test : X -> bool) (l : list X),
+  all (fun x => (test x = true)) l -> filter test l = l.
+Proof.
+  intros X test l.
+  induction l as [|h t].
+  intros. reflexivity.
+  intros. simpl.
+  inversion H.
+  rewrite -> H2.
+  apply f2_apply. reflexivity.
+  apply IHt. apply H3.
+Qed.
+
+Theorem filter_spec: forall (X : Type) (test : X -> bool) (l1 l2 l : list X),
+  all (fun x => test x = true) l1 ->
+  all (fun x => ~ (test x = true)) l2 ->
+  i_merge l1 l2 l ->
+  filter test l = l1.
+Proof.
+Admitted.
+
 (** [] *)
 
 (** **** Exercise: 5 stars, advanced, optional (filter_challenge_2) *)
