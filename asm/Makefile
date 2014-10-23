@@ -1,7 +1,7 @@
 PROGS:=exit
 OBJDIR=_build
 
-AS=yasm
+AS=gcc -c -O2 -x assembler
 LD=gcc
 
 .PHONY: all
@@ -10,10 +10,8 @@ all: $(PROGS)
 
 .SECONDARY:
 
-LST=$(patsubst %.asm,%.lst,$<)
-
 $(OBJDIR)/%.o : %.asm | $(OBJDIR)
-	$(AS) -f elf64 -g dwarf2 -l $(LST) -o $@ $<
+	$(AS) -o $@ $<
 
 % : $(OBJDIR)/%.o
 	$(LD) -o $@ $^
@@ -23,5 +21,7 @@ $(OBJDIR):
 
 .PHONY: clean
 clean:
-	rm -rf $(PROGS) $(OBJDIR) *.lst *~ 
+	rm -rf $(PROGS) $(OBJDIR) *~ 
 
+
+% : %.s
