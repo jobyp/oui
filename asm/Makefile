@@ -1,7 +1,7 @@
 PROGS:=exit
 OBJDIR=_build
 
-AS=gcc -c -O2 -x assembler
+AS=as
 LD=gcc
 
 .PHONY: all
@@ -11,7 +11,7 @@ all: $(PROGS)
 .SECONDARY:
 
 $(OBJDIR)/%.o : %.asm | $(OBJDIR)
-	$(AS) -o $@ $<
+	$(AS) -aln=$*.list -g -o $@ $<
 
 % : $(OBJDIR)/%.o
 	$(LD) -o $@ $^
@@ -19,9 +19,10 @@ $(OBJDIR)/%.o : %.asm | $(OBJDIR)
 $(OBJDIR):
 	mkdir -p $@
 
+
 .PHONY: clean
 clean:
-	rm -rf $(PROGS) $(OBJDIR) *~ 
+	rm -rf $(PROGS) $(OBJDIR) $(PROGS:%=%.list)
 
 
 % : %.s

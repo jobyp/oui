@@ -1,0 +1,49 @@
+\documentclass[a4paper, 12pt]{article}
+
+\title{x86-64 assembly programming}
+\author{P C Joby}
+\date{23 Oct, 2014}
+
+\begin{document}
+\maketitle
+
+\section{Computer Memory}
+
+Hardware mapping registers on an \textit{x86-64} can map pages of 
+2 different sizes - 4 KiB and 2 MiB. \textit{Linux} uses 2 MiB
+for kernel and 4 KiB pages for most other uses.
+
+\section{Process memory model in Linux}
+
+In Linux, memory of a process is divided into 4 logical regions: text,
+data, heap and stack. The stack is mapped to the highest address of a 
+process and on x86-64 Linux this is \texttt{0x7fff\_ffff\_ffff\_ffff\_ffff\_ffff} or 131 TiB.
+
+The lowest address in x86-64 process (text segment) is \texttt{0x40\_0000} (4 MiB).
+The stack segment is restricted in size to typically 16 MiB.
+
+\section{Memory mapping in 64-bit mode}
+
+CR3 register holds the address of PML4 (Page Map Level 4) table.
+Of the 64 bits of virtual address \textit{63-48} are \textit{unused}.
+Bits \textit{47-39} are used as an index into PML4 table. PML4 table is 
+essentially an array of 512 pointers. These pointers point to pages of memory
+so the rightmost 12 bits of each pointer can be used for other purposes like
+indicating whether an entry is valid or not. Generally not all entries in PML4 table would be valid.
+
+The next level in memory translation hierarchy is the collection of page directory pointer tables. Each of these tables is also an array of 512 pointers.
+Bits \textit{38-30} are used as index into PDPT.
+
+The third level in memory translation heirarchy is the collection of page directory tables. Bits \textit{29-21} are used as an index into PDT.
+
+The fourth and last level in memory translation heirarchy is the collection
+of page tables. Again each of this table is a collection of 512 pointers. Bits \textit{20-12} are used as an index into PT. 
+
+After using 4 tables we reach the address of the page of memory which was 
+originally referenced. Then we can add the page offset (bits 11-0) to get the final physical address.
+
+CPU designers have added support for large pages using 3 levels of existing
+translation tables. By using 3 levels of tables, there are 9 + 12 = 21 bits left for the page offset field. This make large pages \(2^{21}\) bytes (2 MiB). 
+
+ 
+\end{document}
