@@ -1,0 +1,6 @@
+In Linux, first 6 arguments are passed in registers (RDI, RSI, RDX, RCX, 
+R8, R9) rest are passed on stack. RAX register holds the number of vector
+registers passed.
+
+
+(setq asm-comment-char ?\#)

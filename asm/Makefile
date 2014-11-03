@@ -1,4 +1,4 @@
-PROGS:=exit
+PROGS:=$(patsubst %.asm,%,$(wildcard *.asm))
 OBJDIR=_build
 
 AS=as
@@ -11,7 +11,7 @@ all: $(PROGS)
 .SECONDARY:
 
 $(OBJDIR)/%.o : %.asm | $(OBJDIR)
-	$(AS) -aln=$*.list -g -o $@ $<
+	$(AS) -aln=$(OBJDIR)/$*.list -g -o $@ $<
 
 % : $(OBJDIR)/%.o
 	$(LD) -o $@ $^
@@ -22,7 +22,9 @@ $(OBJDIR):
 
 .PHONY: clean
 clean:
-	rm -rf $(PROGS) $(OBJDIR) $(PROGS:%=%.list)
+	rm -rf $(PROGS) $(OBJDIR) *~ hw.*
 
 
 % : %.s
+% : %.c
+
