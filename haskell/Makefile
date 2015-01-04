@@ -1,4 +1,5 @@
-PROGS:=$(patsubst %.hs,%,$(wildcard *.hs)) 
+PROGS := wc interact split_lines
+GHCFLAGS := --make -Wall
 
 .PHONY: all
 all: $(PROGS)
@@ -10,5 +11,5 @@ clean:
 
 
 % : %.hs
-	ghc $<
+	ghc $(GHCFLAGS) $< -o $@
 
