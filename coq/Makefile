@@ -1,7 +1,8 @@
-PROGS:=$(patsubst %.v,%.vo,$(wildcard *.v))
+PROGS:=Basics
+#PROGS:=$(patsubst %.v,%.vo,$(wildcard *.v))
 
 .PHONY: all
-all: $(PROGS)
+all: $(patsubst %,%.vo,$(PROGS))
 	@ :
 
 %.vo : %.v
