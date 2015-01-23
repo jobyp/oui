@@ -364,6 +364,7 @@ Definition pred (n : nat) : nat :=
 
 End Playground1.
 
+
 Definition minustwo (n : nat) : nat :=
   match n with
     | O => O
@@ -371,21 +372,23 @@ Definition minustwo (n : nat) : nat :=
     | S (S n') => n'
   end.
 
+Definition minustwo' (n : nat) : nat := pred (pred n).
+
 (** Because natural numbers are such a pervasive form of data,
     Coq provides a tiny bit of built-in magic for parsing and printing
     them: ordinary arabic numerals can be used as an alternative to
     the "unary" notation defined by the constructors [S] and [O].  Coq
     prints numbers in arabic form by default: *)
 
-Check (S (S (S (S O)))).
-Eval compute in (minustwo 4).
+(* Check (S (S (S (S O)))). *)
+(* Eval compute in (minustwo 4). *)
 
 (** The constructor [S] has the type [nat -> nat], just like the
     functions [minustwo] and [pred]: *)
 
-Check S.
-Check pred.
-Check minustwo.
+(* Check S. *)
+(* Check pred. *)
+(* Check minustwo. *)
 
 (** These are all things that can be applied to a number to yield a
     number.  However, there is a fundamental difference: functions
@@ -401,7 +404,14 @@ Check minustwo.
     whether [n-2] is even.  To write such functions, we use the
     keyword [Fixpoint]. *)
 
-Fixpoint evenb (n:nat) : bool :=
+
+Fixpoint evenb (n : nat) : bool :=
+  match n with
+    | O => true
+    | S n' => negb (evenb n')
+  end.
+
+Fixpoint evenb' (n:nat) : bool :=
   match n with
   | O        => true
   | S O      => false
@@ -430,9 +440,10 @@ Fixpoint plus (n : nat) (m : nat) : nat :=
     | S n' => S (plus n' m)
   end.
 
+
 (** Adding three to two now gives us five, as we'd expect. *)
 
-Eval compute in (plus (S (S (S O))) (S (S O))).
+(* Eval compute in (plus (S (S (S O))) (S (S O))). *)
 
 (** The simplification that Coq performs to reach this conclusion can
     be visualized as follows: *)
@@ -461,12 +472,14 @@ Proof. reflexivity.  Qed.
 (** You can match two expressions at once by putting a comma
     between them: *)
 
-Fixpoint minus (n m:nat) : nat :=
+Fixpoint minus (n m : nat) : nat :=
   match n, m with
-  | O   , _    => O
-  | S _ , O    => n
-  | S n', S m' => minus n' m'
+    | O, O => O
+    | S _, O => n
+    | O, S _ => O
+    | S n', S m' => minus n' m'
   end.
+
 
 (** The _ in the first line is a _wildcard pattern_.  Writing _ in a
     pattern is the same as writing some variable that doesn't get used
@@ -490,12 +503,15 @@ Fixpoint exp (base power : nat) : nat :=
     Translate this into Coq. *)
 
 Fixpoint factorial (n:nat) : nat := 
-(* FILL IN HERE *) admit.
+  match n with
+    | O => S O
+    | S n' => mult n (factorial n')
+  end.
 
 Example test_factorial1:          (factorial 3) = 6.
-(* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 Example test_factorial2:          (factorial 5) = (mult 10 12).
-(* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 
 (** [] *)
 
@@ -503,17 +519,18 @@ Example test_factorial2:          (factorial 5) = (mult 10 12).
     write by introducing "notations" for addition, multiplication, and
     subtraction. *)
 
-Notation "x + y" := (plus x y)  
-                       (at level 50, left associativity) 
-                       : nat_scope.
-Notation "x - y" := (minus x y)  
-                       (at level 50, left associativity) 
-                       : nat_scope.
-Notation "x * y" := (mult x y)  
-                       (at level 40, left associativity) 
-                       : nat_scope.
+(* Notation "x + y" := (plus x y)   *)
+(*                        (at level 50, left associativity)  *)
+(*                        : nat_scope. *)
+(* Notation "x - y" := (minus x y)   *)
+(*                        (at level 50, left associativity)  *)
+(*                        : nat_scope. *)
+(* Notation "x * y" := (mult x y)   *)
+(*                        (at level 40, left associativity)  *)
+(*                        : nat_scope. *)
 
-Check ((0 + 1) + 1).
+(* Check ((0 + 1) * 1). *)
+(* Eval compute in ( (2 + 3) * 4). *)
 
 (** (The [level], [associativity], and [nat_scope] annotations
    control how these notations are treated by Coq's parser.  The
@@ -529,32 +546,30 @@ Check ((0 + 1) + 1).
 (** When we say that Coq comes with nothing built-in, we really
     mean it: even equality testing for numbers is a user-defined
     operation! *)
+
 (** The [beq_nat] function tests [nat]ural numbers for [eq]uality,
     yielding a [b]oolean.  Note the use of nested [match]es (we could
     also have used a simultaneous match, as we did in [minus].)  *)
 
 Fixpoint beq_nat (n m : nat) : bool :=
-  match n with
-  | O => match m with
-         | O => true
-         | S m' => false
-         end
-  | S n' => match m with
-            | O => false
-            | S m' => beq_nat n' m'
-            end
+  match n, m with
+    | O, O => true
+    | S _, O => false
+    | O, S _ => false
+    | S n', S m' => beq_nat n' m'
   end.
+
 
 (** Similarly, the [ble_nat] function tests [nat]ural numbers for
     [l]ess-or-[e]qual, yielding a [b]oolean. *)
 
 Fixpoint ble_nat (n m : nat) : bool :=
-  match n with
-  | O => true
-  | S n' =>
+  match n with 
+    | O => true
+    | S n' => 
       match m with
-      | O => false
-      | S m' => ble_nat n' m'
+        | O => false
+        | S m' => ble_nat n' m'
       end
   end.
 
