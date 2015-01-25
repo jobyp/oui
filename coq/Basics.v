@@ -586,14 +586,15 @@ Proof. reflexivity.  Qed.
     this one, define it in terms of a previously defined function. *)
 
 Definition blt_nat (n m : nat) : bool :=
-  (* FILL IN HERE *) admit.
+  andb (ble_nat n m) (negb (beq_nat n m)).
+                  
 
 Example test_blt_nat1:             (blt_nat 2 2) = false.
-(* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 Example test_blt_nat2:             (blt_nat 2 4) = true.
-(* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 Example test_blt_nat3:             (blt_nat 4 2) = false.
-(* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 
 (** [] *)
 
@@ -625,9 +626,7 @@ Example test_blt_nat3:             (blt_nat 4 2) = false.
     [n] is, a fact that can be read directly off the definition of [plus].*)
 
 Theorem plus_O_n : forall n : nat, 0 + n = n.
-Proof.
-  intros n. reflexivity.  Qed.
-
+Proof. intros n. simpl. reflexivity. Qed.
 
 (** (_Note_: You may notice that the above statement looks
     different in the original source file and the final html output. In Coq
@@ -661,7 +660,6 @@ Proof.
 (** We could try to prove a similar theorem about [plus] *)
 
 Theorem plus_n_O : forall n, n + 0 = n.
-
 (** However, unlike the previous proof, [simpl] doesn't do anything in
     this case *)
 
@@ -735,7 +733,10 @@ Proof.
 Theorem plus_id_exercise : forall n m o : nat,
   n = m -> m = o -> n + m = m + o.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m o.
+  intros H1 H2.
+  rewrite -> H1. rewrite <- H2. reflexivity.
+Qed.
 (** [] *)
 
 (** As we've seen in earlier examples, the [Admitted] command
@@ -765,7 +766,10 @@ Theorem mult_S_1 : forall n m : nat,
   m = S n -> 
   m * (1 + n) = m * m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m.
+  intros H.
+  rewrite -> plus_1_l. rewrite <- H. reflexivity.
+Qed.
 (** [] *)
 
 
@@ -781,7 +785,10 @@ Proof.
 Theorem plus_1_neq_0_firsttry : forall n : nat,
   beq_nat (n + 1) 0 = false.
 Proof.
-  intros n. 
+  intros n.
+  (* destruct n as [|n']. *)
+  (* simpl. reflexivity. *)
+  (* simpl. reflexivity. *)
   simpl.  (* does nothing! *)
 Abort.
 
@@ -850,8 +857,11 @@ Proof.
 Theorem zero_nbeq_plus_1 : forall n : nat,
   beq_nat 0 (n + 1) = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
-
+  intros n.
+  destruct n as [|n'].
+  simpl. reflexivity.
+  simpl. reflexivity.
+Qed.
 (** [] *)
 
 (* ###################################################################### *)
@@ -863,16 +873,28 @@ Proof.
 
 Theorem identity_fn_applied_twice : 
   forall (f : bool -> bool), 
-  (forall (x : bool), f x = x) ->
-  forall (b : bool), f (f b) = b.
+    (forall (x : bool), f x = x) ->
+    forall (b : bool), f (f b) = b.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros f.
+  intros H.
+  intros b.
+  rewrite -> H. rewrite -> H. reflexivity.
+Qed.
 
 (** Now state and prove a theorem [negation_fn_applied_twice] similar
     to the previous one but where the second hypothesis says that the
     function [f] has the property that [f x = negb x].*)
 
-(* FILL IN HERE *)
+Theorem negation_fn_applied_twice:
+  forall (f : bool -> bool),
+    (forall (x : bool), f x = negb x) ->
+    forall (b : bool), f (f b) = b.
+Proof.
+  intros.
+  rewrite -> H. rewrite -> H. rewrite <- negb_involutive.
+  reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars (andb_eq_orb)  *)
@@ -885,7 +907,11 @@ Theorem andb_eq_orb :
   (andb b c = orb b c) ->
   b = c.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros b.
+  destruct b.
+  intros. simpl in H. symmetry. apply H.
+  simpl. intros. apply H.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars (binary)  *)
