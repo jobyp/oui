@@ -1,5 +1,4 @@
-PROGS:=Basics
-#PROGS:=$(patsubst %.v,%.vo,$(wildcard *.v))
+PROGS:=Basics Induction
 
 .PHONY: all
 all: $(patsubst %,%.vo,$(PROGS))

@@ -950,7 +950,25 @@ Qed.
         then incrementing. 
 *)
 
-(* FILL IN HERE *)
+Inductive bin : Type :=
+| b_O : bin
+| b_2x : bin -> bin
+| b_2x_plus_1 : bin -> bin.
+
+Fixpoint bin_incr (n : bin) : bin :=
+  match n with
+    | b_O => b_2x_plus_1 b_O
+    | b_2x n' => b_2x_plus_1 n'
+    | b_2x_plus_1 n' => b_2x (bin_incr n')
+  end.
+
+Fixpoint bin_to_nat (n : bin) : nat :=
+  match n with
+    | b_O => O
+    | b_2x n' => mult 2 (bin_to_nat n')
+    | b_2x_plus_1 n' => S (mult 2 (bin_to_nat n'))
+  end.
+
 (** [] *)
 
 (* ###################################################################### *)
@@ -961,12 +979,12 @@ Qed.
     first reading, you might want to skim these sections so that you
     know what's there for future reference. *)
 
-Notation "x + y" := (plus x y)  
-                       (at level 50, left associativity) 
-                       : nat_scope.
-Notation "x * y" := (mult x y)  
-                       (at level 40, left associativity) 
-                       : nat_scope.
+(* Notation "x + y" := (plus x y)   *)
+(*                        (at level 50, left associativity)  *)
+(*                        : nat_scope. *)
+(* Notation "x * y" := (mult x y)   *)
+(*                        (at level 40, left associativity)  *)
+(*                        : nat_scope. *)
 
 (** For each notation-symbol in Coq we can specify its _precedence level_
     and its _associativity_. The precedence level n can be specified by the
@@ -1019,7 +1037,6 @@ Fixpoint plus' (n : nat) (m : nat) : nat :=
     _does_ terminate on all inputs, but that Coq will reject because
     of this restriction. *)
 
-(* FILL IN HERE *)
 (** [] *)
 
 (** $Date: 2014-12-31 15:31:47 -0500 (Wed, 31 Dec 2014) $ *)
