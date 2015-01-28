@@ -352,7 +352,7 @@ Proof.
   intros n m p q.
   (* We just need to swap (n + m) for (m + n)...
      it seems like plus_comm should do the trick! *)
-  rewrite -> plus_comm.
+  rewrite -> plus_comm. 
   (* Doesn't work...Coq rewrote the wrong plus! *)
 Abort.
 
@@ -378,18 +378,45 @@ Proof.
 Theorem plus_swap : forall n m p : nat, 
   n + (m + p) = m + (n + p).
 Proof.
-  (* FILL IN HERE *) Admitted.
-
+  intros n m p.
+  assert (n + (m + p) = n + m + p) as H1.
+  Case "Proof of assertion".
+    rewrite -> plus_assoc. reflexivity.
+  rewrite -> H1.
+  assert (m + (n + p) = m + n + p) as H2.
+  Case "Proof of assertion".
+    rewrite -> plus_assoc. reflexivity.
+  rewrite -> H2.
+  assert (n + m = m + n) as H3.
+  Case "Proof of assertion".
+    rewrite -> plus_comm. reflexivity.
+  rewrite -> H3. reflexivity.
+Qed.
 
 (** Now prove commutativity of multiplication.  (You will probably
     need to define and prove a separate subsidiary theorem to be used
     in the proof of this one.)  You may find that [plus_swap] comes in
     handy. *)
 
+Lemma mult_n_Sm : forall n m : nat,
+  n * S m = n + n * m.
+Proof.
+  intros n m. induction n as [| n'].
+  Case "n = 0".
+    simpl. reflexivity.
+  Case "n = S n'".
+    simpl. rewrite -> IHn'. rewrite -> plus_swap. reflexivity.
+Qed.
+
 Theorem mult_comm : forall m n : nat,
  m * n = n * m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros m n. induction m as [| m'].
+  Case "m = 0".
+    simpl. rewrite -> mult_0_r. reflexivity.
+  Case "m = S m'".
+    simpl. rewrite -> mult_n_Sm. rewrite -> IHm'. reflexivity.
+Qed.  
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (evenb_n__oddb_Sn)  *)
