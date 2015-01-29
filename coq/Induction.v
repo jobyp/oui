@@ -585,7 +585,40 @@ Proof.
     wanting to change your original definitions to make the property
     easier to prove, feel free to do so.) *)
 
-(* FILL IN HERE *)
+(* 
+Inductive bin : Type :=
+| b_O : bin
+| b_2x : bin -> bin
+| b_2x_plus_1 : bin -> bin.
+
+Fixpoint bin_incr (n : bin) : bin :=
+  match n with
+    | b_O => b_2x_plus_1 b_O
+    | b_2x n' => b_2x_plus_1 n'
+    | b_2x_plus_1 n' => b_2x (bin_incr n')
+  end.
+
+Fixpoint bin_to_nat (n : bin) : nat :=
+  match n with
+    | b_O => O
+    | b_2x n' => mult 2 (bin_to_nat n')
+    | b_2x_plus_1 n' => S (mult 2 (bin_to_nat n'))
+  end.
+*)
+
+Theorem binary_commute: forall n : bin,
+  bin_to_nat (bin_incr n) = S (bin_to_nat n).
+Proof.
+  intros n. induction n as [ | n'| n'].
+  Case "n = b_O".
+    simpl. reflexivity.
+  Case "n = b_2x n'".
+    simpl. reflexivity.
+  Case "n = b_2x_plus_1 n'".
+    simpl. rewrite -> IHn'. simpl. rewrite -> plus_0_r.
+    rewrite -> plus_n_Sm. rewrite -> plus_n_Sm.
+    rewrite -> plus_n_Sm. reflexivity.
+Qed.
 (** [] *)
 
 
@@ -615,7 +648,46 @@ Proof.
     here. 
 *)
 
-(* FILL IN HERE *)
+Fixpoint nat_to_bin (n : nat) : bin :=
+  match n with
+    | O => b_O
+    | S n' => bin_incr (nat_to_bin n')
+  end.
+
+Theorem nat_bin_1: forall (n : nat),
+  bin_to_nat (nat_to_bin n) = n.
+Proof.
+  intros n. induction n as [|n'].
+  Case "n = 0". simpl. reflexivity.
+  Case "n = S n'". simpl. rewrite -> binary_commute.
+    rewrite -> IHn'. reflexivity.
+Qed.
+
+Fixpoint is_this_bin_zero (n : bin) : bool :=
+  match n with
+    | b_O => true
+    | b_2x n' => is_this_bin_zero n'
+    | b_2x_plus_1 n' => false
+  end.
+
+Fixpoint normalize (n : bin) : bin :=
+  match n with
+    | b_O => b_O
+    | b_2x n' => 
+      match (is_this_bin_zero n') with
+        | true => b_O
+        | false => b_2x (normalize n')
+      end
+    | b_2x_plus_1 n' => b_2x_plus_1 (normalize n')
+  end.
+
+Theorem bin_nat_1 : forall (n : bin),
+  nat_to_bin (bin_to_nat n) = normalize n.
+Proof.
+  intros n. induction n as [ | n' | n'].
+  Case "n = b_O". simpl. reflexivity.
+  Case "n = b_2x n'". simpl. rewrite -> plus_0_r.
+  Admitted.
 (** [] *)
 
 (* ###################################################################### *)
