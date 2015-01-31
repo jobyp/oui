@@ -681,13 +681,82 @@ Fixpoint normalize (n : bin) : bin :=
     | b_2x_plus_1 n' => b_2x_plus_1 (normalize n')
   end.
 
+Lemma normalize_n__zero_1: forall (n : bin),
+  is_this_bin_zero n = true -> normalize n = b_O.
+Proof.
+  intros n. intros H. induction n as [ | n' | n' ].
+  Case "n = b_O". simpl. reflexivity.
+  Case "n = b_2x n'".
+    simpl. simpl in H. rewrite -> H. reflexivity.
+  Case "n = b_2x_plus_1 n'".
+    simpl in H. inversion H.
+Qed.
+
+Lemma bin_to_nat__normalize: forall (n : bin),
+  bin_to_nat n = bin_to_nat (normalize n).
+Proof.  
+  intros n. induction n as [ | n'| n'].
+  reflexivity.
+  simpl. rewrite -> plus_0_r.
+  destruct (is_this_bin_zero n') eqn:H1.
+  rewrite -> IHn'.
+  assert (normalize n' = b_O) as H2.
+  apply normalize_n__zero_1. trivial.
+  rewrite -> H2. reflexivity.
+  simpl. rewrite -> plus_0_r. rewrite -> IHn'. reflexivity.
+  simpl. rewrite -> plus_0_r. rewrite -> plus_0_r.
+  rewrite -> IHn'. reflexivity.
+Qed.
+
+Lemma normalize_n__zero_2: forall (n : bin),
+  is_this_bin_zero n = true -> bin_to_nat n = O.
+Proof.
+  intros n. intros H1.
+  rewrite -> bin_to_nat__normalize.
+  assert (normalize n = b_O) as H2.
+  apply normalize_n__zero_1. trivial.
+  rewrite -> H2. reflexivity.
+Qed.
+
+(* Lemma bin_n_plus_n: forall (n : nat), *)
+(*   nat_to_bin (n + n) = normalize (b_2x (nat_to_bin n)). *)
+(* Proof. *)
+(*   intros n. induction n as [|n']. *)
+(*   simpl. reflexivity. *)
+(*   rewrite <- plus_n_Sm. simpl. *)
+(*   rewrite -> IHn'. *)
+(*   simpl. *)
+
+
+(* H1 : is_this_bin_zero n' = false *)
+(* ============================ *)
+(*  nat_to_bin (bin_to_nat n' + bin_to_nat n') = *)
+(*  b_2x (nat_to_bin (bin_to_nat n')) *)
+
+Lemma bin_n_plus_n : forall (n : bin),
+  is_this_bin_zero n = false ->
+  nat_to_bin (bin_to_nat n + bin_to_nat n) = b_2x (nat_to_bin (bin_to_nat n)).
+Proof.
+  intros n. intros H1.
+  induction n as [|n'|n'].
+  simpl in H1. inversion H1.
+  simpl in H1.
+  apply IHn' in H1.
+  simpl. rewrite -> plus_0_r.
+  Abort.
+
 Theorem bin_nat_1 : forall (n : bin),
   nat_to_bin (bin_to_nat n) = normalize n.
 Proof.
   intros n. induction n as [ | n' | n'].
   Case "n = b_O". simpl. reflexivity.
   Case "n = b_2x n'". simpl. rewrite -> plus_0_r.
-  Admitted.
+    destruct (is_this_bin_zero n') eqn:H1.
+    assert (bin_to_nat n' = O) as H2.
+    apply normalize_n__zero_2. trivial. 
+    rewrite -> H2. reflexivity.
+    simpl. rewrite <- IHn'.
+    Abort.
 (** [] *)
 
 (* ###################################################################### *)
