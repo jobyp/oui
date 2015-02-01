@@ -1,4 +1,4 @@
-PROGS:=Basics Induction Lists
+PROGS:=Basics Induction Lists Poly
 
 .PHONY: all
 all: $(patsubst %,%.vo,$(PROGS))

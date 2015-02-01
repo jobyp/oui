@@ -992,19 +992,17 @@ Fixpoint index_bad (n:nat) (l:natlist) : nat :=
     and [Some a] when the list has enough members and [a] appears at
     position [n]. *)
 
-
 Inductive natoption : Type :=
-  | Some : nat -> natoption
-  | None : natoption.  
+| Some : nat -> natoption
+| None : natoption.
 
-
-Fixpoint index (n:nat) (l:natlist) : natoption :=
+Fixpoint index (n : nat) (l : natlist) : natoption :=
   match l with
-  | nil => None 
-  | a :: l' => match beq_nat n O with 
-               | true => Some a
-               | false => index (pred n) l' 
-               end
+    | nil => None
+    | h :: t =>  match n with
+                   | O => Some h
+                   | S n' => index n' t
+                 end
   end.
 
 Example test_index1 :    index 0 [4;5;6;7]  = Some 4.
@@ -1039,8 +1037,8 @@ Fixpoint index' (n:nat) (l:natlist) : natoption :=
 
 Definition option_elim (d : nat) (o : natoption) : nat :=
   match o with
-  | Some n' => n'
-  | None => d
+    | Some n => n
+    | None => d
   end.
 
 (** **** Exercise: 2 stars (hd_opt)  *)
@@ -1048,16 +1046,19 @@ Definition option_elim (d : nat) (o : natoption) : nat :=
    have to pass a default element for the [nil] case.  *)
 
 Definition hd_opt (l : natlist) : natoption :=
-  (* FILL IN HERE *) admit.
+  match l with
+    | nil => None
+    | h :: t => Some h
+  end.
 
 Example test_hd_opt1 : hd_opt [] = None.
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Example test_hd_opt2 : hd_opt [1] = Some 1.
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Example test_hd_opt3 : hd_opt [5;6] = Some 5.
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, optional (option_elim_hd)  *)
@@ -1066,7 +1067,11 @@ Example test_hd_opt3 : hd_opt [5;6] = Some 5.
 Theorem option_elim_hd : forall (l:natlist) (default:nat),
   hd default l = option_elim default (hd_opt l).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l default.
+  destruct l as [|h t].
+  simpl. reflexivity.
+  simpl. reflexivity.
+Qed.
 (** [] *)
 
 (* ###################################################### *)
@@ -1081,8 +1086,8 @@ Proof.
 Module Dictionary.
 
 Inductive dictionary : Type :=
-  | empty  : dictionary 
-  | record : nat -> nat -> dictionary -> dictionary. 
+| empty : dictionary
+| record : nat -> nat -> dictionary -> dictionary.
 
 (** This declaration can be read: "There are two ways to construct a
     [dictionary]: either using the constructor [empty] to represent an
@@ -1091,7 +1096,7 @@ Inductive dictionary : Type :=
     [dictionary] with an additional key to value mapping." *)
 
 Definition insert (key value : nat) (d : dictionary) : dictionary :=
-  (record key value d).
+  record key value d.
 
 (** Here is a function [find] that searches a [dictionary] for a
     given key.  It evaluates evaluates to [None] if the key was not
@@ -1099,14 +1104,14 @@ Definition insert (key value : nat) (d : dictionary) : dictionary :=
     dictionary. If the same key is mapped to multiple values, [find]
     will return the first one it finds. *)
 
-Fixpoint find (key : nat) (d : dictionary) : natoption := 
-  match d with 
-  | empty         => None
-  | record k v d' => if (beq_nat key k) 
-                       then (Some v) 
-                       else (find key d')
+Fixpoint find (key : nat) (d : dictionary) : natoption :=
+  match d with
+    | empty => None
+    | record k v d' => match (beq_nat key k) with
+                         | true => Some v
+                         | false => find key d'
+                       end
   end.
-
 
 
 (** **** Exercise: 1 star (dictionary_invariant1)  *)
@@ -1115,7 +1120,11 @@ Fixpoint find (key : nat) (d : dictionary) : natoption :=
 Theorem dictionary_invariant1' : forall (d : dictionary) (k v: nat),
   (find k (insert k v d)) = Some v.
 Proof.
- (* FILL IN HERE *) Admitted.
+  intros d k v.
+  destruct d as [|m n d'].
+  simpl. rewrite <- beq_nat_refl. reflexivity.
+  simpl. rewrite <- beq_nat_refl. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star (dictionary_invariant2)  *)
@@ -1124,14 +1133,15 @@ Proof.
 Theorem dictionary_invariant2' : forall (d : dictionary) (m n o: nat),
   beq_nat m n = false -> find m d = find m (insert n o d).
 Proof.
- (* FILL IN HERE *) Admitted.
+  intros d m n o. intros H.
+  destruct d as [|k v d'].
+  simpl. rewrite -> H. reflexivity.
+  simpl. rewrite -> H. reflexivity.
+Qed.
 (** [] *)
-
-
 
 End Dictionary.
 
 End NatList.
 
 (** $Date: 2014-12-31 11:17:56 -0500 (Wed, 31 Dec 2014) $ *)
-
