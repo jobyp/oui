@@ -202,9 +202,9 @@ Fixpoint app' X l1 l2 : list X :=
 
 (** Indeed it will.  Let's see what type Coq has assigned to [app']: *)
 
-Check app'.
+(* Check app'. *)
 (* ===> forall X : Type, list X -> list X -> list X *)
-Check app.
+(* Check app. *)
 (* ===> forall X : Type, list X -> list X -> list X *)
 
 (** It has exactly the same type type as [app].  Coq was able to
@@ -296,7 +296,7 @@ Arguments snoc {X} l v.
 
 (* note: no _ arguments required... *)
 Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
-Check (length list123'').
+(* Check (length list123''). *)
 
 (** *** *)
 
@@ -338,7 +338,7 @@ Definition mynil : list nat := nil.
 (** Alternatively, we can force the implicit arguments to be explicit by
    prefixing the function name with [@]. *)
 
-Check @nil.
+(* Check @nil. *)
 
 Definition mynil' := @nil nat.
 
@@ -360,9 +360,6 @@ Notation "x ++ y" := (app x y)
 Definition list123''' := [1; 2; 3].
 
 
-
-
-
 (* ###################################################### *)
 (** *** Exercises: Polymorphic Lists *)
 
@@ -372,35 +369,48 @@ Definition list123''' := [1; 2; 3].
     and complete the proofs below. *)
 
 Fixpoint repeat {X : Type} (n : X) (count : nat) : list X :=
-  (* FILL IN HERE *) admit.
+  match count with
+    | O => nil
+    | S count' => cons n (repeat n count')
+  end.
 
 Example test_repeat1:
   repeat true 2 = cons true (cons true nil).
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Theorem nil_app : forall X:Type, forall l:list X,
   app [] l = l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X l. simpl. reflexivity.
+Qed.
 
 Theorem rev_snoc : forall X : Type,
                      forall v : X,
                      forall s : list X,
   rev (snoc s v) = v :: (rev s).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X v s. induction s as [|h t].
+  simpl. reflexivity.
+  simpl. rewrite -> IHt. simpl. reflexivity.
+Qed.
 
 Theorem rev_involutive : forall X : Type, forall l : list X,
   rev (rev l) = l.
 Proof.
-(* FILL IN HERE *) Admitted.
+  intros X l. induction l as [|h t].
+  simpl. reflexivity.
+  simpl. rewrite -> rev_snoc. rewrite -> IHt. reflexivity. 
+Qed.
 
 Theorem snoc_with_append : forall X : Type,
                          forall l1 l2 : list X,
                          forall v : X,
   snoc (l1 ++ l2) v = l1 ++ (snoc l2 v).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X l1 l2 v. induction l1 as [|h t].
+  simpl. reflexivity.
+  simpl. rewrite -> IHt. reflexivity.
+Qed.
 (** [] *)
 
 (* ###################################################### *)
@@ -411,7 +421,7 @@ Proof.
     _polymorphic pairs_ (or _products_): *)
 
 Inductive prod (X Y : Type) : Type :=
-  pair : X -> Y -> prod X Y.
+| pair : X -> Y -> prod X Y.
 
 Arguments pair {X} {Y} _ _.
 
@@ -440,10 +450,14 @@ Notation "X * Y" := (prod X Y) : type_scope.
     much as they would in any functional programming language. *)
 
 Definition fst {X Y : Type} (p : X * Y) : X :=
-  match p with (x,y) => x end.
+  match p with
+    | (x, y) => x
+  end.
 
 Definition snd {X Y : Type} (p : X * Y) : Y :=
-  match p with (x,y) => y end.
+  match p with
+    | (x, y) => y
+  end.
 
 (** The following function takes two lists and combines them
     into a list of pairs.  In many functional programming languages,
@@ -452,12 +466,13 @@ Definition snd {X Y : Type} (p : X * Y) : Y :=
 (** Note that the pair notation can be used both in expressions and in
     patterns... *)
 
-Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
-           : list (X*Y) :=
-  match (lx,ly) with
-  | ([],_) => []
-  | (_,[]) => []
-  | (x::tx, y::ty) => (x,y) :: (combine tx ty)
+Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y) 
+         : list (X * Y) :=
+  match lx, ly with
+    | nil, nil => []
+    | nil, y :: ty => []
+    | x :: tx, nil => []
+    | x :: tx, y :: ty => cons (x, y) (combine tx ty)
   end.
 
 (** **** Exercise: 1 star, optional (combine_checks)  *)
@@ -481,12 +496,17 @@ Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
 Fixpoint split
            {X Y : Type} (l : list (X*Y))
            : (list X) * (list Y) :=
-(* FILL IN HERE *) admit.
+  match l with
+    | nil => (nil, nil)
+    | (x, y) :: txy => let (tx, ty) := split txy 
+                       in (x :: tx, y :: ty)
+  end.
 
 Example test_split:
   split [(1,false);(2,false)] = ([1;2],[false;false]).
 Proof.
-(* FILL IN HERE *) Admitted.
+  simpl. reflexivity.
+Qed.
 (** [] *)
 
 (* ###################################################### *)
@@ -496,12 +516,12 @@ Proof.
     The type declaration generalizes the one for [natoption] in the
     previous chapter: *)
 
-Inductive option (X:Type) : Type :=
-  | Some : X -> option X
-  | None : option X.
+Inductive option (X : Type) : Type :=
+| Some : X -> option X
+| None : option X.
 
-Arguments Some {X} _. 
-Arguments None {X}. 
+Arguments Some {X} _.
+Arguments None {X}.
 
 (** *** *)
 (** We can now rewrite the [index] function so that it works
@@ -510,8 +530,11 @@ Arguments None {X}.
 Fixpoint index {X : Type} (n : nat)
                (l : list X) : option X :=
   match l with
-  | [] => None
-  | a :: l' => if beq_nat n O then Some a else index (pred n) l'
+    | nil => None
+    | h :: t => match n with
+                  | O => Some h
+                  | S n' => index n' t
+                end
   end.
 
 Example test_index1 :    index 0 [4;5;6;7]  = Some 4.
@@ -527,17 +550,20 @@ Proof. reflexivity.  Qed.
     passes the unit tests below. *)
 
 Definition hd_opt {X : Type} (l : list X)  : option X :=
-  (* FILL IN HERE *) admit.
+  match l with
+    | nil => None
+    | cons h t => Some h
+  end.
 
 (** Once again, to force the implicit arguments to be explicit,
     we can use [@] before the name of the function. *)
 
-Check @hd_opt.
+(* Check @hd_opt. *)
 
 Example test_hd_opt1 :  hd_opt [1;2] = Some 1.
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 Example test_hd_opt2 :   hd_opt  [[1];[2]]  = Some [1].
- (* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 (** [] *)
 
 (* ###################################################### *)
