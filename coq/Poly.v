@@ -37,10 +37,9 @@ Inductive boollist : Type :=
     inductive type definitions.  For example, here is a _polymorphic
     list_ datatype. *)
 
-Inductive list (X:Type) : Type :=
-  | nil : list X
-  | cons : X -> list X -> list X.
-
+Inductive list (X : Type) : Type :=
+| nil : list X
+| cons : X -> list X -> list X.
 
 (** This is exactly like the definition of [natlist] from the
     previous chapter, except that the [nat] argument to the [cons]
@@ -64,9 +63,9 @@ Inductive list (X:Type) : Type :=
     are now _polymorphic constructors_.  Observe the types of these
     constructors: *)
 
-Check nil.
+(* Check nil. *)
 (* ===> nil : forall X : Type, list X *)
-Check cons.
+(* Check cons. *)
 (* ===> cons : forall X : Type, X -> list X -> list X *)
 
 (** The "[forall X]" in these types can be read as an additional
@@ -75,7 +74,8 @@ Check cons.
     arguments are supplied in the same way as the others.  For
     example, the list containing [2] and [1] is written like this: *)
 
-Check (cons nat 2 (cons nat 1 (nil nat))).
+(* Check (nil nat). *)
+(* Check (cons nat 2 (cons nat 1 (nil nat))). *)
 
 (** (We've gone back to writing [nil] and [cons] explicitly here
     because we haven't yet defined the [ [] ] and [::] notations for
@@ -89,8 +89,8 @@ Check (cons nat 2 (cons nat 1 (nil nat))).
 
 Fixpoint length (X:Type) (l:list X) : nat :=
   match l with
-  | nil      => 0
-  | cons h t => S (length X t)
+    | nil => O
+    | cons h t => S (length X t)
   end.
 
 (** Note that the uses of [nil] and [cons] in [match] patterns
@@ -138,8 +138,6 @@ Fixpoint rev (X:Type) (l:list X) : list X :=
   | cons h t => snoc X (rev X t) h
   end.
 
-
-
 Example test_rev1 :
     rev nat (cons nat 1 (cons nat 2 (nil nat)))
   = (cons nat 2 (cons nat 1 (nil nat))).
@@ -163,17 +161,17 @@ Inductive grumble (X:Type) : Type :=
 
 (** Which of the following are well-typed elements of [grumble X] for
     some type [X]?
-      - [d (b a 5)]
-      - [d mumble (b a 5)]
-      - [d bool (b a 5)]
-      - [e bool true]
-      - [e mumble (b c 0)]
-      - [e bool (b c 0)]
-      - [c] 
+      - [d (b a 5)]              NO
+      - [d mumble (b a 5)]       YES
+      - [d bool (b a 5)]         YES
+      - [e bool true]            YES
+      - [e mumble (b c 0)]       YES
+      - [e bool (b c 0)]         NO
+      - [c]                      YES
 (* FILL IN HERE *)
 *)
-(** [] *)
 
+(** [] *)
 
 (** **** Exercise: 2 stars (baz_num_elts)  *)
 (** Consider the following inductive definition: *)
