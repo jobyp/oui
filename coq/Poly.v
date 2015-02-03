@@ -925,10 +925,10 @@ Definition option_map {X Y : Type} (f : X -> Y) (xo : option X)
     operation that lies at the heart of Google's map/reduce
     distributed programming framework. *)
 
-Fixpoint fold {X Y:Type} (f: X->Y->Y) (l:list X) (b:Y) : Y :=
+Fixpoint fold {X Y : Type} (f : X -> Y -> Y) (l : list X) (b : Y) : Y :=
   match l with
-  | nil => b
-  | h :: t => f h (fold f t b)
+    | nil => b
+    | h :: t => f h (fold f t b)
   end.
 
 (** *** *)
@@ -945,7 +945,7 @@ Fixpoint fold {X Y:Type} (f: X->Y->Y) (l:list X) (b:Y) : Y :=
     Here are some more examples:
 *)
 
-Check (fold andb).
+(* Check (fold andb). *)
 (* ===> fold andb : list bool -> bool -> bool *)
 
 Example fold_example1 : fold mult [1;2;3;4] 1 = 24.
@@ -956,7 +956,6 @@ Proof. reflexivity. Qed.
 
 Example fold_example3 : fold app  [[1];[];[2;3];[4]] [] = [1;2;3;4].
 Proof. reflexivity. Qed.
-
 
 (** **** Exercise: 1 star, advanced (fold_types_different)  *)
 (** Observe that the type of [fold] is parameterized by _two_ type
@@ -977,10 +976,10 @@ Proof. reflexivity. Qed.
     some type [X]) and returns a function from [nat] to [X] that
     yields [x] whenever it is called, ignoring its [nat] argument. *)
 
-Definition constfun {X: Type} (x: X) : nat->X :=
-  fun (k:nat) => x.
+Definition constfun {X : Type} (x : X) : nat -> X :=
+  fun (k : nat) => x.
 
-Definition ftrue := constfun true.
+Definition ftrue : (nat -> bool) := constfun true.
 
 Example constfun_example1 : ftrue 0 = true.
 Proof. reflexivity. Qed.
@@ -995,8 +994,11 @@ Proof. reflexivity. Qed.
     exactly like [f] except that, when called with the argument [k],
     it returns [x]. *)
 
-Definition override {X: Type} (f: nat->X) (k:nat) (x:X) : nat->X:=
-  fun (k':nat) => if beq_nat k k' then x else f k'.
+Definition override {X : Type} (f : nat -> X) (k : nat) (x : X) : nat -> X :=
+  fun (k' : nat) => 
+    if beq_nat k k'
+    then x
+    else f k'.
 
 (** For example, we can apply [override] twice to obtain a
     function from numbers to booleans that returns [false] on [1] and
@@ -1028,7 +1030,10 @@ Proof. reflexivity. Qed.
 Theorem override_example : forall (b:bool),
   (override (constfun b) 3 true) 2 = b.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros b. destruct b.
+  compute. reflexivity.
+  compute. reflexivity.
+Qed.
 (** [] *)
 
 (** We'll use function overriding heavily in parts of the rest of the
@@ -1078,13 +1083,12 @@ Proof.
     override a function at some argument [k] and then look up [k], we
     get back the overridden value. *)
 
-Theorem override_eq : forall {X:Type} x k (f:nat->X),
-  (override f k x) k = x.
+Theorem override_eq : forall (X : Type) x k (f : nat -> X),
+  (override f k x) k = x.                      
 Proof.
-  intros X x k f.
-  unfold override.
-  rewrite <- beq_nat_refl.
-  reflexivity.  Qed.
+  intros. unfold override.
+  rewrite <- beq_nat_refl. reflexivity.
+Qed.
 
 (** This proof was straightforward, but note that it requires
     [unfold] to expand the definition of [override]. *)
@@ -1095,7 +1099,11 @@ Theorem override_neq : forall (X:Type) x1 x2 k1 k2 (f : nat->X),
   beq_nat k2 k1 = false ->
   (override f k2 x2) k1 = x1.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X x1 x2 k1 k2 f H1 H2.
+  unfold override. 
+  rewrite -> H2.
+  rewrite -> H1. reflexivity.
+Qed.
 (** [] *)
 
 (** As the inverse of [unfold], Coq also provides a tactic
@@ -1110,7 +1118,7 @@ Proof.
    [fold].  For example, here is an alternative definition of [length]: *)
 
 Definition fold_length {X : Type} (l : list X) : nat :=
-  fold (fun _ n => S n) l 0.
+  fold (fun _ n => S n) l O.
 
 Example test_fold_length1 : fold_length [4;7;0] = 3.
 Proof. reflexivity. Qed.
@@ -1119,7 +1127,12 @@ Proof. reflexivity. Qed.
 
 Theorem fold_length_correct : forall X (l : list X),
   fold_length l = length l.
-(* FILL IN HERE *) Admitted.
+Proof.
+  intros. induction l as [|h t].
+  compute. reflexivity.
+  simpl. unfold fold_length. simpl.
+  rewrite <- IHt. unfold fold_length. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars (fold_map)  *)
@@ -1127,12 +1140,19 @@ Theorem fold_length_correct : forall X (l : list X),
     below. *)
 
 Definition fold_map {X Y:Type} (f : X -> Y) (l : list X) : list Y :=
-(* FILL IN HERE *) admit.
+  fold (fun x ys => f x :: ys) l [].
 
 (** Write down a theorem [fold_map_correct] in Coq stating that
    [fold_map] is correct, and prove it. *)
 
-(* FILL IN HERE *)
+Theorem fold_map_correct: forall (X Y : Type) (f : X -> Y) (l : list X),
+  fold_map f l = map f l.
+Proof.
+  intros. induction l as [|h t].
+  compute. reflexivity.
+  unfold fold_map. simpl. rewrite <- IHt.
+  unfold fold_map. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, advanced (index_informal)  *)
