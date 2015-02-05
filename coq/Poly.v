@@ -618,7 +618,7 @@ Proof. reflexivity.  Qed.
     supply just the first.  This is called _partial application_. *)
 
 Definition plus3 := plus 3.
-Check plus3.
+(* Check plus3. *)
 
 Example test_plus3 :    plus3 4 = 7.
 Proof. reflexivity.  Qed.
@@ -1183,7 +1183,7 @@ Definition nat := forall X : Type, (X -> X) -> X -> X.
 (** Let's see how to write some numbers with this notation. Any
     function [f] iterated once shouldn't change. Thus, *)
 
-Definition one : nat := 
+Definition one : nat :=
   fun (X : Type) (f : X -> X) (x : X) => f x.
 
 (** [two] should apply [f] twice to its argument: *)
@@ -1210,46 +1210,48 @@ Definition three : nat := @doit3times.
 
 (** Successor of a natural number *)
 
-Definition succ (n : nat) : nat :=
-  (* FILL IN HERE *) admit.
+Definition succ (n : nat) : nat := 
+  fun (X : Type) (f : X -> X)  (x : X) =>
+    f (n X f x).
 
 Example succ_1 : succ zero = one.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 
 Example succ_2 : succ one = two.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 
 Example succ_3 : succ two = three.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 
 (** Addition of two natural numbers *)
 
 Definition plus (n m : nat) : nat :=
-  (* FILL IN HERE *) admit.
+  fun X f x => n X f (m X f x).
 
 Example plus_1 : plus zero one = one.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. simpl. compute. reflexivity. Qed.
 
 Example plus_2 : plus two three = plus three two.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. simpl. compute. reflexivity.
 
 Example plus_3 :
   plus (plus two two) three = plus one (plus three three).
-Proof. (* FILL IN HERE *) Admitted.
+Proof. simpl. compute. reflexivity. Qed.
 
 (** Multiplication *)
 
 Definition mult (n m : nat) : nat := 
-  (* FILL IN HERE *) admit.
+  fun X f x =>
+    n X (m X f) x.
 
 Example mult_1 : mult one one = one.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. simpl. compute. reflexivity. Qed.
 
 Example mult_2 : mult zero (plus three three) = zero.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. simpl. compute. reflexivity. Qed.
 
 Example mult_3 : mult two three = plus three three.
-Proof. (* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 
 (** Exponentiation *)
 
