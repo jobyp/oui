@@ -1,10 +1,19 @@
-(** * MoreCoq: More About Coq *)
+(** * MoreCoq: More About Coq's Tactics *)
 
 Require Export Poly.
 
-(** This chapter introduces several more Coq tactics that,
-    together, allow us to prove many more theorems about the
-    functional programs we are writing. *)
+(** This chapter introduces several more proof strategies and
+    tactics that, together, allow us to prove theorems about the
+    functional programs we have been writing. In particular, we'll
+    reason about functions that work with natural numbers and lists.
+
+    In particular, we will see:
+    - how to use auxiliary lemmas, in both forwards and backwards reasoning;
+    - how to reason about data constructors, which are injective and disjoint;
+    - how to create a strong induction hypotheses (and when
+      strengthening is required); and
+    - how to reason by case analysis.
+ *)
 
 (* ###################################################### *)
 (** * The [apply] Tactic *)
@@ -37,10 +46,8 @@ Theorem silly2 : forall (n m o p : nat),
      (forall (q r : nat), q = r -> [q;o] = [r;p]) ->
      [n;o] = [m;p].
 Proof.
-  intros n m o p eq1 eq2.
-  apply eq2.
-  apply eq1.
-Qed.
+  intros n m o p eq1 eq2. 
+  apply eq2. apply eq1.  Qed.
 
 (** You may find it instructive to experiment with this proof
     and see if there is a way to complete it using just [rewrite]
@@ -60,10 +67,9 @@ Theorem silly2a : forall (n m : nat),
      [n] = [m].
 Proof.
   intros n m eq1 eq2.
-  apply eq2. apply eq1.
-Qed.
+  apply eq2. apply eq1.  Qed.
 
-(** **** Exercise: 2 stars, optional (silly_ex) *)
+(** **** Exercise: 2 stars, optional (silly_ex)  *)
 (** Complete the following proof without using [simpl]. *)
 
 Theorem silly_ex : 
@@ -71,8 +77,7 @@ Theorem silly_ex :
      evenb 3 = true ->
      oddb 4 = true.
 Proof.
-  intros. apply H. apply H0.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
 (** To use the [apply] tactic, the (conclusion of the) fact
@@ -102,7 +107,7 @@ Proof.
             [apply] will perform simplification first. *)
   apply H.  Qed.         
 
-(** **** Exercise: 3 stars (apply_exercise1) *)
+(** **** Exercise: 3 stars (apply_exercise1)  *)
 (** Hint: you can use [apply] with previously defined lemmas, not
     just hypotheses in the context.  Remember that [SearchAbout] is
     your friend. *)
@@ -111,19 +116,14 @@ Theorem rev_exercise1 : forall (l l' : list nat),
      l = rev l' ->
      l' = rev l.
 Proof.
-  intros.
-  assert (rev (rev l') = l') as H1.
-  apply rev_involutive.
-  rewrite -> H.
-  symmetry.
-  apply rev_involutive.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 1 star, optional (apply_rewrite) *)
+(** **** Exercise: 1 star, optional (apply_rewrite)  *)
 (** Briefly explain the difference between the tactics [apply] and
     [rewrite].  Are there situations where both can usefully be
     applied?
+  (* FILL IN HERE *)
 *)
 (** [] *)
 
@@ -149,9 +149,8 @@ Proof.
 Theorem trans_eq : forall (X:Type) (n m o : X),
   n = m -> m = o -> n = o.
 Proof.
-  intros.
-  rewrite -> H. rewrite -> H0. reflexivity.
-Qed.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2. 
+  reflexivity.  Qed.
 
 (** Now, we should be able to use [trans_eq] to
     prove the above example.  However, to do this we need
@@ -162,7 +161,7 @@ Example trans_eq_example' : forall (a b c d e f : nat),
      [c;d] = [e;f] ->
      [a;b] = [e;f].
 Proof.
-  intros a b c d e f eq1 eq2.
+  intros a b c d e f eq1 eq2. 
   (* If we simply tell Coq [apply trans_eq] at this point,
      it can tell (by matching the goal against the
      conclusion of the lemma) that it should instantiate [X]
@@ -171,25 +170,20 @@ Proof.
      instantiation for [m]: we have to supply one explicitly
      by adding [with (m:=[c,d])] to the invocation of
      [apply]. *)
-  apply trans_eq with (m:=[c; d]).
-  apply eq1. apply eq2.
-Qed.
+  apply trans_eq with (m:=[c;d]). apply eq1. apply eq2.   Qed.
 
 (**  Actually, we usually don't have to include the name [m]
     in the [with] clause; Coq is often smart enough to
     figure out which instantiation we're giving. We could
     instead write: [apply trans_eq with [c,d]]. *)
 
-(** **** Exercise: 3 stars, optional (apply_with_exercise) *)
+(** **** Exercise: 3 stars, optional (apply_with_exercise)  *)
 Example trans_eq_exercise : forall (n m o p : nat),
      m = (minustwo o) ->
      (n + p) = m ->
      (n + p) = (minustwo o). 
 Proof.
-  intros.
-  apply trans_eq with (m := m).
-  apply H0. apply H.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
 
@@ -247,19 +241,17 @@ Qed.
     Below you will find example theorems that demonstrate the use of
     [inversion] and exercises to test your understanding. *)
 
-
 Theorem eq_add_S : forall (n m : nat),
-  S n = S m ->
-  n = m.
+     S n = S m ->
+     n = m.
 Proof.
-  intros. inversion H. reflexivity.
-Qed.
+  intros n m eq. inversion eq. reflexivity.  Qed.
 
 Theorem silly4 : forall (n m : nat),
      [n] = [m] ->
      n = m.
 Proof.
-  intros. inversion H. reflexivity. Qed.
+  intros n o eq. inversion eq. reflexivity.  Qed.
 
 (** As a convenience, the [inversion] tactic can also
     destruct equalities between complex values, binding
@@ -269,40 +261,36 @@ Theorem silly5 : forall (n m o : nat),
      [n;m] = [o;o] ->
      [n] = [m].
 Proof.
-  intros. inversion H. reflexivity. Qed.
+  intros n m o eq. inversion eq. reflexivity. Qed.
 
-(** **** Exercise: 1 star (sillyex1) *) 
+(** **** Exercise: 1 star (sillyex1)  *) 
 Example sillyex1 : forall (X : Type) (x y z : X) (l j : list X),
      x :: y :: l = z :: j ->
      y :: l = x :: j ->
      x = y.
 Proof.
-  intros. inversion H. inversion H0. symmetry. apply H2.
-Qed.
-
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
 Theorem silly6 : forall (n : nat),
      S n = O ->
      2 + 2 = 5.
 Proof.
-  intros.
-  inversion H.
-Qed.
+  intros n contra. inversion contra. Qed.
 
 Theorem silly7 : forall (n m : nat),
      false = true ->
      [n] = [m].
 Proof.
-  intros. inversion H. Qed.
+  intros n m contra. inversion contra.  Qed.
 
-(** **** Exercise: 1 star (sillyex2) *)
+(** **** Exercise: 1 star (sillyex2)  *)
 Example sillyex2 : forall (X : Type) (x y z : X) (l j : list X),
      x :: y :: l = [] ->
      y :: l = z :: j ->
      x = z.
 Proof.
-  intros. inversion H. Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
 (** While the injectivity of constructors allows us to reason
@@ -312,26 +300,27 @@ Proof.
 
 Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A), 
     x = y -> f x = f y. 
-Proof. intros. rewrite -> H. reflexivity. Qed.
+Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed. 
 
-(** **** Exercise: 2 stars, optional (practice) *)
+
+
+
+(** **** Exercise: 2 stars, optional (practice)  *)
 (** A couple more nontrivial but not-too-complicated proofs to work
     together in class, or for you to work as exercises. *)
  
+
 Theorem beq_nat_0_l : forall n,
    beq_nat 0 n = true -> n = 0.
 Proof.
-  intros. destruct n as [|n']. 
-  reflexivity. simpl in H. inversion H.
-Qed.
-  
+  (* FILL IN HERE *) Admitted.
+
 Theorem beq_nat_0_r : forall n,
    beq_nat n 0 = true -> n = 0.
 Proof.
-  intros. destruct n as [|n'].
-  reflexivity. rewrite -> S_nbeq_0 in H. inversion H.
-Qed.  
+  (* FILL IN HERE *) Admitted.
 (** [] *)
+
 
 (* ###################################################### *)
 (** * Using Tactics on Hypotheses *)
@@ -344,11 +333,10 @@ Qed.
     the hypothesis named [H] in the context. *)
 
 Theorem S_inj : forall (n m : nat) (b : bool),
-  beq_nat (S n) (S m) = b ->
-  beq_nat n m = b.
+     beq_nat (S n) (S m) = b  ->
+     beq_nat n m = b. 
 Proof.
-  intros. simpl in H. trivial.
-Qed.
+  intros n m b H. simpl in H. apply H.  Qed.
 
 (** Similarly, the tactic [apply L in H] matches some
     conditional statement [L] (of the form [L1 -> L2], say) against a
@@ -371,12 +359,9 @@ Theorem silly3' : forall (n : nat),
      true = beq_nat n 5  ->
      true = beq_nat (S (S n)) 7.
 Proof.
-  intros.
-  symmetry in H0.
-  apply H in H0.
-  symmetry in H0.
-  trivial.
-Qed.
+  intros n eq H.
+  symmetry in H. apply eq in H. symmetry in H. 
+  apply H.  Qed.
 
 (** Forward reasoning starts from what is _given_ (premises,
     previously proven theorems) and iteratively draws conclusions from
@@ -389,7 +374,7 @@ Qed.
     situations the forward style can be easier to use or to think
     about.  *)
 
-(** **** Exercise: 3 stars (plus_n_n_injective) *)
+(** **** Exercise: 3 stars (plus_n_n_injective)  *)
 (** Practice using "in" variants in this exercise. *)
 
 Theorem plus_n_n_injective : forall n m,
@@ -397,20 +382,8 @@ Theorem plus_n_n_injective : forall n m,
      n = m.
 Proof.
   intros n. induction n as [| n'].
-  intros. destruct m as [|m'].
-  reflexivity. simpl in H. inversion H.
-  intros. destruct m as [|m'].
-  simpl in H. inversion H.
-  assert (n'  = m' -> S n' = S m') as H1.
-  intros. rewrite -> H0. reflexivity.
-  apply H1.
-  apply IHn'.
-  simpl in H.
-  inversion H.
-  rewrite -> plus_comm in H2. simpl in H2.
-  rewrite <- plus_n_Sm in H2.
-  inversion H2. trivial.
-Qed.
+    (* Hint: use the plus_n_Sm lemma *)
+    (* FILL IN HERE *) Admitted.
 (** [] *)
 
 (* ###################################################### *)
@@ -552,24 +525,14 @@ Proof.
 
 (** The proof of this theorem (left as an exercise) has to be treated similarly: *)
 
-(** **** Exercise: 2 stars (beq_nat_true) *)
+(** **** Exercise: 2 stars (beq_nat_true)  *)
 Theorem beq_nat_true : forall n m,
     beq_nat n m = true -> n = m.
 Proof.
-  intros n.
-  induction n as [|n'].
-  intros. destruct m as [|m'].
-  reflexivity. simpl in H. inversion H.
-  intros. destruct m as [|m'].
-  simpl in H. inversion H.
-  assert (n' = m' -> S n' = S m') as H1.
-  intros. rewrite -> H0. reflexivity.
-  apply H1. apply IHn'.
-  simpl in H. trivial.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, advanced (beq_nat_true_informal) *)
+(** **** Exercise: 2 stars, advanced (beq_nat_true_informal)  *)
 (** Give a careful informal proof of [beq_nat_true], being as explicit
     as possible about quantifiers. *)
 
@@ -674,6 +637,8 @@ _Proof_: Let [m] be a [nat]. We prove by induction on [m] that, for
     m'].  Since [S n' = n] and [S m' = m], this is just what we wanted
     to show. [] *)
 
+
+
 (** Here's another illustration of [inversion] and using an
     appropriately general induction hypothesis.  This is a slightly
     roundabout way of stating a fact that we have already proved
@@ -730,26 +695,17 @@ Proof.
     In general, a good rule of thumb is to make the induction hypothesis
     as general as possible. *)
 
-(** **** Exercise: 3 stars (gen_dep_practice) *)
-
+(** **** Exercise: 3 stars (gen_dep_practice)  *)
 (** Prove this by induction on [l]. *)
 
 Theorem index_after_last: forall (n : nat) (X : Type) (l : list X),
      length l = n ->
      index n l = None.
 Proof.
-  intros n X l.
-  generalize dependent n.
-  induction l as [|h t].
-  intros. destruct n as [|n']. simpl. reflexivity.
-  simpl. reflexivity.
-  intros. destruct n as [|n'].
-  simpl in H. inversion H.
-  simpl. apply IHt. simpl in H. inversion H. reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, advanced, optional (index_after_last_informal) *)
+(** **** Exercise: 3 stars, advanced, optional (index_after_last_informal)  *)
 (** Write an informal proof corresponding to your Coq proof
     of [index_after_last]:
  
@@ -761,7 +717,7 @@ Qed.
 []
 *)
 
-(** **** Exercise: 3 stars, optional (gen_dep_practice_more) *)
+(** **** Exercise: 3 stars, optional (gen_dep_practice_more)  *)
 (** Prove this by induction on [l]. *)
 
 Theorem length_snoc''' : forall (n : nat) (X : Type) 
@@ -769,64 +725,33 @@ Theorem length_snoc''' : forall (n : nat) (X : Type)
      length l = n ->
      length (snoc l v) = S n. 
 Proof.
-  intros n X v l.
-  generalize dependent n.
-  induction l as [|h t].
-  intros. destruct n as [|n'].
-  reflexivity. inversion H.
-  intros. simpl. apply eq_S.
-  destruct n as [|n'].
-  inversion H.
-  apply IHt. simpl in H. inversion H. reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, optional (app_length_cons) *)
-(** Prove this by induction on [l1], without using [app_length]. *)
+(** **** Exercise: 3 stars, optional (app_length_cons)  *)
+(** Prove this by induction on [l1], without using [app_length]
+    from [Lists]. *)
 
 Theorem app_length_cons : forall (X : Type) (l1 l2 : list X) 
                                   (x : X) (n : nat),
      length (l1 ++ (x :: l2)) = n ->
      S (length (l1 ++ l2)) = n.
 Proof.
-  intros X l1 l2 x.
-  induction l1 as [|h t].
-  intros. simpl. simpl in H. trivial.
-  intros. simpl. destruct n as [|n'].
-  inversion H.
-  apply eq_S. apply IHt.
-  simpl in H. inversion H. reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 4 stars, optional (app_length_twice) *)
+(** **** Exercise: 4 stars, optional (app_length_twice)  *)
 (** Prove this by induction on [l], without using app_length. *)
-
-Lemma app_length : forall (X : Type) (l1 l2 : list X),
-  length (l1 ++ l2) = length l1 + length l2.
-Proof.
-  intros.
-  induction l1 as [|h t].
-  simpl. reflexivity.
-  simpl. apply eq_S. trivial.
-Qed.
 
 Theorem app_length_twice : forall (X:Type) (n:nat) (l:list X),
      length l = n ->
      length (l ++ l) = n + n.
 Proof.
-  intros X n l.
-  generalize dependent n.
-  induction l as [|h t].
-  intros. destruct n as [|n'].
-  reflexivity. inversion H.
-  intros. rewrite -> app_length.
-  rewrite -> H. reflexivity.
-Qed.
- (** [] *)
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 
-(** **** Exercise: 3 stars, optional (double_induction) *)
+(** **** Exercise: 3 stars, optional (double_induction)  *)
 (** Prove the following principle of induction over two naturals. *)
 
 Theorem double_induction: forall (P : nat -> nat -> Prop), 
@@ -836,20 +761,9 @@ Theorem double_induction: forall (P : nat -> nat -> Prop),
   (forall m n, P m n -> P (S m) (S n)) ->
   forall m n, P m n.
 Proof.
-  intros.
-  generalize dependent n.
-  induction m as [|m'].
-  intros.
-  induction n as [|n'].
-  apply H.
-  apply H1. trivial.
-  intros.
-  induction n as [|n'].
-  apply H0. apply IHm'.
-  apply H2.
-  apply IHm'.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
+
 
 (* ###################################################### *)
 (** * Using [destruct] on Compound Expressions *)
@@ -869,13 +783,12 @@ Definition sillyfun (n : nat) : bool :=
 Theorem sillyfun_false : forall (n : nat),
   sillyfun n = false.
 Proof.
-  intros.
-  unfold sillyfun.
+  intros n. unfold sillyfun. 
   destruct (beq_nat n 3).
-  reflexivity.
-  destruct (beq_nat n 5).
-  reflexivity. reflexivity.
-Qed.
+    Case "beq_nat n 3 = true". reflexivity.
+    Case "beq_nat n 3 = false". destruct (beq_nat n 5).
+      SCase "beq_nat n 5 = true". reflexivity.
+      SCase "beq_nat n 5 = false". reflexivity.  Qed.
 
 (** After unfolding [sillyfun] in the above proof, we find that
     we are stuck on [if (beq_nat n 3) then ... else ...].  Well,
@@ -891,59 +804,22 @@ Qed.
 
 *)
 
-(** **** Exercise: 1 star (override_shadow) *)
+(** **** Exercise: 1 star (override_shadow)  *)
 Theorem override_shadow : forall (X:Type) x1 x2 k1 k2 (f : nat->X),
   (override (override f k1 x2) k1 x1) k2 = (override f k1 x1) k2.
 Proof.
-  intros.
-  unfold override.
-  destruct (beq_nat k1 k2).
-  reflexivity. reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, optional (combine_split) *)
+(** **** Exercise: 3 stars, optional (combine_split)  *)
 (** Complete the proof below *)
-
-Lemma f1_s : forall (X : Type) (v : X) (l1 l2 : list X),
-  v :: l1 = v :: l2 -> l1 = l2.
-Proof.
-  intros.
-  generalize dependent l2.
-  induction l1 as [|h1 t1].
-  intros. inversion H. reflexivity.
-  intros. inversion H.
-  reflexivity.
-Qed.
-
-Lemma f2_s : forall (X : Type) (v : X) (l1 l2 : list X),
-  l1 = l2 -> v :: l1 = v :: l2.
-Proof.
-  intros.
-  rewrite -> H. reflexivity.
-Qed.
 
 Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
   split l = (l1, l2) ->
   combine l1 l2 = l.
 Proof.
-  intros X Y l.
-  induction l as [| (x, y) txy].
-  intros. inversion H. reflexivity.
-  intros. destruct l1 as [|h1 t1].
-  simpl in H. inversion H.
-  destruct l2 as [|h2 t2].
-  inversion H.
-  simpl. inversion H.
-  apply f2_s.
-  apply IHtxy.
-  rewrite -> H2. rewrite -> H4.
-  simpl in H.
-  inversion H.
-  destruct (split txy). simpl. reflexivity. 
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
-
 
 (** Sometimes, doing a [destruct] on a compound expression (a
     non-variable) will erase information we need to complete a proof. *)
@@ -964,18 +840,10 @@ Theorem sillyfun1_odd_FAILED : forall (n : nat),
      sillyfun1 n = true ->
      oddb n = true.
 Proof.
-  intros n.
-  unfold sillyfun1.
-  assert (beq_nat n 3 = true -> n = 3) as H1.
-  intros. apply beq_nat_true. trivial.
-  assert (beq_nat n 5 = true -> n = 5) as H2.
-  intros. apply beq_nat_true. trivial.
-  destruct (beq_nat n 3). intros. apply H1 in H. rewrite -> H. reflexivity.
-  destruct (beq_nat n 5). intros. apply H2 in H. rewrite -> H. reflexivity.
-  intros. apply H1 in H. rewrite -> H. reflexivity.
-Qed.  
-
-(* PCJ: proof completed.... *)
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (beq_nat n 3).
+  (* stuck... *)
+Abort.
 
 (** We get stuck at this point because the context does not
     contain enough information to prove the goal!  The problem is that
@@ -1014,35 +882,20 @@ Proof.
         SCase "e5 = false". inversion eq.  Qed.
 
 
-(** **** Exercise: 2 stars (destruct_eqn_practice) *)
+(** **** Exercise: 2 stars (destruct_eqn_practice)  *)
 Theorem bool_fn_applied_thrice : 
   forall (f : bool -> bool) (b : bool), 
   f (f (f b)) = f b.
 Proof.
-  intros.
-  destruct b.
-  destruct (f true) eqn:Hf_true.
-  rewrite -> Hf_true. trivial.
-  destruct (f false) eqn:Hf_false.
-  rewrite -> Hf_true. reflexivity. trivial.
-  destruct (f false) eqn:Hf_false.
-  destruct (f true) eqn:Hf_true.
-  trivial. trivial.
-  rewrite -> Hf_false. rewrite Hf_false. reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars (override_same) *)
+(** **** Exercise: 2 stars (override_same)  *)
 Theorem override_same : forall (X:Type) x1 k1 k2 (f : nat->X),
   f k1 = x1 -> 
   (override f k1 x1) k2 = f k2.
 Proof.
-  intros.
-  unfold override.
-  destruct (beq_nat k1 k2) eqn:H1.
-  symmetry. apply beq_nat_true in H1. rewrite <- H1. trivial.
-  reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
 (* ################################################################## *)
@@ -1123,21 +976,14 @@ Qed.
 (* ###################################################### *)
 (** * Additional Exercises *)
 
-(** **** Exercise: 3 stars (beq_nat_sym) *)
+(** **** Exercise: 3 stars (beq_nat_sym)  *)
 Theorem beq_nat_sym : forall (n m : nat),
   beq_nat n m = beq_nat m n.
 Proof.
-  intros n.
-  induction n as [|n'].
-  intros. destruct m as [|m'].
-  reflexivity. simpl. reflexivity.
-  intros. destruct m as [|m'].
-  simpl. reflexivity.
-  simpl. apply IHn'.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, advanced, optional (beq_nat_sym_informal) *)
+(** **** Exercise: 3 stars, advanced, optional (beq_nat_sym_informal)  *)
 (** Give an informal proof of this lemma that corresponds to your
     formal proof above:
 
@@ -1148,23 +994,19 @@ Qed.
 []
  *)
 
-(** **** Exercise: 3 stars, optional (beq_nat_trans) *)
+(** **** Exercise: 3 stars, optional (beq_nat_trans)  *)
 Theorem beq_nat_trans : forall n m p,
   beq_nat n m = true ->
   beq_nat m p = true ->
   beq_nat n p = true.
 Proof.
-  intros.
-  apply beq_nat_true in H.
-  apply beq_nat_true in H0.
-  rewrite -> H. rewrite <- H0. symmetry. apply beq_nat_refl.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, advanced (split_combine) *)
+(** **** Exercise: 3 stars, advanced (split_combine)  *)
 (** We have just proven that for all lists of pairs, [combine] is the
     inverse of [split].  How would you formalize the statement that
-    [split] is the inverse of [combine]?
+    [split] is the inverse of [combine]? When is this property true?
 
     Complete the definition of [split_combine_statement] below with a
     property that states that [split] is the inverse of
@@ -1174,47 +1016,25 @@ Qed.
     and [l2] for [split] [combine l1 l2 = (l1,l2)] to be true?)  *)
 
 Definition split_combine_statement : Prop :=
-  forall (X : Type) (l1 l2 : list X),
-    length l1 = length l2 -> split (combine l1 l2) = (l1, l2).
+(* FILL IN HERE *) admit.
 
 Theorem split_combine : split_combine_statement.
 Proof.
-  intros X l1.
-  induction l1 as [| h1 t1].
-  intros. destruct l2 as [|h2 t2].
-  reflexivity.
-  simpl in H. inversion H.
-  intros.
-  destruct l2 as [|h2 t2].
-  inversion H.
-  simpl. simpl in H. inversion H.
-  apply IHt1 in H1.
-  rewrite -> H1. simpl. reflexivity.
-Qed.
+(* FILL IN HERE *) Admitted.
+
+
+
 (** [] *)
 
-(** **** Exercise: 3 stars (override_permute) *)
+(** **** Exercise: 3 stars (override_permute)  *)
 Theorem override_permute : forall (X:Type) x1 x2 k1 k2 k3 (f : nat->X),
   beq_nat k2 k1 = false ->
   (override (override f k2 x2) k1 x1) k3 = (override (override f k1 x1) k2 x2) k3.
 Proof.
-  intros.
-  unfold override.
-  destruct (beq_nat k1 k3) eqn:Heq13.
-  destruct (beq_nat k2 k3) eqn:Heq23.
-  apply beq_nat_true in Heq13.
-  apply beq_nat_true in Heq23.
-  rewrite -> Heq13 in H.
-  rewrite -> Heq23 in H.
-  assert (beq_nat k3 k3 = true) as H1.
-  symmetry.
-  apply beq_nat_refl. rewrite -> H1 in H. inversion H.
-  reflexivity.
-  reflexivity.
-Qed.  
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, advanced (filter_exercise) *)
+(** **** Exercise: 3 stars, advanced (filter_exercise)  *)
 (** This one is a bit challenging.  Pay attention to the form of your IH. *)
 
 Theorem filter_exercise : forall (X : Type) (test : X -> bool)
@@ -1222,18 +1042,10 @@ Theorem filter_exercise : forall (X : Type) (test : X -> bool)
      filter test l = x :: lf ->
      test x = true.
 Proof.
-  intros.
-  generalize dependent x.
-  generalize dependent lf.
-  induction l as [|h t].
-  intros. simpl in H. inversion H.
-  intros. simpl in H. destruct (test h) eqn:Heq1.
-  inversion H. rewrite <- H1. trivial.
-  apply IHt with (lf:=lf). trivial.
-Qed.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 4 stars, advanced (forall_exists_challenge) *)
+(** **** Exercise: 4 stars, advanced (forall_exists_challenge)  *)
 (** Define two recursive [Fixpoints], [forallb] and [existsb].  The
     first checks whether every element in a list satisfies a given
     predicate:
@@ -1256,66 +1068,14 @@ Qed.
     Next, define a _nonrecursive_ version of [existsb] -- call it
     [existsb'] -- using [forallb] and [negb].
  
-    Prove that [existsb'] and [existsb] have the same behavior.
+    Prove theorem [existsb_existsb'] that [existsb'] and [existsb] have
+    the same behavior.
 *)
 
-Fixpoint forallb {X: Type} (test : X -> bool) (l : list X) : bool :=
-  match l with
-    | []     => true
-    | h :: t => andb (test h) (forallb test t)
-  end.
-
-Example test_forallb_1 : forallb oddb [1;3;5;7;9] = true.
-Proof. compute. reflexivity. Qed.
-Example test_forallb_2 : forallb negb [false;false] = true.
-Proof. compute. reflexivity. Qed.
-Example test_forallb_3 : forallb evenb [0;2;4;5] = false.
-Proof. compute. reflexivity. Qed.
-Example test_forallb_4 : forallb (beq_nat 5) [] = true.
-Proof. compute. reflexivity. Qed.
-
-
-Fixpoint existsb {X : Type} (test : X -> bool) (l : list X) : bool :=
-  match l with
-    | []     => false
-    | h :: t => orb (test h) (existsb test t)
-  end.
-
-Example test_existsb_1 : existsb (beq_nat 5) [0;2;3;6] = false.
-Proof. compute. reflexivity. Qed.
-Example test_existsb_2 : existsb (andb true) [true;true;false] = true.
-Proof. compute. reflexivity. Qed.
-Example test_existsb_3 : existsb oddb [1;0;0;0;0;3] = true.
-Proof. compute. reflexivity. Qed.
-Example test_existsb_4 : existsb evenb [] = false.
-Proof. compute. reflexivity. Qed.
-
-Definition existsb' {X : Type} (test : X -> bool) (l : list X) : bool :=
-  negb (forallb (fun x => negb (test x)) l).
-
-Example test_existsb'_1 : existsb' (beq_nat 5) [0;2;3;6] = false.
-Proof. compute. reflexivity. Qed.
-Example test_existsb'_2 : existsb' (andb true) [true;true;false] = true.
-Proof. compute. reflexivity. Qed.
-Example test_existsb'_3 : existsb' oddb [1;0;0;0;0;3] = true.
-Proof. compute. reflexivity. Qed.
-Example test_existsb'_4 : existsb' evenb [] = false.
-Proof. compute. reflexivity. Qed.
-
-Theorem existsb_challenge : forall (X : Type) (test : X -> bool) (l : list X),
-  existsb test l = existsb' test l.                                 
-Proof.
-  intros.
-  induction l as [|h t].
-  compute. reflexivity.
-  simpl. unfold existsb'. simpl.
-  destruct (test h) eqn:Heq1.
-  simpl. reflexivity.
-  simpl. unfold existsb' in IHt. trivial.
-Qed.
+(* FILL IN HERE *)
 (** [] *)
 
-(* $Date: 2014-02-04 07:15:43 -0500 (Tue, 04 Feb 2014) $ *)
+(** $Date: 2014-12-31 16:01:37 -0500 (Wed, 31 Dec 2014) $ *)
 
 
 
