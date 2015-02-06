@@ -1232,7 +1232,7 @@ Example plus_1 : plus zero one = one.
 Proof. simpl. compute. reflexivity. Qed.
 
 Example plus_2 : plus two three = plus three two.
-Proof. simpl. compute. reflexivity.
+Proof. simpl. compute. reflexivity. Qed.
 
 Example plus_3 :
   plus (plus two two) three = plus one (plus three three).
