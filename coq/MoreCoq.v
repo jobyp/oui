@@ -77,7 +77,9 @@ Theorem silly_ex :
      evenb 3 = true ->
      oddb 4 = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros H1 H2.
+  apply H1. trivial.
+Qed.
 (** [] *)
 
 (** To use the [apply] tactic, the (conclusion of the) fact
@@ -116,7 +118,9 @@ Theorem rev_exercise1 : forall (l l' : list nat),
      l = rev l' ->
      l' = rev l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l l' H.
+  rewrite -> H. symmetry. apply rev_involutive.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, optional (apply_rewrite)  *)
@@ -149,8 +153,9 @@ Proof.
 Theorem trans_eq : forall (X:Type) (n m o : X),
   n = m -> m = o -> n = o.
 Proof.
-  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2. 
-  reflexivity.  Qed.
+  intros X n m o eq1 eq2.
+  rewrite -> eq1. rewrite <- eq2. reflexivity.
+Qed.
 
 (** Now, we should be able to use [trans_eq] to
     prove the above example.  However, to do this we need
@@ -183,7 +188,9 @@ Example trans_eq_exercise : forall (n m o p : nat),
      (n + p) = m ->
      (n + p) = (minustwo o). 
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m o p H1 H2.
+  apply trans_eq with m.
+  trivial. trivial. Qed.
 (** [] *)
 
 
@@ -245,13 +252,14 @@ Theorem eq_add_S : forall (n m : nat),
      S n = S m ->
      n = m.
 Proof.
-  intros n m eq. inversion eq. reflexivity.  Qed.
+  intros n m eq.
+  inversion eq. reflexivity. Qed.
 
 Theorem silly4 : forall (n m : nat),
      [n] = [m] ->
      n = m.
 Proof.
-  intros n o eq. inversion eq. reflexivity.  Qed.
+  intros n m eq. inversion eq. reflexivity. Qed.
 
 (** As a convenience, the [inversion] tactic can also
     destruct equalities between complex values, binding
@@ -269,20 +277,21 @@ Example sillyex1 : forall (X : Type) (x y z : X) (l j : list X),
      y :: l = x :: j ->
      x = y.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X x y z l j eq1 eq2.
+  inversion eq2. reflexivity. Qed.
 (** [] *)
 
 Theorem silly6 : forall (n : nat),
      S n = O ->
      2 + 2 = 5.
 Proof.
-  intros n contra. inversion contra. Qed.
+  intros. inversion H. Qed.
 
 Theorem silly7 : forall (n m : nat),
      false = true ->
      [n] = [m].
 Proof.
-  intros n m contra. inversion contra.  Qed.
+  intros n m contra. inversion contra. Qed.
 
 (** **** Exercise: 1 star (sillyex2)  *)
 Example sillyex2 : forall (X : Type) (x y z : X) (l j : list X),
@@ -290,7 +299,7 @@ Example sillyex2 : forall (X : Type) (x y z : X) (l j : list X),
      y :: l = z :: j ->
      x = z.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. inversion H. Qed.
 (** [] *)
 
 (** While the injectivity of constructors allows us to reason
@@ -300,25 +309,31 @@ Proof.
 
 Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A), 
     x = y -> f x = f y. 
-Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed. 
-
-
+Proof. 
+  intros A B f x y eq.
+  rewrite -> eq. reflexivity. Qed.
 
 
 (** **** Exercise: 2 stars, optional (practice)  *)
 (** A couple more nontrivial but not-too-complicated proofs to work
     together in class, or for you to work as exercises. *)
- 
 
 Theorem beq_nat_0_l : forall n,
    beq_nat 0 n = true -> n = 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n eq.
+  destruct n as [|n'].
+  reflexivity.
+  simpl in eq. inversion eq. Qed.
 
 Theorem beq_nat_0_r : forall n,
    beq_nat n 0 = true -> n = 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n eq.
+  destruct n as [|n'].
+  reflexivity.
+  simpl in eq. inversion eq. Qed.
+
 (** [] *)
 
 
@@ -336,7 +351,8 @@ Theorem S_inj : forall (n m : nat) (b : bool),
      beq_nat (S n) (S m) = b  ->
      beq_nat n m = b. 
 Proof.
-  intros n m b H. simpl in H. apply H.  Qed.
+  intros n m b eq.
+  simpl in eq. trivial. Qed.
 
 (** Similarly, the tactic [apply L in H] matches some
     conditional statement [L] (of the form [L1 -> L2], say) against a
@@ -359,9 +375,8 @@ Theorem silly3' : forall (n : nat),
      true = beq_nat n 5  ->
      true = beq_nat (S (S n)) 7.
 Proof.
-  intros n eq H.
-  symmetry in H. apply eq in H. symmetry in H. 
-  apply H.  Qed.
+  intros n H eq. symmetry in eq. apply H in eq. symmetry.
+  trivial. Qed.
 
 (** Forward reasoning starts from what is _given_ (premises,
     previously proven theorems) and iteratively draws conclusions from
@@ -382,8 +397,15 @@ Theorem plus_n_n_injective : forall n m,
      n = m.
 Proof.
   intros n. induction n as [| n'].
+  intros. destruct m as [ | m']. reflexivity. simpl in H.
+  inversion H.
+  intros.
+  simpl in H. rewrite <- plus_n_Sm in H.
+  destruct m as [|m']. simpl in H. inversion H.
+  simpl in H. rewrite <- plus_n_Sm in H. inversion H.
+  apply IHn' in H1. rewrite -> H1. reflexivity.
+Qed.
     (* Hint: use the plus_n_Sm lemma *)
-    (* FILL IN HERE *) Admitted.
 (** [] *)
 
 (* ###################################################### *)
