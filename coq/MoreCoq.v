@@ -551,7 +551,11 @@ Proof.
 Theorem beq_nat_true : forall n m,
     beq_nat n m = true -> n = m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n. induction n as [|n'].
+  intros. destruct m as [|m']. reflexivity. simpl in H. inversion H.
+  intros. destruct m as [|m']. simpl in H. inversion H. apply f_equal. 
+  apply IHn'. simpl in H. trivial.
+Qed.  
 (** [] *)
 
 (** **** Exercise: 2 stars, advanced (beq_nat_true_informal)  *)
@@ -724,7 +728,20 @@ Theorem index_after_last: forall (n : nat) (X : Type) (l : list X),
      length l = n ->
      index n l = None.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n X l.
+  generalize dependent n.
+  
+  induction l as [|h t].
+  intros. destruct n as [|n'].
+  simpl. reflexivity.
+  
+  simpl in H. inversion H.
+  simpl. intros.
+  
+  destruct n as [|n'].
+  inversion H. 
+  simpl. apply IHt. inversion H. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, advanced, optional (index_after_last_informal)  *)
@@ -747,7 +764,14 @@ Theorem length_snoc''' : forall (n : nat) (X : Type)
      length l = n ->
      length (snoc l v) = S n. 
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n X v l.
+  generalize dependent n.
+  induction l as [|h t].
+  simpl. intros. rewrite -> H. trivial.
+  
+  simpl. intros. destruct n as [|n']. inversion H.
+  apply f_equal. apply IHt. inversion H. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, optional (app_length_cons)  *)
@@ -759,19 +783,35 @@ Theorem app_length_cons : forall (X : Type) (l1 l2 : list X)
      length (l1 ++ (x :: l2)) = n ->
      S (length (l1 ++ l2)) = n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X l1 l2 x.
+  induction l1 as [|h t].
+  simpl. trivial.
+  
+  simpl. intros. destruct n as [|n'].
+  inversion H.
+  apply f_equal. apply IHt. inversion H. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 4 stars, optional (app_length_twice)  *)
 (** Prove this by induction on [l], without using app_length. *)
 
+Lemma app_length: forall (X : Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof.
+  intros. induction l1 as [|h t].
+  simpl. reflexivity.
+  simpl. apply f_equal. trivial.
+Qed.
+
 Theorem app_length_twice : forall (X:Type) (n:nat) (l:list X),
      length l = n ->
      length (l ++ l) = n + n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  rewrite -> app_length. rewrite -> H. reflexivity.
+Qed.
 (** [] *)
-
 
 (** **** Exercise: 3 stars, optional (double_induction)  *)
 (** Prove the following principle of induction over two naturals. *)
@@ -783,7 +823,15 @@ Theorem double_induction: forall (P : nat -> nat -> Prop),
   (forall m n, P m n -> P (S m) (S n)) ->
   forall m n, P m n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. 
+  generalize dependent n.
+  induction m as [|m'].
+  intros n. induction n as [|n'].
+  trivial. apply H1. trivial.
+  intros. induction n as [|n'].
+  apply H0. apply IHm'.
+  apply H2. apply IHm'.
+Qed.
 (** [] *)
 
 
