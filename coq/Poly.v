@@ -498,8 +498,7 @@ Fixpoint split
            : (list X) * (list Y) :=
   match l with
     | nil => (nil, nil)
-    | (x, y) :: txy => let (tx, ty) := split txy 
-                       in (x :: tx, y :: ty)
+    | (x, y) :: txy => (x :: fst (split txy), y :: snd (split txy))
   end.
 
 Example test_split:
