@@ -1,4 +1,4 @@
-PROGS:=Basics Induction Lists Poly MoreCoq Logic
+PROGS:=Basics Induction Lists Poly MoreCoq Logic Prop
 
 .PHONY: all
 all: $(patsubst %,%.vo,$(PROGS))

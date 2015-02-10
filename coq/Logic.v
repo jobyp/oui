@@ -650,8 +650,12 @@ we would have both [~ (P \/ ~P)] and [~ ~ (P \/ ~P)], a contradiction. *)
 
 Theorem excluded_middle_irrefutable:  forall (P:Prop), ~ ~ (P \/ ~ P).  
 Proof.
-  Admitted.
-  
+  intros P.
+  unfold not.
+  intros. apply H.
+  right. intros.
+  apply H. left. trivial.
+Qed.
 
 (* ########################################################## *)
 (** ** Inequality *)
@@ -673,12 +677,11 @@ Theorem not_false_then_true : forall b : bool,
   b <> false -> b = true.
 Proof.
   intros b H. destruct b.
-  Case "b = true". reflexivity.
-  Case "b = false".
-    unfold not in H.  
-    apply ex_falso_quodlibet.
-    apply H. reflexivity.   Qed.
-
+  reflexivity.
+  apply ex_falso_quodlibet.
+  unfold not in H.
+  apply H. reflexivity.
+Qed.
 
 (** *** *)
 
@@ -695,14 +698,37 @@ Theorem false_beq_nat : forall n m : nat,
      n <> m ->
      beq_nat n m = false.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  induction n as [|n'].
+  intros. destruct m as [|m'].
+  apply ex_falso_quodlibet. unfold not in H. apply H. reflexivity.
+  simpl. reflexivity.
+  intros. destruct m as [|m'].
+  simpl. reflexivity.
+  simpl. apply IHn'. unfold not.
+  intros.
+  unfold not in H.
+  apply H. rewrite -> H0. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (beq_nat_false)  *)
 Theorem beq_nat_false : forall n m,
   beq_nat n m = false -> n <> m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  induction n as [|n'].
+  intros.
+  destruct m as [|m']. simpl in H. inversion H.
+  unfold not. intros. inversion H0.
+  intros.
+  destruct m as [|m'].
+  simpl in H.
+  unfold not. intros. inversion H0.
+  unfold not. simpl in H. intros.
+  apply IHn' in H. unfold not in H. apply H. inversion H0.
+  reflexivity.
+Qed.
 (** [] *)
 
 
