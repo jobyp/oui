@@ -139,7 +139,7 @@ function: *)
     constructor. *)
 
 Inductive and (P Q : Prop) : Prop :=
-  conj : P -> Q -> (and P Q). 
+| conj : P -> Q -> and P Q.
 
 (** The intuition behind this definition is simple: to
     construct evidence for [and P Q], we must provide evidence
@@ -163,7 +163,7 @@ Notation "P /\ Q" := (and P Q) : type_scope.
 
 (** Consider the "type" of the constructor [conj]: *)
 
-Check conj.
+(* Check conj. *)
 (* ===>  forall P Q : Prop, P -> Q -> P /\ Q *)
 
 (** Notice that it takes 4 inputs -- namely the propositions [P]
@@ -183,9 +183,7 @@ Check conj.
 Theorem and_example : 
   (0 = 0) /\ (4 = mult 2 2).
 Proof.
-  apply conj.
-  Case "left". reflexivity.
-  Case "right". reflexivity.  Qed.
+  apply conj. reflexivity. reflexivity. Qed.
 
 (** Just for convenience, we can use the tactic [split] as a shorthand for
     [apply conj]. *)
@@ -214,7 +212,8 @@ Proof.
 Theorem proj2 : forall P Q : Prop, 
   P /\ Q -> Q.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros P Q H.
+  inversion H as [PH PQ]. trivial. Qed.
 (** [] *)
 
 Theorem and_commut : forall P Q : Prop, 
@@ -237,8 +236,11 @@ Theorem and_assoc : forall P Q R : Prop,
   P /\ (Q /\ R) -> (P /\ Q) /\ R.
 Proof.
   intros P Q R H.
-  destruct H as [HP [HQ HR]].
-(* FILL IN HERE *) Admitted.
+  destruct H as [HP HQR].
+  destruct HQR as [HQ HR].
+  split. split. trivial. trivial. trivial. Qed.
+
+(* destruct H as [HP [HQ HR]]. *)
 (** [] *)
 
 
@@ -257,7 +259,7 @@ Notation "P <-> Q" := (iff P Q)
 
 Theorem iff_implies : forall P Q : Prop, 
   (P <-> Q) -> P -> Q.
-Proof.  
+Proof.
   intros P Q H. 
   destruct H as [HAB HBA]. apply HAB.  Qed.
 
@@ -278,19 +280,22 @@ Proof.
 Theorem iff_refl : forall P : Prop, 
   P <-> P.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros. split. intros. trivial. intros. trivial. Qed.
 
 Theorem iff_trans : forall P Q R : Prop, 
   (P <-> Q) -> (Q <-> R) -> (P <-> R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros P Q R HPQ HQR.
+  inversion HPQ.
+  inversion HQR.
+  split. intros. apply H in H3. apply H1 in H3. trivial.
+  intros. apply H0. apply H2. trivial.
+Qed.
 
 (** Hint: If you have an iff hypothesis in the context, you can use
     [inversion] to break it into two separate implications.  (Think
     about why this works.) *)
 (** [] *)
-
-
 
 (** Some of Coq's tactics treat [iff] statements specially, thus
     avoiding the need for some low-level manipulation when reasoning
@@ -306,21 +311,21 @@ Proof.
     inductive proposition. *)
 
 Inductive or (P Q : Prop) : Prop :=
-  | or_introl : P -> or P Q
-  | or_intror : Q -> or P Q. 
+| or_introl : P -> or P Q
+| or_intror : Q -> or P Q.
 
 Notation "P \/ Q" := (or P Q) : type_scope.
 
 (** Consider the "type" of the constructor [or_introl]: *)
 
-Check or_introl.
+(* Check or_introl. *)
 (* ===>  forall P Q : Prop, P -> P \/ Q *)
 
 (** It takes 3 inputs, namely the propositions [P], [Q] and
     evidence of [P], and returns, as output, the evidence of [P \/ Q].
     Next, look at the type of [or_intror]: *)
 
-Check or_intror.
+(* Check or_intror. *)
 (* ===>  forall P Q : Prop, Q -> P \/ Q *)
 
 (** It is like [or_introl] but it requires evidence of [Q]
@@ -359,32 +364,35 @@ Proof.
     Case "right". left. apply HQ.  Qed.
 
 
-
-
-
 Theorem or_distributes_over_and_1 : forall P Q R : Prop,
   P \/ (Q /\ R) -> (P \/ Q) /\ (P \/ R).
 Proof. 
-  intros P Q R. intros H. destruct H as [HP | [HQ HR]]. 
-    Case "left". split.
-      SCase "left". left. apply HP.
-      SCase "right". left. apply HP.
-    Case "right". split.
-      SCase "left". right. apply HQ.
-      SCase "right". right. apply HR.  Qed.
+  intros P Q R H.
+  destruct H as [HP | HQR].
+  split. left. trivial. left. trivial.
+  destruct HQR as [HQ HR].
+  split. right. trivial. right. trivial. Qed.
 
 (** **** Exercise: 2 stars (or_distributes_over_and_2)  *)
 Theorem or_distributes_over_and_2 : forall P Q R : Prop,
   (P \/ Q) /\ (P \/ R) -> P \/ (Q /\ R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  inversion H.
+  inversion H0. 
+  left. trivial.
+  inversion H1. left. trivial.
+  right. split. trivial. trivial. Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, optional (or_distributes_over_and)  *)
 Theorem or_distributes_over_and : forall P Q R : Prop,
   P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. split.
+  intros. apply or_distributes_over_and_1. trivial.
+  intros. apply or_distributes_over_and_2. trivial.
+Qed.
 (** [] *)
 
 (* ################################################### *)
@@ -402,41 +410,47 @@ Proof.
 Theorem andb_prop : forall b c,
   andb b c = true -> b = true /\ c = true.
 Proof.
-  (* WORKED IN CLASS *)
   intros b c H.
-  destruct b.
-    Case "b = true". destruct c.
-      SCase "c = true". apply conj. reflexivity. reflexivity.
-      SCase "c = false". inversion H.
-    Case "b = false". inversion H.  Qed.
+  destruct b. simpl in H.
+  split. reflexivity. trivial.
+  simpl in H. inversion H. 
+Qed.
 
 Theorem andb_true_intro : forall b c,
   b = true /\ c = true -> andb b c = true.
 Proof.
-  (* WORKED IN CLASS *)
-  intros b c H.
-  destruct H.
-  rewrite H. rewrite H0. reflexivity. Qed.
+  intros. inversion H.
+  rewrite -> H0. rewrite -> H1. simpl. reflexivity.
+Qed. 
 
 (** **** Exercise: 2 stars, optional (andb_false)  *)
 Theorem andb_false : forall b c,
   andb b c = false -> b = false \/ c = false.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct b. simpl in H. right. trivial.
+  simpl in H. left. trivial.
+Qed.
 
 (** **** Exercise: 2 stars, optional (orb_false)  *)
 Theorem orb_prop : forall b c,
   orb b c = true -> b = true \/ c = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct b. simpl in H. left. trivial.
+  simpl in H. right. trivial.
+Qed.
 
 (** **** Exercise: 2 stars, optional (orb_false_elim)  *)
 Theorem orb_false_elim : forall b c,
   orb b c = false -> b = false /\ c = false.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros. destruct b.
+  simpl in H. inversion H.
+  simpl in H.
+  split. reflexivity. apply H.
+Qed.
 (** [] *)
-
 
 
 (* ################################################### *)
