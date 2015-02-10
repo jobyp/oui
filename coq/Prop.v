@@ -10,7 +10,7 @@ Require Export Logic.
     function to define the _proposition_ that some number [n] is
     even: *)
 
-Definition even (n:nat) : Prop := 
+Definition even (n : nat) : Prop :=
   evenb n = true.
 
 (** That is, we can define "[n] is even" to mean "the function [evenb]
@@ -28,9 +28,8 @@ Definition even (n:nat) : Prop :=
     presenting _evidence_ that a number is even. *)
 
 Inductive ev : nat -> Prop :=
-  | ev_0 : ev O
-  | ev_SS : forall n:nat, ev n -> ev (S (S n)).
-
+| ev_0 : ev O
+| ev_SS : forall n:nat, ev n -> ev (S (S n)).
 
 (** The first line declares that [ev] is a proposition -- or,
     more formally, a family of propositions "indexed by" natural
@@ -51,9 +50,12 @@ Inductive ev : nat -> Prop :=
 Theorem double_even : forall n,
   ev (double n).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction n as [|n'].
+  simpl. apply ev_0.
+  simpl. apply ev_SS. apply IHn'.
+Qed.
 (** [] *)
-
 
 
 (* ##################################################### *)
@@ -148,10 +150,10 @@ Proof.
     follows: *)
 
 Inductive beautiful : nat -> Prop :=
-  b_0   : beautiful 0
-| b_3   : beautiful 3
-| b_5   : beautiful 5
-| b_sum : forall n m, beautiful n -> beautiful m -> beautiful (n+m).
+| b_0 : beautiful 0
+| b_3 : beautiful 3
+| b_5 : beautiful 5
+| b_sum : forall n m, beautiful n -> beautiful m -> beautiful (n + m).
 
 (** *** *)
 (** 
@@ -163,7 +165,7 @@ Inductive beautiful : nat -> Prop :=
 Theorem three_is_beautiful: beautiful 3.
 Proof.
    (* This simply follows from the rule [b_3]. *)
-   apply b_3.
+  apply b_3.
 Qed.
 
 Theorem eight_is_beautiful: beautiful 8.
@@ -193,13 +195,19 @@ Qed.
 (** **** Exercise: 2 stars (b_times2)  *)
 Theorem b_times2: forall n, beautiful n -> beautiful (2*n).
 Proof.
-    (* FILL IN HERE *) Admitted.
+  intros n B.
+  simpl. rewrite -> plus_0_r. apply b_sum. apply B. apply B.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars (b_timesm)  *)
 Theorem b_timesm: forall n m, beautiful n -> beautiful (m*n).
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros n m. generalize dependent n.
+  induction m as [|m'].
+  intros. simpl. apply b_0.
+  intros. simpl. apply b_sum. trivial. apply IHm'. trivial.
+Qed.
 (** [] *)
 
 
