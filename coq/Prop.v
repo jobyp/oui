@@ -334,7 +334,6 @@ Proof.
 (** [] *)
 
 
-
 (** Here is a proof that the inductive definition of evenness implies
 the computational one. *)
 
@@ -345,7 +344,7 @@ Proof.
   Case "E = ev_0". 
     unfold even. reflexivity.
   Case "E = ev_SS n' E'".  
-    unfold even. apply IHE'.  
+    unfold even. simpl. rewrite -> negb_involutive.  apply IHE'.  
 Qed.
 
 (** **** Exercise: 1 star (ev__even)  *) 
