@@ -459,7 +459,7 @@ Qed.
 (** Logical falsehood can be represented in Coq as an inductively
     defined proposition with no constructors. *)
 
-Inductive False : Prop := . 
+Inductive False : Prop :=.  
 
 (** Intuition: [False] is a proposition for which there is no way
     to give evidence. *)
@@ -495,12 +495,10 @@ Proof.
     thing being proved; it can easily be generalized to work for an
     arbitrary [P]: *)
 
-Theorem ex_falso_quodlibet : forall (P:Prop),
+Theorem ex_falso_quodlibet : forall (P : Prop),
   False -> P.
 Proof.
-  (* WORKED IN CLASS *)
-  intros P contra.
-  inversion contra.  Qed.
+  intros. inversion H. Qed.
 
 (** The Latin _ex falso quodlibet_ means, literally, "from
     falsehood follows whatever you please."  This theorem is also
@@ -518,7 +516,8 @@ Proof.
     intution is that [True] should be a proposition for which it is
     trivial to give evidence.) *)
 
-(* FILL IN HERE *)
+Inductive True : Prop := I.
+
 (** [] *)
 
 (** However, unlike [False], which we'll use extensively, [True] is
@@ -534,14 +533,14 @@ Proof.
 (** The logical complement of a proposition [P] is written [not
     P] or, for shorthand, [~P]: *)
 
-Definition not (P:Prop) := P -> False.
+Definition not (P : Prop) := P -> False.
 
 (** The intuition is that, if [P] is not true, then anything at
     all (even [False]) follows from assuming [P]. *)
 
 Notation "~ x" := (not x) : type_scope.
 
-Check not.
+(* Check not. *)
 (* ===> Prop -> Prop *)
 
 (** It takes a little practice to get used to working with
@@ -551,24 +550,26 @@ Check not.
     proofs of a few familiar facts about negation to get you warmed
     up. *)
 
-Theorem not_False : 
+Theorem not_False :
   ~ False.
 Proof.
-  unfold not. intros H. inversion H.  Qed.
+  unfold not. intros H. inversion H. Qed.
 
 (** *** *)
 Theorem contradiction_implies_anything : forall P Q : Prop,
   (P /\ ~P) -> Q.
 Proof. 
-  (* WORKED IN CLASS *)
-  intros P Q H. destruct H as [HP HNA]. unfold not in HNA. 
-  apply HNA in HP. inversion HP.  Qed.
+  intros P Q H.
+  inversion H.
+  apply H1 in H0. inversion H0.
+Qed.
 
 Theorem double_neg : forall P : Prop,
   P -> ~~P.
 Proof.
-  (* WORKED IN CLASS *)
-  intros P H. unfold not. intros G. apply G. apply H.  Qed.
+  intros P H.
+  unfold not.
+  intros. apply H0 in H. inversion H. Qed.
 
 (** **** Exercise: 2 stars, advanced (double_neg_inf)  *)
 (** Write an informal proof of [double_neg]:
@@ -584,14 +585,16 @@ Proof.
 Theorem contrapositive : forall P Q : Prop,
   (P -> Q) -> (~Q -> ~P).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros P Q H.
+  unfold not. intros. apply H0. apply H. trivial. Qed.
 (** [] *)
 
 (** **** Exercise: 1 star (not_both_true_and_false)  *)
 Theorem not_both_true_and_false : forall P : Prop,
   ~ (P /\ ~P).
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros P. unfold not.
+  intros. inversion H. apply H1. trivial. Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, advanced (informal_not_PNP)  *)
@@ -647,8 +650,8 @@ we would have both [~ (P \/ ~P)] and [~ ~ (P \/ ~P)], a contradiction. *)
 
 Theorem excluded_middle_irrefutable:  forall (P:Prop), ~ ~ (P \/ ~ P).  
 Proof.
-  (* FILL IN HERE *) Admitted.
-
+  Admitted.
+  
 
 (* ########################################################## *)
 (** ** Inequality *)
