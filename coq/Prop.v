@@ -587,9 +587,9 @@ Qed.
    suppose we would like to characterize lists of _even_ length. We can 
    do that with the following definition.  *)
 
-Inductive ev_list {X:Type} : list X -> Prop :=
-  | el_nil : ev_list []
-  | el_cc  : forall x y l, ev_list l -> ev_list (x :: y :: l).
+Inductive ev_list {X : Type} : list X -> Prop :=
+| el_nil : ev_list []
+| el_cc : forall x y l, ev_list l -> ev_list (x :: y :: l).
 
 (** Of course, this proposition is equivalent to just saying that the
 length of the list is even. *)
@@ -607,6 +607,19 @@ carefully. *)
 
 Lemma ev_length__ev_list: forall X n, ev n -> forall (l : list X), n = length l -> ev_list l.
 Proof.
+  (* intros X n H. *)
+  (* induction H as [|n' E']. *)
+  (* intros. destruct l as [|h t]. apply el_nil. inversion H. *)
+  (* intros. *)
+  (* destruct l as [|h t]. *)
+  (* inversion H. *)
+  (* inversion H. *)
+  (* destruct t as [|x tx]. *)
+  (* inversion H1. *)
+  (* apply el_cc. *)
+  (* apply IHE'. *)
+  (* inversion H1. *)
+  (* reflexivity. *)
   intros X n H. 
   induction H.
   Case "ev_0". intros l H. destruct l.
@@ -636,7 +649,27 @@ Qed.
        forall l, pal l -> l = rev l.
 *)
 
-(* FILL IN HERE *)
+Inductive pal {X : Type} : list X -> Prop :=
+| pal_nil : pal []
+| pal_one : forall x, pal [x]
+| pal_l : forall x l, pal l -> pal (x :: snoc l x).
+
+Theorem pal_app_rev: forall (X : Type) (l : list X), pal (l ++ rev l).
+Proof.
+  intros. induction l as [|h t].
+  simpl. apply pal_nil.
+  simpl. rewrite <- snoc_with_append.
+  apply pal_l. apply IHt.
+Qed.
+
+Theorem pal_rev: forall (X : Type) (l : list X), pal l -> l = rev l.
+Proof.
+  intros X l H.
+  induction H as [|x | x l H'].
+  simpl. reflexivity.
+  simpl. reflexivity.
+  simpl. rewrite -> rev_snoc. simpl. rewrite <- IHH'. reflexivity.
+Qed.
 (** [] *)
 
 (* Again, the converse direction is much more difficult, due to the
