@@ -497,15 +497,19 @@ Proof.
 Theorem SSSSev__even : forall n,
   ev (S (S (S (S n)))) -> ev n.
 Proof.
-  (* FILL IN HERE *) Admitted.
-
+  intros n E.
+  inversion E as [|n' E'].
+  inversion E' as [|n'' E''].
+  apply E''.
+Qed.
 (** The [inversion] tactic can also be used to derive goals by showing
     the absurdity of a hypothesis. *)
 
 Theorem even5_nonsense : 
   ev 5 -> 2 + 2 = 9.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. inversion H. inversion H1. inversion H3.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, advanced (ev_ev__ev)  *)
@@ -515,7 +519,11 @@ Proof.
 Theorem ev_ev__ev : forall n m,
   ev (n+m) -> ev n -> ev m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m Enm En.
+  induction En as [|n' En'].
+  simpl in Enm. apply Enm.
+  apply IHEn'. simpl in Enm. inversion Enm. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, optional (ev_plus_plus)  *)
@@ -526,7 +534,14 @@ Proof.
 Theorem ev_plus_plus : forall n m p,
   ev (n+m) -> ev (n+p) -> ev (m+p).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m p Enm Enp.
+  apply ev_sum with (n + m) (n + p) in Enm.
+  rewrite -> plus_swap in Enm. rewrite <- plus_assoc in Enm.
+  remember (m + p) as q. rewrite -> plus_assoc in Enm.
+  apply ev_ev__ev with (n + n). trivial.
+  rewrite <- double_plus. 
+  apply double_even. trivial.
+Qed.
 (** [] *)
 
 
