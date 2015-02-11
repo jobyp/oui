@@ -244,9 +244,9 @@ Qed.
     To illustrate this, let's define another property of numbers: *)
 
 Inductive gorgeous : nat -> Prop :=
-  g_0 : gorgeous 0
-| g_plus3 : forall n, gorgeous n -> gorgeous (3+n)
-| g_plus5 : forall n, gorgeous n -> gorgeous (5+n).
+| g_0 : gorgeous 0
+| g_plus3 : forall n, gorgeous n -> gorgeous (3 + n)
+| g_plus5 : forall n, gorgeous n -> gorgeous (5 + n).
 
 (** **** Exercise: 1 star (gorgeous_tree)  *)
 (** Write out the definition of [gorgeous] numbers using inference rule
@@ -261,7 +261,9 @@ Inductive gorgeous : nat -> Prop :=
 Theorem gorgeous_plus13: forall n, 
   gorgeous n -> gorgeous (13+n).
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros.
+  apply g_plus3. apply g_plus5. apply g_plus5. apply H.
+Qed.
 (** [] *)
 
 (** *** *)
@@ -314,16 +316,25 @@ Qed.
 Theorem gorgeous_sum : forall n m,
   gorgeous n -> gorgeous m -> gorgeous (n + m).
 Proof.
- (* FILL IN HERE *) Admitted.
+  intros n m H0. generalize dependent m.
+  induction H0 as [|n'|n'].
+  intros. simpl. trivial.
+  intros. rewrite <- plus_assoc. apply g_plus3. apply IHgorgeous. trivial.
+  intros. rewrite <- plus_assoc. apply g_plus5. apply IHgorgeous. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, advanced (beautiful__gorgeous)  *)
 Theorem beautiful__gorgeous : forall n, beautiful n -> gorgeous n.
 Proof.
- (* FILL IN HERE *) Admitted.
+  intros n H0.
+  induction H0 as [ | | |p q].
+  apply g_0.
+  apply g_plus3. apply g_0.
+  apply g_plus5. apply g_0.
+  apply gorgeous_sum. trivial. trivial.
+Qed.
 (** [] *)
-
-
 
 
 (** **** Exercise: 3 stars, optional (g_times2)  *)
@@ -332,13 +343,28 @@ Proof.
 
 Lemma helper_g_times2 : forall x y z, x + (z + y) = z + x + y.
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros. rewrite -> plus_assoc. assert (x + z = z + x) as H.
+  rewrite -> plus_comm. reflexivity.
+  rewrite ->H. reflexivity.
+Qed.
 
 Theorem g_times2: forall n, gorgeous n -> gorgeous (2*n).
 Proof.
-   intros n H. simpl. 
-   induction H.
-   (* FILL IN HERE *) Admitted.
+  (* trivial proof using gorgeous_sum*)
+  (* intros n H. *)
+  (* simpl. rewrite -> plus_0_r. apply gorgeous_sum. trivial. trivial. *)
+  intros n H. simpl. 
+  induction H as [|n'|n'].
+  simpl. apply g_0.
+  rewrite -> plus_0_r. rewrite <- plus_assoc.
+  apply g_plus3. rewrite -> helper_g_times2. rewrite <- plus_assoc.
+  apply g_plus3. rewrite -> plus_0_r in IHgorgeous. trivial.
+  
+  rewrite -> plus_0_r in IHgorgeous. rewrite -> plus_0_r.
+  rewrite <- plus_assoc. apply g_plus5. rewrite -> helper_g_times2.
+  rewrite <- plus_assoc. apply g_plus5. trivial.
+Qed.
+
 (** [] *)
 
 
@@ -388,9 +414,13 @@ Qed.
 Theorem ev_sum : forall n m,
    ev n -> ev m -> ev (n+m).
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros n m En Em.
+  generalize dependent m.
+  induction En as [|n' En'].
+  simpl. trivial.
+  simpl. intros. apply ev_SS. apply IHEn'. apply Em.
+Qed.
 (** [] *)
-
 
 
 (* ####################################################### *)
