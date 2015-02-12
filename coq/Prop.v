@@ -681,9 +681,7 @@ lack of evidence. *)
      forall l, l = rev l -> pal l.
 *)
 
-(* FILL IN HERE *)
 (** [] *)
-
 
 
 (* ####################################################### *)
@@ -709,8 +707,8 @@ Module LeModule.
     to the predecessor of the second. *)
 
 Inductive le : nat -> nat -> Prop :=
-  | le_n : forall n, le n n
-  | le_S : forall n m, (le n m) -> (le n (S m)).
+| le_n : forall n, le n n
+| le_S : forall n m, (le n m) -> (le n (S m)).
 
 Notation "m <= n" := (le m n).
 
@@ -754,6 +752,8 @@ Proof.
 
 End LeModule.
 
+Print le.
+
 Definition lt (n m:nat) := le (S n) m.
 
 Notation "m < n" := (lt m n).
@@ -761,27 +761,28 @@ Notation "m < n" := (lt m n).
 (** Here are a few more simple relations on numbers: *)
 
 Inductive square_of : nat -> nat -> Prop :=
-  sq : forall n:nat, square_of n (n * n).
+| sq : forall n:nat, square_of n (n * n).
 
 Inductive next_nat : nat -> nat -> Prop :=
-  | nn : forall n:nat, next_nat n (S n).
+| nn : forall n, next_nat n (S n).  
 
 Inductive next_even : nat -> nat -> Prop :=
-  | ne_1 : forall n, ev (S n) -> next_even n (S n)
-  | ne_2 : forall n, ev (S (S n)) -> next_even n (S (S n)).
+| ne_1 : forall n, ev (S n) -> next_even n (S n)
+| ne_2 : forall n, ev (S (S n)) -> next_even n (S (S n)).
 
 (** **** Exercise: 2 stars (total_relation)  *)
 (** Define an inductive binary relation [total_relation] that holds
     between every pair of natural numbers. *)
 
-(* FILL IN HERE *)
+Inductive total_relation : nat -> nat -> Prop :=
+| tr : forall n m, total_relation n m.
 (** [] *)
 
 (** **** Exercise: 2 stars (empty_relation)  *)
 (** Define an inductive binary relation [empty_relation] (on numbers)
     that never holds. *)
 
-(* FILL IN HERE *)
+Inductive empty_relation : nat -> nat -> Prop :=. 
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (le_exercises)  *)
@@ -789,68 +790,144 @@ Inductive next_even : nat -> nat -> Prop :=
     we are going to need later in the course.  The proofs make good
     practice exercises. *)
 
+Lemma le_0 : forall n, le O n.
+Proof.
+  intros n.
+  induction n as [|n'].
+  apply le_n.
+  apply le_S. trivial.
+Qed.
+
+Lemma le_n_m_SS: forall n m, le n m -> le (S n) (S m).
+Proof.
+  intros n m H.
+  induction H. apply le_n.
+  apply le_S. apply IHle.
+Qed.
+
+Lemma le_Sm_n: forall n m, le (S n) m -> le n m.
+Proof.
+  intros n m H.
+  induction H. apply le_S. apply le_n.
+  apply le_S. apply IHle.
+Qed.
+
 Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros m n o H.
+  induction H.
+  intros. trivial.
+  intros.
+  apply IHle.
+  apply le_Sm_n.
+  apply H0.
+Qed.
 
 Theorem O_le_n : forall n,
   0 <= n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  apply le_0.
+Qed.
 
 Theorem n_le_m__Sn_le_Sm : forall n m,
   n <= m -> S n <= S m.
 Proof. 
-  (* FILL IN HERE *) Admitted.
-
+  apply le_n_m_SS.
+Qed.
 
 Theorem Sn_le_Sm__n_le_m : forall n m,
   S n <= S m -> n <= m.
 Proof. 
-  (* FILL IN HERE *) Admitted.
-
+  intros n m H.
+  inversion H. apply le_n.
+  apply le_Sm_n. trivial.
+Qed.
 
 Theorem le_plus_l : forall a b,
   a <= a + b.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros a b.
+  induction a as [|a'].
+  simpl. apply O_le_n.
+  simpl. apply n_le_m__Sn_le_Sm. trivial.
+Qed.
 
 Theorem plus_lt : forall n1 n2 m,
   n1 + n2 < m ->
   n1 < m /\ n2 < m.
 Proof. 
- unfold lt. 
- (* FILL IN HERE *) Admitted.
+  unfold lt.
+  intros.
+  induction H.
+  split. apply n_le_m__Sn_le_Sm.
+  apply le_plus_l.
+  apply n_le_m__Sn_le_Sm.
+  rewrite -> plus_comm. apply le_plus_l.
+  inversion IHle.
+  split.
+  apply le_S. trivial.
+  apply le_S. trivial.
+Qed.
 
 Theorem lt_S : forall n m,
   n < m ->
   n < S m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold lt.
+  intros.
+  apply le_S. trivial.
+Qed.
 
 Theorem ble_nat_true : forall n m,
   ble_nat n m = true -> n <= m.
 Proof. 
-  (* FILL IN HERE *) Admitted.
+  intros n.
+  induction n as [|n'].
+  intros. apply le_0.
+  intros. destruct m as [|m'].
+  inversion H.
+  apply le_n_m_SS. simpl in H. apply IHn'. trivial.
+Qed.
 
 Theorem le_ble_nat : forall n m,
   n <= m ->
   ble_nat n m = true.
 Proof.
-  (* Hint: This may be easiest to prove by induction on [m]. *)
-  (* FILL IN HERE *) Admitted.
+  intros n m. generalize dependent n.
+  induction m as [|m'].
+  intros. destruct n as [|n'].
+  reflexivity.
+  inversion H.
+  intros. destruct n as [|n'].
+  reflexivity.
+  simpl. apply IHm'. apply Sn_le_Sm__n_le_m. trivial.
+Qed.  (* Hint: This may be easiest to prove by induction on [m]. *)
+ 
 
 Theorem ble_nat_true_trans : forall n m o,
-  ble_nat n m = true -> ble_nat m o = true -> ble_nat n o = true.                               
+  ble_nat n m = true -> ble_nat m o = true -> ble_nat n o = true.
 Proof.
-  (* Hint: This theorem can be easily proved without using [induction]. *)
-  (* FILL IN HERE *) Admitted.
+  intros.
+  apply le_ble_nat. apply ble_nat_true in H. apply ble_nat_true in H0.
+  apply le_trans with m. trivial. trivial.
+Qed. 
 
 (** **** Exercise: 2 stars, optional (ble_nat_false)  *)
 Theorem ble_nat_false : forall n m,
   ble_nat n m = false -> ~(n <= m).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold not.
+  intros n.
+  induction n as [|n'].
+  intros. destruct m as [|m'].
+  simpl in H. inversion H.
+  simpl in H. inversion H.
+  intros. destruct m as [|m'].
+  inversion H0.
+  simpl in H.
+  apply IHn' in H. inversion H.
+  apply Sn_le_Sm__n_le_m. trivial.
+Qed.
 (** [] *)
 
 
