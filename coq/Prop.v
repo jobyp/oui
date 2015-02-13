@@ -752,8 +752,6 @@ Proof.
 
 End LeModule.
 
-Print le.
-
 Definition lt (n m:nat) := le (S n) m.
 
 Notation "m < n" := (lt m n).
@@ -967,9 +965,31 @@ Inductive R : nat -> nat -> nat -> Prop :=
     [n], and [o], and vice versa?
 *)
 
-(* FILL IN HERE *)
-(** [] *)
+Theorem R_fact_1: forall (n m o : nat), n + m = o -> R n m o.
+Proof.
+  intros n.
+  induction n as [|n'].
+  simpl. intros m. 
+  induction m as [|m'].
+  intros o H. rewrite <- H. apply c1.
+  intros o H. rewrite <- H. apply c3. apply IHm'. reflexivity.
+  intros m. induction m as [|m'].
+  intros o H. rewrite -> plus_0_r in H. rewrite <- H. apply c2.
+  apply IHn'. rewrite -> plus_0_r. reflexivity.
+  intros o H. simpl in H. rewrite <- plus_n_Sm in H.
+  rewrite <- H.
+  apply c2. apply c3. apply IHn'. reflexivity.
+Qed.
 
+Theorem R_fact_2: forall (n m o : nat), R n m o -> n + m = o.
+Proof.
+  intros n m o H.
+  induction H. reflexivity. rewrite <- IHR. simpl. reflexivity.
+  rewrite <- plus_n_Sm. rewrite <- IHR. reflexivity.
+  simpl in IHR. rewrite <- plus_n_Sm in IHR.
+  inversion IHR. reflexivity. rewrite -> plus_comm. trivial.
+Qed.
+(** [] *)
 End R.
 
 (** **** Exercise: 4 stars, advanced (subsequence)  *)
