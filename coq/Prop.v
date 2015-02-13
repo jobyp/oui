@@ -1024,7 +1024,29 @@ End R.
       Hint: choose your induction carefully!
 *)
 
-(* FILL IN HERE *)
+Inductive subseq : (list nat) -> (list nat) -> Prop :=
+| sub_nil : forall l, subseq [] l
+| sub_n1 : forall n l1 l2, subseq l1 l2 -> subseq (n :: l1) (n :: l2)
+| sub_n2 : forall n l1 l2, subseq l1 l2 -> subseq l1 (n :: l2).
+
+Theorem subseq_refl: forall l, subseq l l.
+Proof.
+  intros l. induction l as [|h t].
+  apply sub_nil.
+  apply sub_n1. trivial.
+Qed.
+
+Theorem subseq_app: forall l1 l2 l3, subseq l1 l2 -> subseq l1 (l2 ++ l3).
+Proof.
+  intros l1 l2 l3 H1.
+  induction H1. apply sub_nil.
+  simpl. apply sub_n1. trivial.
+  simpl. apply sub_n2. trivial.
+Qed.
+
+Theorem subseq_trans: forall l1 l2 l3, subseq l1 l2 -> subseq l2 l3 -> subseq l1 l3.
+Proof.
+  Admitted.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (R_provability)  *)
