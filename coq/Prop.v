@@ -1057,9 +1057,9 @@ Proof.
       | c3 : forall n l, R (S n) l -> R n l.
     Which of the following propositions are provable?
 
-    - [R 2 [1,0]]
-    - [R 1 [1,2,1,0]]
-    - [R 6 [3,2,1,0]]
+    - [R 2 [1,0]]       -> Yes
+    - [R 1 [1,2,1,0]]   -> No
+    - [R 6 [3,2,1,0]]   -> No
 *)
 
 (** [] *)
@@ -1072,13 +1072,13 @@ Proof.
     like "two plus two equals four."  In Coq, propositions are written
     as expressions of type [Prop]. . *)
 
-Check (2 + 2 = 4).
+(* Check (2 + 2 = 4). *)
 (* ===> 2 + 2 = 4 : Prop *)
 
-Check (ble_nat 3 2 = false).
+(* Check (ble_nat 3 2 = false). *)
 (* ===> ble_nat 3 2 = false : Prop *)
 
-Check (beautiful 8).
+(* Check (beautiful 8). *)
 (* ===> beautiful 8 : Prop *)
 
 (** *** *)
@@ -1086,10 +1086,10 @@ Check (beautiful 8).
     propositions.  Simply _being_ a proposition is one thing; being
     _provable_ is something else! *)
 
-Check (2 + 2 = 5).
+(* Check (2 + 2 = 5). *)
 (* ===> 2 + 2 = 5 : Prop *)
 
-Check (beautiful 4).
+(* Check (beautiful 4). *)
 (* ===> beautiful 4 : Prop *)
 
 (** Both [2 + 2 = 4] and [2 + 2 = 5] are legal expressions
@@ -1108,7 +1108,7 @@ Proof. reflexivity.  Qed.
     given names to expressions of other sorts. *)
 
 Definition plus_fact : Prop  :=  2 + 2 = 4.
-Check plus_fact.
+(* Check plus_fact. *)
 (* ===> plus_fact : Prop *)
 
 (** We can later use this name in any situation where a proposition is
@@ -1133,11 +1133,11 @@ Proof. reflexivity.  Qed.
 (** We have also seen _parameterized propositions_, such as [even] and
     [beautiful]. *)
 
-Check (even 4).
+(* Check (even 4). *)
 (* ===> even 4 : Prop *)
-Check (even 3).
+(* Check (even 3). *)
 (* ===> even 3 : Prop *)
-Check even. 
+(* Check even.  *)
 (* ===> even : nat -> Prop *)
 
 (** *** *)
@@ -1193,9 +1193,6 @@ Definition natural_number_induction_valid : Prop :=
     true_for_all_numbers P. 
 
 
-
-
-
 (** **** Exercise: 3 stars (combine_odd_even)  *)
 (** Complete the definition of the [combine_odd_even] function
     below. It takes as arguments two properties of numbers [Podd] and
@@ -1204,7 +1201,10 @@ Definition natural_number_induction_valid : Prop :=
     equivalent to [Peven n] otherwise. *)
 
 Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop :=
-  (* FILL IN HERE *) admit.
+  fun n => match oddb n with
+             | true => Podd n
+             | false => Peven n
+           end.
 
 (** To test your definition, see whether you can prove the following
     facts: *)
@@ -1215,7 +1215,12 @@ Theorem combine_odd_even_intro :
     (oddb n = false -> Peven n) ->
     combine_odd_even Podd Peven n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold combine_odd_even.
+  destruct (oddb n) eqn:H1.
+  apply H. reflexivity.
+  apply H0. reflexivity.
+Qed.
 
 Theorem combine_odd_even_elim_odd :
   forall (Podd Peven : nat -> Prop) (n : nat),
@@ -1223,7 +1228,10 @@ Theorem combine_odd_even_elim_odd :
     oddb n = true ->
     Podd n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold combine_odd_even in H.
+  rewrite -> H0 in H. trivial.
+Qed.
 
 Theorem combine_odd_even_elim_even :
   forall (Podd Peven : nat -> Prop) (n : nat),
@@ -1231,8 +1239,9 @@ Theorem combine_odd_even_elim_even :
     oddb n = false ->
     Peven n.
 Proof.
-  (* FILL IN HERE *) Admitted.
-
+  intros. unfold combine_odd_even in H.
+  rewrite -> H0 in H. trivial.
+Qed.
 (** [] *)
 
 (* ##################################################### *)
@@ -1248,17 +1257,17 @@ Proof.
     [true_upto_n__true_everywhere] that makes
     [true_upto_n_example] work. *)
 
-(* 
-Fixpoint true_upto_n__true_everywhere
-(* FILL IN HERE *)
+
+Fixpoint true_upto_n__true_everywhere (n : nat) (P : nat -> Prop) : Prop :=
+  match n with
+    | O => forall m : nat, P m
+    | S n' => P n -> true_upto_n__true_everywhere n' P
+  end.
 
 Example true_upto_n_example :
     (true_upto_n__true_everywhere 3 (fun n => even n))
   = (even 3 -> even 2 -> even 1 -> forall m : nat, even m).
 Proof. reflexivity.  Qed.
-*)
 (** [] *)
 
 (** $Date: 2014-12-31 11:17:56 -0500 (Wed, 31 Dec 2014) $ *)
-
-
