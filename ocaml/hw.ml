@@ -30,17 +30,17 @@ let rec drop n l =
     | [] -> []
     | _ :: t -> drop (n - 1) t
 
-let rec merge x y = 
+let rec merge cmp x y = 
   match x, y with
   | [], [] -> []
   | [], l -> l
   | l, [] -> l
   | (hx :: tx), (hy :: ty) ->
-    if hx <= hy
-    then hx :: merge tx (hy :: ty)
-    else hy :: merge (hx :: tx) ty
+    if cmp hx hy
+    then hx :: merge cmp tx (hy :: ty)
+    else hy :: merge cmp (hx :: tx) ty
 
-let rec msort l =
+let rec msort cmp l =
   match l with
   | [] -> []
   | [x] -> [x]
@@ -48,7 +48,7 @@ let rec msort l =
     let mid = List.length l / 2 in
     let left = take mid l in
     let right = drop mid l in
-    merge (msort left) (msort right)
+    merge cmp (msort cmp left) (msort cmp right)
 
 let rec detect l = 
   match l with
@@ -75,4 +75,26 @@ let range n = (* ->  [0; 1; ... ] *)
   if n <= 0
   then []
   else range_aux (n - 1) []
+
+let calm = List.map (fun c -> if c = '!' then '.' else c)
+
+let clip n = 
+  if n < 1
+  then 1
+  else if n > 10
+  then 10 
+  else n
+
+let cliplist = List.map clip
+
+let rec apply f n x = 
+  if n <= 0
+  then x
+  else apply f (n - 1) (f x)
+
+let filter f = List.fold_right (fun x l -> if f x then x :: l else l) []
+
+let for_all f = List.fold_left (fun b x -> (f x) && b) true
+
+let mapl f = List.map (List.map f)
 
