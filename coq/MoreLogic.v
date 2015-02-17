@@ -21,7 +21,6 @@ Inductive ex (X:Type) (P : X->Prop) : Prop :=
 
 *)
 
-
 (** *** *)
 (** Coq's [Notation] facility can be used to introduce more
     familiar notation for writing existentially quantified
@@ -47,7 +46,7 @@ Notation "'exists' x : X , p" := (ex _ (fun x:X => p))
 
 Example exists_example_1 : exists n, n + (n * n) = 6.
 Proof.
-  apply ex_intro with (witness:=2). 
+  apply ex_intro with 2.
   reflexivity.  Qed.
 
 (** Note that we have to explicitly give the witness. *)
@@ -110,8 +109,13 @@ Qed.
 Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
   (forall x, P x) -> ~ (exists x, ~ P x).
 Proof. 
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros.
+  unfold not.
+  intros.
+  inversion H0 as [x Hx].
+  apply Hx. apply H.
+Qed.
+  (** [] *)
 
 (** **** Exercise: 3 stars, optional (not_exists_dist)  *)
 (** (The other direction of this theorem requires the classical "law
@@ -122,7 +126,17 @@ Theorem not_exists_dist :
   forall (X:Type) (P : X -> Prop),
     ~ (exists x, ~ P x) -> (forall x, P x).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold excluded_middle.
+  intros.
+  unfold not in H0.
+  assert (P x \/ ~ (P x)) as H1.
+  apply H.
+  inversion H1. trivial.
+  unfold not in H2.
+  apply ex_falso_quodlibet.
+  apply H0.
+  exists x. trivial.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars (dist_exists_or)  *)
@@ -132,7 +146,19 @@ Proof.
 Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
   (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros.
+  unfold iff.
+  split.
+  intros.
+  inversion H as [x Hx].
+  inversion Hx.
+  left. exists x. trivial.
+  right. exists x. trivial.
+  intros. inversion H. inversion H0 as [x Hx].
+  exists x. left. trivial.
+  inversion H0 as [x Hx].
+  exists x. right. trivial.
+Qed.
 (** [] *)
 
 (* ###################################################### *)
@@ -172,6 +198,22 @@ Notation "{ A } + { B }" :=  (sumbool A B) : type_scope.
 
 Theorem eq_nat_dec : forall n m : nat, {n = m} + {n <> m}.
 Proof.
+(*   intros n. *)
+(*   induction n as [|n']. *)
+(*   intros m. *)
+(*   destruct m as [|m']. *)
+(*   apply left. trivial. *)
+(*   apply right. unfold not. intros. inversion H. *)
+(*   intros m. destruct m as [|m']. *)
+(*   right. unfold not. intros. inversion H. *)
+(*   assert ({n' = m'} + {n' <> m'}) as H1. *)
+(*   apply IHn'. *)
+(*   destruct H1 as [eq | neq]. *)
+(*   left. rewrite -> eq. reflexivity. *)
+(*   right. unfold not. intros. unfold not in neq. *)
+(*   apply neq. inversion H. reflexivity. *)
+(* Qed. *)
+
   (* WORKED IN CLASS *)
   intros n.
   induction n as [|n'].
@@ -191,7 +233,7 @@ Proof.
       destruct IHn' with (m := m') as [eq | neq].
       left. apply f_equal.  apply eq.
       right. intros Heq. inversion Heq as [Heq']. apply neq. apply Heq'.
-Defined. 
+Defined.
   
 (** Read as a theorem, this says that equality on [nat]s is decidable:
     that is, given two [nat] values, we can always produce either
