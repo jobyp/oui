@@ -98,3 +98,100 @@ let for_all f = List.fold_left (fun b x -> (f x) && b) true
 
 let mapl f = List.map (List.map f)
 
+let rec last l =
+  match l with
+  | [] -> raise Not_found
+  | [x] -> x
+  | h :: t -> last t
+
+let is_nil l =
+  match l with
+  | [] -> true
+  | _ -> false
+
+
+let smallest l =
+  let rec smaller n l =
+    match l with
+    | [] -> n
+    | h :: t -> 
+       if n < h 
+       then smaller n t 
+       else smaller h t
+  in
+  if for_all (fun n -> n < 0) l
+  then raise Not_found
+  else match l with
+       | [] -> raise Not_found
+       | h :: t -> smaller h t
+
+
+let smallest_or_zero l =
+  try smallest l with
+  | Not_found -> 0
+
+let fst (x, _) = x
+let snd (_, y) = y
+
+let rec lookup x l = 
+  match l with
+  | [] -> raise Not_found
+  | (k, v) :: t ->
+     if k = x then v else lookup x t
+
+let rec add k v d = 
+  match d with
+  | [] -> [(k, v)]
+  | (k', v') :: t ->
+     if k' = k 
+     then (k, v) :: t 
+     else (k', v') :: add k v t
+
+let rec remove k d =
+  match d with
+  | [] -> []
+  | (k', v') :: t -> 
+     if k' = k 
+     then t 
+     else (k', v') :: remove k t
+
+let key_exists k d =
+  try 
+    let _ = lookup k d 
+    in true
+  with Not_found -> false
+
+
+let rec replace k v d = 
+  match d with
+  | [] -> raise Not_found
+  | (k', v') :: t ->
+     if k = k' 
+     then (k, v) :: t
+     else (k', v') :: replace k v t
+
+let rec build_dict x y = 
+  match x, y with
+  | [], [] -> []
+  | (_::_), [] -> raise (Invalid_argument "length x <> length y")
+  | [], (_::_) -> raise (Invalid_argument "length x <> length y")
+  | (hx :: tx), (hy :: ty) -> add hx hy (build_dict tx ty)
+
+
+let rec dict_to_pairs d = 
+  match d with
+  | [] -> ([], [])
+  | (k, v) :: t -> 
+     let (tx, ty) = dict_to_pairs t
+     in (k :: tx, v :: ty)
+
+let rec pairs_to_dict d = 
+  match d with
+  | [] -> []
+  | (x, y) :: t -> add x y (pairs_to_dict t)
+
+let rec union x y = 
+  match x with
+  | [] -> y
+  | (k, v) :: t -> add k v (union t y)
+
