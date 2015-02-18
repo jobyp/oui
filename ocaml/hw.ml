@@ -210,12 +210,12 @@ let truncate n ls = List.map (take n) ls
 let list_heads n = List.map (fun l -> if is_nil l then n else List.hd l)
 
 type color = 
-| Red 
-| Green 
-| Blue 
-| Yellow
-| RGB of int * int * int
-
+  | Red 
+  | Green 
+  | Blue 
+  | Yellow
+  | RGB of int * int * int
+			 
 let components c = 
   match c with
   | Red -> (255, 0, 0)
@@ -225,6 +225,44 @@ let components c =
   | RGB (r, g, b) -> (r, g, b)
 
 type 'a option =
-| None
-| Some of 'a
+  | None
+  | Some of 'a
+
+type ('a , 'b) pair =
+  | P of 'a * 'b
+
+let fst_p (P (x, _)) = x
+
+type 'a sequence = 
+  | Nil 
+  | Cons of 'a * 'a sequence
+
+let rec seq_fold_l f default s = 
+  match s with
+  | Nil -> default
+  | Cons (h, t) -> seq_fold_l f (f default h) t
+    
+let length_s = seq_fold_l (fun n _ -> 1 + n) 0
+
+let list_to_seq l = List.fold_right (fun h s -> Cons (h, s)) l Nil
+
+type expr = 
+  | Num of int
+  | Add of expr * expr
+  | Sub of expr * expr
+  | Mul of expr * expr
+  | Div of expr * expr
+
+(* let rec evaluate e = *)
+(*   match e with *)
+(*   | Num n -> Some n *)
+(*   | Add (e1, e2) -> Some (evaluate e1 + evaluate e2) *)
+(*   | Sub (e1, e2) -> Some (evaluate e1 - evaluate e2) *)
+(*   | Mul (e1, e2) -> Some (evaluate e1 * evaluate e2) *)
+(*   | Div (e1, e2) -> let n = evaluate e2 in *)
+(* 		    if n = 0 then None else Some (evaluate e1 / n) *)
+
+ 
+
+
 
