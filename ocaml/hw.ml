@@ -195,3 +195,36 @@ let rec union x y =
   | [] -> y
   | (k, v) :: t -> add k v (union t y)
 
+let rec member x l =
+  match l with
+  | [] -> false
+  | h :: t -> x = h || member x t
+
+let rec member_all x ls = 
+  match ls with
+  | [] -> false
+  | l :: t -> member x l && member_all x t
+
+let truncate n ls = List.map (take n) ls
+
+let list_heads n = List.map (fun l -> if is_nil l then n else List.hd l)
+
+type color = 
+| Red 
+| Green 
+| Blue 
+| Yellow
+| RGB of int * int * int
+
+let components c = 
+  match c with
+  | Red -> (255, 0, 0)
+  | Green -> (0, 255, 0)
+  | Blue -> (0, 0, 255)
+  | Yellow -> (255, 255, 0)
+  | RGB (r, g, b) -> (r, g, b)
+
+type 'a option =
+| None
+| Some of 'a
+
