@@ -229,9 +229,8 @@ type 'a option =
   | Some of 'a
 
 type ('a , 'b) pair =
-  | P of 'a * 'b
-
-let fst_p (P (x, _)) = x
+  | P of 'a 
+  | Q of 'b
 
 type 'a sequence = 
   | Nil 
@@ -299,4 +298,110 @@ let rec evaluate e =
 (*     return x >>= f   =  f x                      -- left unit *)
  
 (*     (m >>= f) >>= g  =  m >>= (\x -> f x >>= g)  -- associativity*)
+
+type 'a btree = 
+| BLf
+| BNode of 'a * 'a btree * 'a btree
+
+(*The empty tree is BLf *)
+
+let rec size tr = 
+  match tr with
+  | BLf -> 0
+  | BNode (_, l, r) -> 1 + size l + size r
+
+let rec total tr =
+  match tr with
+  | BLf -> 0
+  | BNode (n, l, r) -> n + total l + total r
+
+
+let rec max_depth tr = 
+  match tr with
+  | BLf -> 0
+  | BNode (_, l, r) -> 1 + max (max_depth l) (max_depth r)
+
+
+let rec list_of_tree tr = 
+  match tr with
+  | BLf -> []
+  | BNode (x, l, r) -> (list_of_tree l) @ [x] @ (list_of_tree r)
+
+
+let rec tree_map f tr = 
+  match tr with
+  | BLf -> BLf
+  | BNode (x, l, r) -> BNode (f x, tree_map f l, tree_map f r)
+
+
+let rec lookup tr k = 
+  match tr with
+  | BLf -> None
+  | BNode ((k', v'), l, r) -> 
+    if k = k' then Some v'
+    else if k < k' then lookup l k 
+    else lookup r k
+
+
+let rec insert tr k v = 
+  match tr with
+  | BLf -> BNode ((k, v), BLf, BLf)
+  | BNode ((k', v'), l, r) ->
+    if k = k' then BNode ((k, v), l, r)
+    else if k < k' then BNode ((k', v'), insert l k v, r)
+    else BNode ((k', v'), l, insert r k v)
+
+
+let rec member x tr = 
+  match tr with
+  | BLf -> false
+  | BNode (y, l, r) -> x = y || member x l || member x r
+
+
+let rec flip_tree tr =
+  match tr with
+  | BLf -> BLf
+  | BNode (x, l, r) -> BNode (x, flip_tree r, flip_tree l)
+
+
+let rec same_shape p q = 
+  match p, q with
+  | BLf, BLf -> true
+  | BLf, _ -> false
+  | _, BLf -> false
+  | BNode (_, lp, rp), BNode (_, lq, rq) ->
+    same_shape lp lq && same_shape rp rq
+
+let tree_of_list l = 
+  let f d (k, v) = insert d k v in
+  List.fold_left f BLf l
+
+let rec combine_trees p q = 
+  match p with
+  | BLf -> q
+  | BNode ((k, v), l, r) -> 
+    combine_trees l 
+      (combine_trees r 
+	 (insert q k v))
+
+type 'a tree = 
+| Lf
+| Nodes of 'a * 'a tree list
+
+let rec size tr = 
+  match tr with
+  | Lf -> 0
+  | Nodes (_, l) -> List.fold_left (+) 1 (List.map size l)
+
+let rec total tr = 
+  match tr with
+  | Lf -> 0
+  | Nodes (n, l) -> List.fold_left (+) n (List.map total l)
+
+
+let rec tr_map f tr = 
+  match tr with
+  | Lf -> Lf
+  | Nodes (n, l) -> Nodes (f n, List.map (tr_map f) l)
+
 
