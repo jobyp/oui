@@ -253,16 +253,50 @@ type expr =
   | Mul of expr * expr
   | Div of expr * expr
 
-(* let rec evaluate e = *)
-(*   match e with *)
-(*   | Num n -> Some n *)
-(*   | Add (e1, e2) -> Some (evaluate e1 + evaluate e2) *)
-(*   | Sub (e1, e2) -> Some (evaluate e1 - evaluate e2) *)
-(*   | Mul (e1, e2) -> Some (evaluate e1 * evaluate e2) *)
-(*   | Div (e1, e2) -> let n = evaluate e2 in *)
-(* 		    if n = 0 then None else Some (evaluate e1 / n) *)
+		    
+let m_return n = Some n
 
+let m_bind m g =
+  match m with
+  | None -> None
+  | Some n -> g n
+		
+let rec evaluate e =
+  match e with
+  | Num n -> m_return n
+
+  | Add (e1, e2) -> 
+     let m_add e = 
+       fun x -> m_bind (evaluate e) (fun y -> m_return (x + y))
+     in m_bind (evaluate e1) (m_add e2)
+
+  | Sub (e1, e2) -> 
+     let m_sub e = 
+       fun x -> m_bind (evaluate e) (fun y -> m_return (x - y))
+     in m_bind (evaluate e1) (m_sub e2)
+	       
+  | Mul (e1, e2) -> 
+     let m_mul e = 
+       fun x -> m_bind (evaluate e) (fun y -> m_return (x * y))
+     in m_bind (evaluate e1) (m_mul e2)
+
+  | Div (e1, e2) -> 
+     let m_div e = 
+       fun x -> m_bind (evaluate e) (fun y -> 
+				     if y = 0 
+				     then None 
+				     else m_return (x / y))
+     in m_bind (evaluate e1) (m_div e2)
+
+
+(* Key ideas from arithmetic expression interpreter 'evaluate'*)
+     (* (1) Monad   *)
+     (* (2) lazy evaluation with the help of partial functions *)
+
+(* Laws of Monad *)
+(* Every 'return' and 'bind' should obey following rules*)
+(*     m >>= return     =  m                        -- right unit *)
+(*     return x >>= f   =  f x                      -- left unit *)
  
-
-
+(*     (m >>= f) >>= g  =  m >>= (\x -> f x >>= g)  -- associativity*)
 
