@@ -405,3 +405,22 @@ let rec tr_map f tr =
   | Nodes (n, l) -> Nodes (f n, List.map (tr_map f) l)
 
 
+let print_dict_entry (k, v) =
+  print_char '(' ; 
+  print_int k ; 
+  print_string ", "; 
+  print_string v; 
+  print_char ')'; 
+  print_newline ()
+
+let rec iter f l = 
+  match l with
+  | [] -> ()
+  | h :: t -> f h ; iter f t
+
+let print_dict  = iter print_dict_entry
+
+
+let () = Printf.printf "Hello, World\n" 
+
+
