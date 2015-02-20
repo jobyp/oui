@@ -241,7 +241,7 @@ let rec seq_fold_l f default s =
   | Nil -> default
   | Cons (h, t) -> seq_fold_l f (f default h) t
     
-let length_s = seq_fold_l (fun n _ -> 1 + n) 0
+let length_s s = seq_fold_l (fun n _ -> 1 + n) 0 s
 
 let list_to_seq l = List.fold_right (fun h s -> Cons (h, s)) l Nil
 
@@ -406,11 +406,9 @@ let rec tr_map f tr =
 
 
 let print_dict_entry (k, v) =
-  print_char '(' ; 
-  print_int k ; 
-  print_string ", "; 
-  print_string v; 
-  print_char ')'; 
+  print_int k; 
+  print_newline ();
+  print_string v;
   print_newline ()
 
 let rec iter f l = 
@@ -420,7 +418,99 @@ let rec iter f l =
 
 let print_dict  = iter print_dict_entry
 
+let rec read_dict () = 
+  try
+    let i = read_int () in
+    let name = read_line () in
+    (i, name) :: read_dict () 
+  with 
+  | Failure "int_of_string" ->
+     print_string "This is not a valid integer. Please try again.";
+     print_newline ();
+    read_dict () 
+  | End_of_file -> []
 
-let () = Printf.printf "Hello, World\n" 
+let entry_to_channel ch (k, v) =
+  output_string ch (string_of_int k);
+  output_char ch '\n';
+  output_string ch v;
+  output_char ch '\n'
+
+let dict_to_channel ch d = iter (entry_to_channel ch) d
+
+let dict_to_file filename d = 
+  let ch = open_out filename in
+  dict_to_channel ch d;
+  close_out ch
+
+let entry_of_channel ch =
+  let k = input_line ch in
+  let v = input_line ch in
+  (int_of_string k, v)
+
+let rec dict_of_channel ch =
+  try
+    let e = entry_of_channel ch in
+    e :: dict_of_channel ch
+  with 
+    End_of_file -> []
+
+let dict_of_file filename = 
+  let ch = open_in filename in
+  let dict = dict_of_channel ch in
+  close_in ch; 
+  dict
+
+(* Summary of I/O functions *)
+(* ------------------------ *)
+(* print_int *)
+(* print_string *)
+(* print_newline *)
+(* read_line  *)
+(* read_int *)
+(* int_of_string *)
+(* string_of_int *)
+(* open_out *)
+(* close_out *)
+(* open_in *)
+(* close_in *)
+(* output_string *)
+(* output_char  *)
+ 
+
+let print_list l = 
+  match l with
+  | [] -> print_string "[]" ; print_newline ()
+  | [x] -> print_string ("[" ^ string_of_int x ^ "]"); 
+	   print_newline ()
+  | h :: t ->
+     let ts = List.map (fun n -> "; " ^ string_of_int n) t in
+     let s = "[" ^ string_of_int h ^ List.fold_right (^) ts "]" in
+     print_string s ; print_newline ()
+
+let rec repeat n x = 
+  if n <= 0 then [] else x :: repeat (n - 1) x
+
+let rec upto n m = 
+  if n > m then [] else n :: upto (n + 1) m
+
+
+let row l n = List.map (fun x -> x * n) l
+
+let rows l = List.map (row l) l
+
+let string_of_row l = 
+  List.fold_right (^) (List.map (fun n -> string_of_int n ^ "\t") l) ""
+
+let string_of_rows ll = 
+  List.fold_right (^) (List.map (fun l -> string_of_row l ^ "\n") ll) ""
+
+
+(* let () =  *)
+(*   let d = read_dict () in *)
+(*   print_newline (); *)
+(*   let f = read_line () in *)
+(*   dict_to_file f d *)
+
 
 
