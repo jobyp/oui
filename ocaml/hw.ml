@@ -406,35 +406,35 @@ let rec tr_map f tr =
 
 
 let print_dict_entry (k, v) =
-  print_int k; 
-  print_newline ();
-  print_string v;
-  print_newline ()
+  print_int k; print_newline ();
+  print_string v; print_newline ()
 
 let rec iter f l = 
   match l with
   | [] -> ()
-  | h :: t -> f h ; iter f t
+  | h :: t -> f h; iter f t
 
-let print_dict  = iter print_dict_entry
+let print_dict d = iter print_dict_entry d
 
-let rec read_dict () = 
+let rec read_dict_entry () =
   try
-    let i = read_int () in
-    let name = read_line () in
-    (i, name) :: read_dict () 
-  with 
-  | Failure "int_of_string" ->
-     print_string "This is not a valid integer. Please try again.";
-     print_newline ();
-    read_dict () 
-  | End_of_file -> []
+    let n = read_int () in
+    let s = read_line () in
+    (n, s)
+  with Failure "int_of_string" -> 
+    print_string "This is not a valid integer. Please try again.";
+    print_newline () ;
+    read_dict_entry ()
+
+let rec read_dict () =
+  try 
+    let e = read_dict_entry () in
+    e :: read_dict ()
+  with End_of_file -> []
 
 let entry_to_channel ch (k, v) =
-  output_string ch (string_of_int k);
-  output_char ch '\n';
-  output_string ch v;
-  output_char ch '\n'
+  output_string ch (string_of_int k); output_char ch '\n';
+  output_string ch v; output_char ch '\n'
 
 let dict_to_channel ch d = iter (entry_to_channel ch) d
 
@@ -443,12 +443,12 @@ let dict_to_file filename d =
   dict_to_channel ch d;
   close_out ch
 
-let entry_of_channel ch =
-  let k = input_line ch in
+let entry_of_channel ch = 
+  let n = input_line ch in
   let v = input_line ch in
-  (int_of_string k, v)
+  (int_of_string n, v)
 
-let rec dict_of_channel ch =
+let rec dict_of_channel ch = 
   try
     let e = entry_of_channel ch in
     e :: dict_of_channel ch
@@ -457,9 +457,8 @@ let rec dict_of_channel ch =
 
 let dict_of_file filename = 
   let ch = open_in filename in
-  let dict = dict_of_channel ch in
-  close_in ch; 
-  dict
+  let d = dict_of_channel ch in
+  close_in ch; d
 
 (* Summary of I/O functions *)
 (* ------------------------ *)
@@ -476,7 +475,6 @@ let dict_of_file filename =
 (* close_in *)
 (* output_string *)
 (* output_char  *)
- 
 
 let print_list l = 
   match l with
@@ -494,17 +492,48 @@ let rec repeat n x =
 let rec upto n m = 
   if n > m then [] else n :: upto (n + 1) m
 
+let table filename n = 
+  let row l n = List.map (fun x -> x * n) l in
+  let rows l = List.map (row l) l in
+  let string_of_row l = 
+    List.fold_right (^) (List.map (fun n -> string_of_int n ^ "\t") l) ""
+  in
+  let string_of_rows ll = 
+    List.fold_right (^) (List.map (fun l -> string_of_row l ^ "\n") ll) ""
+  in
+  if n < 1
+  then ()
+  else
+    let ch = open_out filename in
+    let m_tbl = rows (upto 1 n) in
+    let m_tbl_str = string_of_rows m_tbl in
+    output_string ch m_tbl_str;
+    close_out ch
 
-let row l n = List.map (fun x -> x * n) l
+let rec read_num () =
+  try read_int () with
+  | Failure "int_of_string" ->
+     print_string "Integer expected. Please try again.";
+     print_newline ();
+     read_num ()
 
-let rows l = List.map (row l) l
+let read_tuple_of_3 () =
+  try (read_num (), read_num (), read_num ()) with
+  | End_of_file ->
+     failwith "Failed to read 3 integers."
 
-let string_of_row l = 
-  List.fold_right (^) (List.map (fun n -> string_of_int n ^ "\t") l) ""
+let rec read_lines_of_channel ch = 
+  try
+    let line = input_line ch in
+    line :: read_lines_of_channel ch
+  with
+    End_of_file -> []
 
-let string_of_rows ll = 
-  List.fold_right (^) (List.map (fun l -> string_of_row l ^ "\n") ll) ""
-
+let num_lines_of_file filename = 
+  let ch = open_in filename in
+  let lines = read_lines_of_channel ch in
+  close_in ch;
+  List.fold_left (+) 0 (List.map (fun _ -> 1) lines)
 
 (* let () =  *)
 (*   let d = read_dict () in *)
