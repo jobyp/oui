@@ -613,6 +613,52 @@ let file_statistics filename =
   channel_statistics ch;
   close_in ch
 
+let make_vector (x0, y0) (x1, y1) =
+  (x1 -. x0, y1 -. y0)
+
+let vector_length (x, y) = 
+  sqrt (x *. x +. y *. y)
+
+let offset_point (x, y) (px, py) =
+  (x +. px, y +. py)		 
+
+let scale_to_length l (a, b) =
+  let current_length = vector_length (a, b) in
+  if current_length = 0. then (a, b) else
+    let factor = l /. current_length in
+    (a *. factor, b *. factor)
+
+let round f = 
+  floor (f +. 0.5)
+
+let mid_point (x0, y0) (x1, y1) = 
+  ((x0 +. x1) /. 2., (y0 +. y1) /. 2.)
+
+let split_float f = 
+  let p = floor f in
+  (p, f -. p)
+
+let star f =
+  if f < 0. || f > 1. 
+  then (print_string "invalid number"; print_newline ())
+  else
+    let m = 50. *. f in
+    let i = int_of_float (fst (split_float m)) in
+    let j = if i = 50 then 49 else i in
+    let s1 = String.make 50 ' ' in
+    let s2 = String.mapi (fun k c -> if k = j then '*' else c) s1 in
+    print_string s2; print_newline ()
+
+let pi = asin 1. *. 2. 
+
+let rec f_range fn b e step = 
+  if b > e
+  then []
+  else fn b :: f_range fn (b +. step) e step
+
+let rec plot fn b e step = 
+  let fs = f_range fn b e step in
+  List.iter star fs
 
 
 (* let () =  *)
