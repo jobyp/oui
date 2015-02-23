@@ -660,6 +660,11 @@ let rec plot fn b e step =
   let fs = f_range fn b e step in
   List.iter star fs
 
+let s_concat ls = 
+  let buf = Buffer.create 0 in
+  List.iter (fun s -> Buffer.add_string buf s) ls;
+  Buffer.contents buf
+
 
 (* let () =  *)
 (*   let d = read_dict () in *)
