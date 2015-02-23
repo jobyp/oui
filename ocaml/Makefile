@@ -1,4 +1,4 @@
-PROGS := stats
+PROGS := stats tac grml
 OCAMLC ?= ocamlopt.opt
 
 .PHONY: all
@@ -10,4 +10,7 @@ clean:
 	@rm -f $(PROGS) *~ *.cmi *.cmo *.o *.cmx
 
 stats : textstat.mli textstat.ml stats.ml
+	$(OCAMLC) $^ -o $@ 
+
+% : %.ml
 	$(OCAMLC) $^ -o $@

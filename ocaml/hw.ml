@@ -665,12 +665,31 @@ let s_concat ls =
   List.iter (fun s -> Buffer.add_string buf s) ls;
   Buffer.contents buf
 
+let string_to_list s =
+  let indices = range (String.length s) in
+  List.map (fun i -> s.[i]) indices
 
-(* let () =  *)
-(*   let d = read_dict () in *)
-(*   print_newline (); *)
-(*   let f = read_line () in *)
-(*   dict_to_file f d *)
+let string_of_list l = 
+  let buf = Buffer.create 0 in
+  List.iter (fun c -> Buffer.add_char buf c) l;
+  Buffer.contents buf
 
+let rec startswith x y = 
+  match x, y with
+  | [], [] -> true
+  | _::_, [] -> false
+  | [], _::_ -> true
+  | hx::tx, hy::ty -> hx = hy && startswith tx ty
+
+let rec substring x y =
+  match y with
+  | [] -> [startswith x y]
+  | _ :: t -> startswith x y :: substring x t
+
+let count_s x y = 
+  let l_x = string_to_list x in
+  let l_y = string_to_list y in
+  let ll = substring l_x l_y in
+  List.fold_left (fun n b -> n + (if b then 1 else 0)) 0 ll
 
 
