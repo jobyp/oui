@@ -535,6 +535,86 @@ let num_lines_of_file filename =
   close_in ch;
   List.fold_left (+) 0 (List.map (fun _ -> 1) lines)
 
+let swap a b = 
+  let t = !a in
+  a := !b ; b := t
+
+let print_hello () =
+  for i = 1 to 5
+  do
+    print_string "Hello...";
+    print_newline () 
+  done
+    
+let smallest_pow2 x = 
+  let t = ref 1 in
+  while !t < x
+  do
+    t := !t * 2
+  done;
+  !t
+
+let print_histogram arr = 
+  print_string "Character frequencies:";
+  print_newline ();
+  for x = 0 to 255 do
+    if arr.(x) > 0 then
+      begin
+	print_string "For character '"; 
+	print_char (char_of_int x);
+	print_string "' (ascii ";
+	print_int x;
+	print_string ") the count is ";
+	print_int arr.(x);
+	print_string ".";
+	print_newline ()
+      end
+  done
+
+let channel_statistics ch = 
+  let lines = ref 0 in
+  let characters = ref 0 in
+  let words = ref 0 in
+  let sentences = ref 0 in
+  let histogram = Array.make 256 0 in
+  try
+    while true 
+    do
+      let line = input_line ch in
+      lines := !lines + 1;
+      characters := !characters + String.length line ;
+      String.iter (fun c ->
+		   match c with
+		   | '.' | '?' | '!' -> sentences := !sentences + 1
+		   | ' ' -> words := !words + 1
+		   | _ -> ()) 
+		  line;
+      String.iter (fun c ->
+		   let i = int_of_char c in
+		   histogram.(i) <- histogram.(i) + 1)
+		  line
+    done
+  with
+  | End_of_file ->
+     print_string "There were "; 
+     print_int !lines; 
+     print_string " lines, making up ";
+     print_int !characters;
+     print_string " characters with ";
+     print_int !words;
+     print_string " words in ";
+     print_int !sentences;
+     print_string " sentences.";
+     print_newline ();
+     print_histogram histogram
+
+let file_statistics filename = 
+  let ch = open_in filename in
+  channel_statistics ch;
+  close_in ch
+
+
+
 (* let () =  *)
 (*   let d = read_dict () in *)
 (*   print_newline (); *)
