@@ -713,5 +713,52 @@ let map f xs = foldr (fun h t -> f h :: t) [] xs
 
 let filter f ls = foldr (fun h t -> if f h then h :: t else t) [] ls
 
+let sumlength xs = (sum xs, length xs)
+
+let sumlength' xs = foldr (fun n (x, y) -> (n + x, y + 1)) (0, 0) xs
+
+let rec drop_while f xs = 
+  match xs with
+  | [] -> []
+  | h :: t -> if f h then drop_while f t else h :: t
+
 (* Programs from More OCaml *)
+
+(* Unravelling fold *)
+
+let rec fold_left f v l = 
+  match l with
+  | [] -> v
+  | h :: t -> fold_left f (f v h) t
+
+let rec fold_right f l v = 
+  match l with
+  | [] -> v
+  | h :: t -> f h (fold_right f t v)
+
+
+let max_l l = fold_left (fun x h -> 
+			 match x with
+			 | None -> Some h
+			 | Some x' -> Some (max x' h))
+			None l
+
+let all l = fold_left (&&) true l
+let any l = fold_left (||) false l
+
+let setify l = 
+  fold_left (fun xs h -> if List.mem h xs then xs else h :: xs) [] l
+
+(* let fold_right f l e =  *)
+(*   fold_left (fun xs h -> f h xs) e (List.rev l) *)
+
+let split xys =
+  fold_right (fun (x, y) (xs, ys) -> (x :: xs, y :: ys)) xys ([], [])
+
+let concat lls = fold_right (@) lls [] 
+let concat' lls = fold_left (@) [] lls  (* this is a bad definition *)			
+
+let last l = fold_left (fun _ h -> Some h) None l
+
+let list_mem x l = fold_left (fun v h -> v || x = h) false l
 
