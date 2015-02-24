@@ -692,4 +692,26 @@ let count_s x y =
   let ll = substring l_x l_y in
   List.fold_left (fun n b -> n + (if b then 1 else 0)) 0 ll
 
+(* A tutorial on the universality and expressiveness *)
+(* of fold - Graham Hutton *)
+
+let rec foldr f v ls = 
+  match ls with
+  | [] -> v
+  | h :: t -> f h (foldr f v t)
+
+let sum = foldr (+) 0
+let all = foldr (&&) true
+
+let append xs ys = foldr (fun h t -> h :: t) ys xs
+
+let length ls = foldr (fun _ n -> 1 + n) 0 ls
+
+let rev ls = foldr (fun h t -> append t [h]) [] ls
+
+let map f xs = foldr (fun h t -> f h :: t) [] xs
+
+let filter f ls = foldr (fun h t -> if f h then h :: t else t) [] ls
+
+(* Programs from More OCaml *)
 
