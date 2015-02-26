@@ -95,17 +95,52 @@ let rec lseq n =
 let lhd (Cons (n, _)) = n
 let ltl (Cons (_, tf)) = tf ()
 
-let rec ltake l n =
+let rec ltake (Cons (h, tf)) n =
   if n <= 0 
   then [] 
   else 
-    let h = lhd l in
-    let tl = ltl l in
-    h :: ltake tl (n - 1)
+    h :: ltake (tf ()) (n - 1)
 
-let rec ldrop l n = 
+let rec ldrop (Cons (h, tf) as ll) n = 
   if n <= 0
-  then l
-  else ldrop (ltl l) (n - 1)
+  then ll
+  else ldrop (tf ()) (n - 1)
+
+let rec lmap f (Cons (h, tf)) =
+  Cons (f h, fun () -> lmap f (tf ()))
+
+let rec lfilter f (Cons (h, tf)) =
+  if f h
+  then Cons (h, fun () -> lfilter f (tf ()))
+  else lfilter f (tf ())
+
+let cubes =
+  lfilter (fun n -> n mod 5 = 0)
+	  (lmap (fun n -> n * n * n)
+		(lseq 1))
+
+let rec mkprimes (Cons (h, tf)) =
+  Cons (h, fun () ->
+	   mkprimes 
+	     (lfilter 
+		(fun x -> x mod h <> 0) 
+		(tf ())))
+
+let primes = mkprimes (lseq 2)
+
+let rec interleave (Cons (h, tf)) l =
+  Cons (h, fun () -> interleave l (tf ()))
+
+let rec lconst n =
+  Cons (n, fun () -> lconst n)
+
+let rec allfrom l = 
+  Cons (l, fun () ->
+	   interleave (allfrom (0 :: l)) (allfrom (1 :: l)))
+
+let allones = allfrom []
 
 
+   
+	
+	
