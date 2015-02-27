@@ -169,3 +169,102 @@ let lfibs =
 
 (* Named Tuples with Records *)
 
+type 'a point = {
+  x : float;
+  y : float;
+  label : string;
+  mutable content : 'a
+}
+ 
+
+let make_point x y label content = {x; y; label; content;}
+
+let string_of_point {label; x; y; _} =
+  label 
+  ^ " = ("
+  ^ string_of_float x
+  ^ ", "
+  ^ string_of_float y
+  ^ ")"
+
+let relabel p l = {p with label = l}
+
+let mirror p = {p with x = p.y; y = p.x}
+
+open Unix
+
+let day_of_tm tm = 
+  match tm.tm_wday with
+  | 0 -> "Sunday"
+  | 1 -> "Monday"
+  | 2 -> "Tuesday"
+  | 3 -> "Wednesday"
+  | 4 -> "Thursday"
+  | 5 -> "Friday"
+  | 6 -> "Saturday"
+  | _ -> failwith "Invalid day"
+
+
+let month_of_tm tm = 
+  match tm.tm_mon with
+  | 0 -> "January"
+  | 1 -> "February"
+  | 2 -> "March"
+  | 3 -> "April"
+  | 4 -> "May"
+  | 5 -> "June"
+  | 6 -> "July"
+  | 7 -> "August"
+  | 8 -> "September"
+  | 9 -> "October"
+  | 10 -> "November"
+  | 11 -> "December"
+  | _ -> failwith "Invalid month"
+
+
+let time_str () =
+  let tm = Unix.localtime (Unix.gettimeofday ()) in
+  let day = day_of_tm tm in
+  let month = month_of_tm tm in
+  "It is "
+  ^ string_of_int (tm.tm_hour)
+  ^ ":"
+  ^ string_of_int (tm.tm_min)
+  ^ " on " 
+  ^ day
+  ^ " "
+  ^ string_of_int (tm.tm_mday)
+  ^ " "
+  ^ month
+  ^ " "
+  ^ string_of_int (tm.tm_year + 1900)
+
+type ('a,  'b,  'c) six_items = 
+  {
+    a : 'a;
+    b : 'a;
+    c : 'b;
+    d : 'b;
+    e : 'c;
+    f : 'c
+  }
+
+
+(* Generalized Input/Output *)
+
+
+type input = {
+  pos_in : unit -> int;
+  seek_in : int -> unit;
+  input_char : unit -> char;
+  in_channel_length : int;
+}
+
+let input_of_channel ch = 
+  {
+    pos_in = (fun () -> pos_in ch);
+    seek_in = seek_in ch;
+    input_char = (fun () -> input_char ch);
+    in_channel_length = in_channel_length ch;
+  }
+
