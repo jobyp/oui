@@ -140,7 +140,32 @@ let rec allfrom l =
 
 let allones = allfrom []
 
+let rec lpow_2 n = 
+  Cons (n, fun () -> lpow_2 (2 * n))
 
-   
-	
-	
+let rec lnth (Cons (h, tf)) n = 
+  if n <= 0
+  then h
+  else lnth (tf ()) (n - 1)
+
+
+let cycle lst = 
+  let rec cycle_aux l = 
+    match l with
+    | [] -> cycle_aux lst
+    | h :: t ->
+      Cons (h, fun () -> cycle_aux t)
+  in
+  match lst with
+  | [] -> failwith "Empty list"
+  | _ -> cycle_aux lst
+
+
+let lfibs = 
+  let rec lfib_aux a b =
+    Cons (a, fun () -> lfib_aux b (a + b))
+  in lfib_aux 0 1
+
+
+(* Named Tuples with Records *)
+
