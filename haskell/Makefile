@@ -1,15 +1,15 @@
-PROGS := wc interact split_lines
-GHCFLAGS := --make -Wall
+PROGS := wc interact split_lines Main
+GHCFLAGS := --make -Wall -O 
 
 .PHONY: all
 all: $(PROGS)
 	@ :
 
-.PHONY: clean
-clean:
-	rm -f *~ $(PROGS) *.hi *.o
-
+Main : CommonWords.hs
 
 % : %.hs
 	ghc $(GHCFLAGS) $< -o $@
 
+.PHONY: clean
+clean:
+	rm -f *~ $(PROGS) *.hi *.o
