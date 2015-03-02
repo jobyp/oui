@@ -131,3 +131,24 @@ p_take n (x : xs)
   | otherwise = x : (p_take $! (n - 1)) xs
                 
 
+roots :: (Float, Float, Float) -> (Float, Float)
+roots (a, b, c)
+  | a == 0 = error "not quadratic"
+  | det < 0 = error "complex roots"
+  | otherwise = ((-b - r) / e, (-b + r) / e)
+  where
+    det = b * b - 4 * a * c
+    r = if det >= 0 then sqrt r else 0
+    e = 2 * a
+
+
+modernise :: String -> String
+modernise = unwords . map upcase . words
+
+first :: (a -> Bool) -> [a] -> a
+first _ [] = error "Empty list"
+first p (x:xs)
+  | p x = x
+  | otherwise = first p xs
+
+
