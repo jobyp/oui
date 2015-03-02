@@ -145,10 +145,81 @@ roots (a, b, c)
 modernise :: String -> String
 modernise = unwords . map upcase . words
 
-first :: (a -> Bool) -> [a] -> a
-first _ [] = error "Empty list"
+first :: (a -> Bool) -> [a] -> Maybe a
+first _ [] = Nothing
 first p (x:xs)
-  | p x = x
+  | p x = Just x
   | otherwise = first p xs
 
+showMonth :: Int -> String
+showMonth n
+  | n == 1 = "January"
+  | n == 2 = "February"
+  | n == 3 =  "March"
+  | n == 4 = "April"
+  | n == 5 = "May"
+  | n == 6 = "June"
+  | n == 7 = "July"
+  | n == 8 = "August"
+  | n == 9 = "September"
+  | n == 10 = "October"
+  | n == 11 = "November"
+  | n == 12 = "December"
+  | otherwise = error ("Invalid month: " ++ show n) 
 
+
+date_suffix :: Int -> String
+date_suffix n = case (mod n 10) of
+  1 -> "st"
+  2 -> "nd"
+  3 -> "rd"
+  _ -> "th"
+  
+  
+showDate :: (Int, Int, Int) -> String
+showDate (d, m, y) = show d ++ date_suffix d ++ " " ++ showMonth m ++ ", " ++ show y 
+
+
+sanitize_string :: String -> String
+sanitize_string = map toLower . filter isAlphaNum 
+
+
+is_palindrome :: String -> String
+is_palindrome s = 
+  if xs == ys
+  then "Yes!"
+  else "No!"
+  where
+    xs = sanitize_string s
+    ys = reverse xs
+    
+
+main :: IO ()
+main = do
+  putStrLn "Enter a string: "
+  line <- getLine
+  putStrLn (is_palindrome line)
+
+
+type CIN = String
+
+valid :: CIN -> Bool
+valid cin = length cin == 10 &&
+            all isDigit cin &&
+            sum_prefix == sum_suffix
+  where
+    ns = map digitToInt cin
+    (xs, ys) = splitAt 8 ns
+    sum_prefix = sum xs
+    sum_suffix = sum ys
+    
+
+addSum :: CIN -> CIN
+addSum s = if length s == 8 && all isDigit s 
+           then 
+             let ns = map digitToInt s
+                 n = sum ns
+             in
+              s ++ show n
+           else
+             error "Invalid CIN[0:8]"
